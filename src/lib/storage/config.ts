@@ -1,11 +1,16 @@
-import { getSupabaseEnv } from "@/lib/supabase/env";
-
+/** Buckets privados: la primera carpeta de cada ruta es el id del cuerpo técnico. */
 export const BUCKETS = {
-  fotosJugadores: "player-photos",
-  escudosEquipos: "team-logos",
+  fotosJugadores: "fotos-jugadores",
+  escudos: "escudos",
 } as const;
 
 export type Bucket = (typeof BUCKETS)[keyof typeof BUCKETS];
+
+export const LISTA_BUCKETS: readonly Bucket[] = Object.values(BUCKETS);
+
+export function esBucket(valor: string): valor is Bucket {
+  return (LISTA_BUCKETS as readonly string[]).includes(valor);
+}
 
 export const IMAGEN_MAX_BYTES = 2 * 1024 * 1024;
 export const IMAGEN_TIPOS = ["image/png", "image/jpeg"] as const;
@@ -31,14 +36,13 @@ export function extensionDe(archivo: File): string {
   return esTipoPermitido(archivo.type) ? EXTENSION[archivo.type] : "bin";
 }
 
-function prefijoPublico(bucket: Bucket): string {
-  return `${getSupabaseEnv().url}/storage/v1/object/public/${bucket}/`;
-}
+/** Ruta válida de un objeto: <cuerpo_tecnico_id>/<uuid>.<png|jpg> */
+export const RUTA_IMAGEN = /^[0-9a-f-]{36}\/[0-9a-f-]{36}\.(png|jpg)$/;
 
-/** Extrae la ruta interna del objeto a partir de su URL pública (null si no es de este bucket). */
-export function rutaDesdeUrlPublica(url: string, bucket: Bucket): string | null {
-  const prefijo = prefijoPublico(bucket);
-  if (!url.startsWith(prefijo)) return null;
-  const ruta = decodeURIComponent(url.slice(prefijo.length).split("?")[0] ?? "");
-  return ruta && !ruta.includes("..") ? ruta : null;
+/**
+ * URL de la app que sirve la imagen (src/app/imagenes). Los buckets son privados:
+ * la ruta verifica la sesión y Storage aplica los permisos del cuerpo técnico.
+ */
+export function urlImagen(bucket: Bucket, ruta: string | null | undefined): string | null {
+  return ruta ? `/imagenes/${bucket}/${ruta}` : null;
 }

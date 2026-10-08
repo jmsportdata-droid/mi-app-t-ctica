@@ -1,14 +1,14 @@
 import { z } from "zod";
-import { rutaDesdeUrlPublica, type Bucket } from "@/lib/storage/config";
+import { RUTA_IMAGEN } from "@/lib/storage/config";
 
-/** URL de imagen opcional que debe pertenecer al bucket indicado de nuestro proyecto. */
-export function urlImagenSchema(bucket: Bucket) {
-  return z
-    .string()
-    .url("URL de imagen no válida")
-    .refine((url) => rutaDesdeUrlPublica(url, bucket) !== null, "URL de imagen no válida")
-    .nullable();
-}
+/** Ruta opcional de una imagen subida a Storage (<cuerpo_tecnico_id>/<uuid>.<ext>). */
+export const rutaImagenSchema = z.string().regex(RUTA_IMAGEN, "Imagen no válida").nullable();
+
+/** Fecha ISO "YYYY-MM-DD". */
+export const fechaSchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Ingresá una fecha válida")
+  .refine((v) => !Number.isNaN(Date.parse(v)), "Ingresá una fecha válida");
 
 /** Texto opcional: cadenas vacías se guardan como null. */
 export function textoOpcionalSchema(max: number, etiqueta: string) {

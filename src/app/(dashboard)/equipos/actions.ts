@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import type { PostgrestError } from "@supabase/supabase-js";
-import { createClient } from "@/lib/supabase/server";
+import { getAccion, SESION_EXPIRADA } from "@/lib/supabase/auth";
 import { borrarImagenes } from "@/lib/storage/server";
 import { BUCKETS } from "@/lib/storage/config";
 import { erroresDeZod } from "@/lib/validations/comun";
@@ -11,11 +11,6 @@ import type { EquipoInput } from "@/types/equipo";
 
 export type EquipoActionResult =
   { ok: true; id: string } | { ok: false; error: string; errores?: EquipoErrores };
-
-const SESION_EXPIRADA: EquipoActionResult = {
-  ok: false,
-  error: "Tu sesión ha expirado. Vuelve a iniciar sesión.",
-};
 
 function errorDeBD(error: PostgrestError): EquipoActionResult {
   if (error.code === "23505") {
@@ -46,11 +41,9 @@ export async function guardarEquipo(
     return { ok: false, error: "Revisa los campos marcados", errores: erroresDeZod(parsed.error) };
   }
 
-  const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return SESION_EXPIRADA;
+  const accion = await getAccion();
+  if (!accion) return SESION_EXPIRADA;
+  const { supabase } = accion;
 
   if (!id) {
     const { data, error } = await supabase
@@ -67,7 +60,7 @@ export async function guardarEquipo(
   // Escudo anterior, para borrarlo de Storage si se ha cambiado o quitado.
   const { data: anterior } = await supabase
     .from("equipos")
-    .select("escudo_url")
+    .select("escudo_ruta")
     .eq("id", id)
     .maybeSingle();
 
@@ -79,8 +72,8 @@ export async function guardarEquipo(
     .single();
   if (error) return errorDeBD(error);
 
-  if (anterior?.escudo_url && anterior.escudo_url !== parsed.data.escudo_url) {
-    await borrarImagenes(supabase, BUCKETS.escudosEquipos, [anterior.escudo_url]);
+  if (anterior?.escudo_ruta && anterior.escudo_ruta !== parsed.data.escudo_ruta) {
+    await borrarImagenes(supabase, BUCKETS.escudos, [anterior.escudo_ruta]);
   }
 
   revalidatePath("/equipos", "layout");
@@ -89,21 +82,19 @@ export async function guardarEquipo(
 }
 
 export async function eliminarEquipo(id: string): Promise<EquipoActionResult> {
-  const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return SESION_EXPIRADA;
+  const accion = await getAccion();
+  if (!accion) return SESION_EXPIRADA;
+  const { supabase } = accion;
 
   const { data, error } = await supabase
     .from("equipos")
     .delete()
     .eq("id", id)
-    .select("escudo_url")
+    .select("escudo_ruta")
     .maybeSingle();
   if (error) return errorDeBD(error);
 
-  await borrarImagenes(supabase, BUCKETS.escudosEquipos, [data?.escudo_url]);
+  await borrarImagenes(supabase, BUCKETS.escudos, [data?.escudo_ruta]);
 
   revalidatePath("/equipos", "layout");
   revalidatePath("/partidos", "layout");

@@ -5,19 +5,22 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
 import { Logo } from "@/components/Logo";
 import { LogoutButton } from "./LogoutButton";
-import { IconEquipos, IconPartidos, IconPlantilla } from "./icons";
+import { ROL_LABEL, type Rol } from "@/types/cuerpo-tecnico";
+import { IconCuenta, IconCuerpoTecnico, IconEquipos, IconPartidos, IconPlantilla } from "./icons";
 
 const NAVEGACION = [
   { href: "/plantilla", label: "Plantilla", Icono: IconPlantilla },
   { href: "/equipos", label: "Equipos", Icono: IconEquipos },
   { href: "/partidos", label: "Partidos", Icono: IconPartidos },
+  { href: "/cuerpo-tecnico", label: "Cuerpo técnico", Icono: IconCuerpoTecnico },
 ] as const;
 
 interface SidebarProps {
-  email: string | null;
+  nombre: string;
+  rol: Rol;
 }
 
-export function Sidebar({ email }: SidebarProps) {
+export function Sidebar({ nombre, rol }: SidebarProps) {
   const pathname = usePathname();
 
   return (
@@ -54,12 +57,22 @@ export function Sidebar({ email }: SidebarProps) {
         })}
       </nav>
 
-      <div className="space-y-2 border-t border-slate-100 p-2 md:p-3">
-        {email && (
-          <p className="hidden truncate px-3 text-xs text-slate-500 md:block" title={email}>
-            {email}
-          </p>
-        )}
+      <div className="space-y-1 border-t border-slate-100 p-2 md:p-3">
+        <Link
+          href="/cuenta"
+          title="Mi cuenta"
+          aria-current={pathname === "/cuenta" ? "page" : undefined}
+          className={cn(
+            "flex items-center justify-center gap-3 rounded-lg px-3 py-2 transition-colors md:justify-start",
+            pathname === "/cuenta" ? "bg-brand-50" : "hover:bg-slate-100",
+          )}
+        >
+          <IconCuenta className="h-5 w-5 shrink-0 text-slate-500" />
+          <span className="hidden min-w-0 md:block">
+            <span className="block truncate text-sm font-medium text-slate-800">{nombre}</span>
+            <span className="block truncate text-xs text-slate-500">{ROL_LABEL[rol]}</span>
+          </span>
+        </Link>
         <LogoutButton />
       </div>
     </aside>

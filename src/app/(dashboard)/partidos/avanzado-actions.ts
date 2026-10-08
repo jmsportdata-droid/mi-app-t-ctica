@@ -43,12 +43,11 @@ export async function guardarAlineacion(
   const supabase = await getClienteAutenticado();
   if (!supabase) return SESION_EXPIRADA;
 
-  const { error } = await supabase
-    .from("alineacion_partido")
-    .upsert(
-      { partido_id: partidoId, ...parsed.data, updated_at: new Date().toISOString() },
-      { onConflict: "partido_id" },
-    );
+  const { error } = await supabase.from("alineacion_partido").upsert(
+    // titulares admite huecos (null): uuid[] en la base, string[] en los tipos generados
+    { partido_id: partidoId, ...parsed.data, titulares: parsed.data.titulares as string[] },
+    { onConflict: "partido_id" },
+  );
   if (error) return errorDeBD(error, "alineacion");
 
   revalidatePath(`/partidos/${partidoId}`);
@@ -81,7 +80,6 @@ export async function guardarCampoAbp(
       partido_id: partidoId,
       ...claveOk.data,
       [campoOk.data]: parsed.data,
-      updated_at: new Date().toISOString(),
     },
     { onConflict: "partido_id,tipo,categoria,indice" },
   );

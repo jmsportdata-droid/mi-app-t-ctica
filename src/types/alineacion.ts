@@ -1,3 +1,4 @@
+import type { Tables } from "./database";
 import type { Posicion } from "./jugador";
 
 /** Hueco en el campo. x/y en % (x: izquierda→derecha, y: portería rival arriba → la nuestra abajo). */
@@ -67,13 +68,9 @@ export const LISTA_FORMACIONES = Object.keys(FORMACIONES) as Formacion[];
 export const TITULARES = 11;
 
 /** Fila de la tabla "alineacion_partido". */
-export type AlineacionPartido = {
-  partido_id: string;
-  formacion: Formacion;
+export type AlineacionPartido = Omit<Tables<"alineacion_partido">, "titulares"> & {
   /** 11 posiciones en el orden de la formación; null = hueco vacío */
   titulares: (string | null)[];
-  suplentes: string[];
-  updated_at: string;
 };
 
 export type AlineacionInput = Pick<AlineacionPartido, "formacion" | "titulares" | "suplentes">;

@@ -3,9 +3,12 @@ import { notFound } from "next/navigation";
 import { getDetallePartido, getPartido } from "@/lib/data/partidos";
 import { getJugadores } from "@/lib/data/jugadores";
 import { nombreArchivoSeguro } from "@/lib/export";
-import { MI_EQUIPO } from "@/lib/config";
+import { clubDeTemporada } from "@/lib/club";
+import { requerirContexto } from "@/lib/contexto";
+import { getTemporada } from "@/lib/data/cuerpo-tecnico";
 import { formatearFechaPartido } from "@/lib/utils/fecha";
 import { esTabPartido, type PartidoConRival } from "@/types/partido";
+import type { Temporada } from "@/types/cuerpo-tecnico";
 import { BackLink } from "@/components/ui/BackLink";
 import { Enfrentamiento } from "@/components/partidos/Enfrentamiento";
 import { PartidoAcciones } from "@/components/partidos/PartidoAcciones";
@@ -16,21 +19,36 @@ interface Props {
   searchParams: { tab?: string };
 }
 
-function tituloPartido(partido: PartidoConRival): string {
+function tituloPartido(partido: PartidoConRival, club: string): string {
   const rival = partido.rival?.nombre ?? "Rival";
-  return partido.es_local ? `${MI_EQUIPO.nombre} vs ${rival}` : `${rival} vs ${MI_EQUIPO.nombre}`;
+  return partido.es_local ? `${club} vs ${rival}` : `${rival} vs ${club}`;
+}
+
+/** El partido y la temporada a la que pertenece (puede no ser la seleccionada). */
+async function getPartidoYTemporada(
+  id: string,
+): Promise<{ partido: PartidoConRival; temporada: Temporada } | null> {
+  const partido = await getPartido(id);
+  const temporada = partido ? await getTemporada(partido.temporada_id) : null;
+  return partido && temporada ? { partido, temporada } : null;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const partido = await getPartido(params.id);
-  return { title: partido ? tituloPartido(partido) : "Partido" };
+  const datos = await getPartidoYTemporada(params.id);
+  return { title: datos ? tituloPartido(datos.partido, datos.temporada.club) : "Partido" };
 }
 
 export default async function PartidoPage({ params, searchParams }: Props) {
-  const partido = await getPartido(params.id);
-  if (!partido) notFound();
+  await requerirContexto();
+  const datos = await getPartidoYTemporada(params.id);
+  if (!datos) notFound();
+  const { partido, temporada } = datos;
+  const titulo = tituloPartido(partido, temporada.club);
 
-  const [detalle, jugadores] = await Promise.all([getDetallePartido(partido.id), getJugadores()]);
+  const [detalle, jugadores] = await Promise.all([
+    getDetallePartido(partido.id),
+    getJugadores(partido.temporada_id),
+  ]);
   const tabInicial = esTabPartido(searchParams.tab) ? searchParams.tab : "informe";
 
   return (
@@ -42,16 +60,12 @@ export default async function PartidoPage({ params, searchParams }: Props) {
           <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
             {partido.competicion ?? "Sin competición"}
           </span>
-          <PartidoAcciones
-            id={partido.id}
-            estado={partido.estado}
-            titulo={tituloPartido(partido)}
-          />
+          <PartidoAcciones id={partido.id} estado={partido.estado} titulo={titulo} />
         </div>
 
         <div className="mx-auto max-w-lg">
-          <h1 className="sr-only">{tituloPartido(partido)}</h1>
-          <Enfrentamiento partido={partido} tamano="lg" />
+          <h1 className="sr-only">{titulo}</h1>
+          <Enfrentamiento partido={partido} club={clubDeTemporada(temporada)} tamano="lg" />
         </div>
 
         <p className="mt-6 text-center text-sm text-slate-600">
@@ -74,7 +88,7 @@ export default async function PartidoPage({ params, searchParams }: Props) {
             partido.fecha,
           ),
           meta: {
-            partido: tituloPartido(partido),
+            partido: titulo,
             fecha: partido.fecha,
             competicion: partido.competicion,
             estadio: partido.estadio,

@@ -39,9 +39,7 @@ interface Props {
 }
 
 function ordenar(eventos: EventoPartido[]): EventoPartido[] {
-  return [...eventos].sort(
-    (a, b) => a.minuto - b.minuto || a.created_at.localeCompare(b.created_at),
-  );
+  return [...eventos].sort((a, b) => a.minuto - b.minuto || a.creado_en.localeCompare(b.creado_en));
 }
 
 export function EventosPanel({

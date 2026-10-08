@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import type { PostgrestError } from "@supabase/supabase-js";
-import { createClient } from "@/lib/supabase/server";
+import { getAccion, SESION_EXPIRADA, SIN_TEMPORADA } from "@/lib/supabase/auth";
 import { borrarImagenes } from "@/lib/storage/server";
 import { BUCKETS } from "@/lib/storage/config";
 import { erroresDeZod, jugadorSchema, type JugadorErrores } from "@/lib/validations/jugador";
@@ -10,11 +10,6 @@ import type { JugadorInput } from "@/types/jugador";
 
 export type ActionResult =
   { ok: true; id: string } | { ok: false; error: string; errores?: JugadorErrores };
-
-const SESION_EXPIRADA: ActionResult = {
-  ok: false,
-  error: "Tu sesión ha expirado. Vuelve a iniciar sesión.",
-};
 
 function errorDeBD(error: PostgrestError): ActionResult {
   if (error.code === "23505") {
@@ -38,16 +33,15 @@ export async function guardarJugador(
     return { ok: false, error: "Revisa los campos marcados", errores: erroresDeZod(parsed.error) };
   }
 
-  const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return SESION_EXPIRADA;
+  const accion = await getAccion();
+  if (!accion) return SESION_EXPIRADA;
+  const { supabase, contexto } = accion;
 
   if (!id) {
+    if (!contexto.temporada) return SIN_TEMPORADA;
     const { data, error } = await supabase
       .from("jugadores")
-      .insert(parsed.data)
+      .insert({ ...parsed.data, temporada_id: contexto.temporada.id })
       .select("id")
       .single();
     if (error) return errorDeBD(error);
@@ -59,7 +53,7 @@ export async function guardarJugador(
   // Foto anterior, para borrarla de Storage si se ha cambiado o quitado.
   const { data: anterior } = await supabase
     .from("jugadores")
-    .select("foto_url")
+    .select("foto_ruta")
     .eq("id", id)
     .maybeSingle();
 
@@ -71,8 +65,8 @@ export async function guardarJugador(
     .single();
   if (error) return errorDeBD(error);
 
-  if (anterior?.foto_url && anterior.foto_url !== parsed.data.foto_url) {
-    await borrarImagenes(supabase, BUCKETS.fotosJugadores, [anterior.foto_url]);
+  if (anterior?.foto_ruta && anterior.foto_ruta !== parsed.data.foto_ruta) {
+    await borrarImagenes(supabase, BUCKETS.fotosJugadores, [anterior.foto_ruta]);
   }
 
   revalidatePath("/plantilla", "layout");
@@ -80,21 +74,19 @@ export async function guardarJugador(
 }
 
 export async function eliminarJugador(id: string): Promise<ActionResult> {
-  const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return SESION_EXPIRADA;
+  const accion = await getAccion();
+  if (!accion) return SESION_EXPIRADA;
+  const { supabase } = accion;
 
   const { data, error } = await supabase
     .from("jugadores")
     .delete()
     .eq("id", id)
-    .select("foto_url")
+    .select("foto_ruta")
     .maybeSingle();
   if (error) return errorDeBD(error);
 
-  await borrarImagenes(supabase, BUCKETS.fotosJugadores, [data?.foto_url]);
+  await borrarImagenes(supabase, BUCKETS.fotosJugadores, [data?.foto_ruta]);
 
   revalidatePath("/plantilla", "layout");
   return { ok: true, id };

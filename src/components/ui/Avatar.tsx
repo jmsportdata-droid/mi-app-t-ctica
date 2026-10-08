@@ -40,6 +40,9 @@ export function Avatar({ src, nombre, tamano = "sm", ajuste = "cover", className
           src={src}
           alt={nombre}
           fill
+          // Imágenes privadas servidas por /imagenes con la sesión del usuario:
+          // el optimizador de Next no tiene esa sesión.
+          unoptimized
           sizes={`${px * 2}px`}
           className={ajuste === "cover" ? "object-cover" : "object-contain p-1.5"}
         />

@@ -1,3 +1,4 @@
+import { BUCKETS, urlImagen } from "@/lib/storage/config";
 import { calcularEdad } from "@/lib/utils/edad";
 import type { Jugador } from "@/types/jugador";
 import { Avatar } from "@/components/ui/Avatar";
@@ -11,7 +12,11 @@ export function JugadorCard({ jugador }: { jugador: Jugador }) {
     <article className="flex flex-col rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md">
       <div className="flex items-start gap-3">
         <div className="relative">
-          <Avatar src={jugador.foto_url} nombre={jugador.nombre} tamano="md" />
+          <Avatar
+            src={urlImagen(BUCKETS.fotosJugadores, jugador.foto_ruta)}
+            nombre={jugador.nombre}
+            tamano="md"
+          />
           <span
             className="absolute -bottom-1 -right-1 flex h-6 min-w-6 items-center justify-center rounded-full bg-slate-900 px-1.5 text-xs font-bold tabular-nums text-white ring-2 ring-white"
             aria-label={jugador.numero !== null ? `Dorsal ${jugador.numero}` : "Sin dorsal"}

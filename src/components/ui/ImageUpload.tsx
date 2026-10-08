@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
-import { IMAGEN_ACCEPT, validarImagen } from "@/lib/storage/config";
+import { IMAGEN_ACCEPT, urlImagen, validarImagen, type Bucket } from "@/lib/storage/config";
 import type { ImagenValor } from "@/lib/storage/client";
 import { cn } from "@/lib/utils/cn";
 
 interface ImageUploadProps {
   label: string;
+  /** Bucket donde está la imagen ya guardada (para la vista previa) */
+  bucket: Bucket;
   value: ImagenValor;
   onChange: (valor: ImagenValor) => void;
   ajuste?: "cover" | "contain";
@@ -17,6 +19,7 @@ interface ImageUploadProps {
 /** Selector de imagen con vista previa. No sube nada: el formulario lo hace al guardar. */
 export function ImageUpload({
   label,
+  bucket,
   value,
   onChange,
   ajuste = "cover",
@@ -38,7 +41,7 @@ export function ImageUpload({
     return () => URL.revokeObjectURL(url);
   }, [value.archivo]);
 
-  const preview = previewArchivo ?? value.url;
+  const preview = previewArchivo ?? urlImagen(bucket, value.ruta);
   const mensajeError = errorLocal ?? error;
 
   function handleArchivo(e: React.ChangeEvent<HTMLInputElement>) {
@@ -52,12 +55,12 @@ export function ImageUpload({
       return;
     }
     setErrorLocal(null);
-    onChange({ archivo, url: value.url });
+    onChange({ archivo, ruta: value.ruta });
   }
 
   function quitar() {
     setErrorLocal(null);
-    onChange({ archivo: null, url: null });
+    onChange({ archivo: null, ruta: null });
   }
 
   return (
@@ -71,7 +74,7 @@ export function ImageUpload({
           )}
         >
           {preview ? (
-            // Vista previa local (blob:) — next/image no aplica aquí
+            // Vista previa local (blob:) o imagen privada — next/image no aplica aquí
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={preview}

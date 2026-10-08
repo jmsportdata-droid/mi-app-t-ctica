@@ -2,28 +2,12 @@ import { z } from "zod";
 import { videoEmbedUrl, vimeoEmbedUrl } from "@/lib/embeds";
 import { CAMPOS_ABP, CATEGORIAS_ABP, TIPOS_ABP } from "@/types/abp";
 import { LISTA_FORMACIONES, TITULARES, type Formacion } from "@/types/alineacion";
-import { ATRIBUTOS, type Atributo } from "@/types/atributos";
 import { MINUTO_MAX, TIPOS_EVENTO } from "@/types/evento";
 
 /** Convierte una lista readonly de literales en la tupla que exige z.enum. */
 function enumDe<T extends string>(valores: readonly T[]) {
   return z.enum(valores as [T, ...T[]]);
 }
-
-// ---------- Atributos de jugador ---------------------------------
-
-const valorAtributo = z
-  .number({ invalid_type_error: "Debe ser un número" })
-  .int("Debe ser un número entero")
-  .min(0, "Mínimo 0")
-  .max(100, "Máximo 100");
-
-export const atributosSchema = z.object(
-  Object.fromEntries(ATRIBUTOS.map((a) => [a, valorAtributo])) as Record<
-    Atributo,
-    typeof valorAtributo
-  >,
-);
 
 // ---------- Alineación -------------------------------------------
 

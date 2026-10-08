@@ -1,3 +1,4 @@
+import { BUCKETS, urlImagen } from "@/lib/storage/config";
 import type { Equipo } from "@/types/equipo";
 import { Avatar } from "@/components/ui/Avatar";
 import { EquipoAcciones } from "./EquipoAcciones";
@@ -7,7 +8,12 @@ export function EquipoCard({ equipo }: { equipo: Equipo }) {
 
   return (
     <article className="flex flex-col items-center rounded-xl border border-slate-200 bg-white p-5 text-center shadow-sm transition-shadow hover:shadow-md">
-      <Avatar src={equipo.escudo_url} nombre={equipo.nombre} tamano="lg" ajuste="contain" />
+      <Avatar
+        src={urlImagen(BUCKETS.escudos, equipo.escudo_ruta)}
+        nombre={equipo.nombre}
+        tamano="lg"
+        ajuste="contain"
+      />
       <h3 className="mt-4 w-full truncate font-semibold text-slate-900" title={equipo.nombre}>
         {equipo.nombre}
       </h3>

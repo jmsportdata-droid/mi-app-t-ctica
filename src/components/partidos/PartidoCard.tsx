@@ -2,9 +2,9 @@ import Link from "next/link";
 import { formatearFechaPartido } from "@/lib/utils/fecha";
 import type { PartidoConRival } from "@/types/partido";
 import { EstadoBadge } from "./EstadoBadge";
-import { Enfrentamiento } from "./Enfrentamiento";
+import { Enfrentamiento, type ClubPropio } from "./Enfrentamiento";
 
-export function PartidoCard({ partido }: { partido: PartidoConRival }) {
+export function PartidoCard({ partido, club }: { partido: PartidoConRival; club: ClubPropio }) {
   return (
     <article className="flex flex-col rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
       <div className="mb-4 flex items-center justify-between gap-2">
@@ -14,7 +14,7 @@ export function PartidoCard({ partido }: { partido: PartidoConRival }) {
         <EstadoBadge estado={partido.estado} />
       </div>
 
-      <Enfrentamiento partido={partido} />
+      <Enfrentamiento partido={partido} club={club} />
 
       <dl className="mt-5 space-y-1.5 border-t border-slate-100 pt-4 text-sm">
         <div className="flex items-center gap-2 text-slate-700">

@@ -6,13 +6,14 @@ import type { AlineacionPartido } from "@/types/alineacion";
 import type { EventoPartido } from "@/types/evento";
 import type { InformeRival, PartidoConRival, PlanPartido } from "@/types/partido";
 
-const SELECT_CON_RIVAL = "*, rival:equipos(id, nombre, escudo_url, estadio)";
+const SELECT_CON_RIVAL = "*, rival:equipos(id, nombre, escudo_ruta, estadio)";
 
-export async function getPartidos(): Promise<PartidoConRival[]> {
+export async function getPartidos(temporadaId: string): Promise<PartidoConRival[]> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("partidos")
     .select(SELECT_CON_RIVAL)
+    .eq("temporada_id", temporadaId)
     .order("fecha", { ascending: true });
 
   if (error) {
@@ -61,7 +62,7 @@ export async function getDetallePartido(partidoId: string): Promise<DetalleParti
       .select("*")
       .eq("partido_id", partidoId)
       .order("minuto", { ascending: true })
-      .order("created_at", { ascending: true }),
+      .order("creado_en", { ascending: true }),
   ]);
 
   const error = plan.error ?? informe.error ?? abp.error ?? alineacion.error ?? eventos.error;
@@ -73,7 +74,7 @@ export async function getDetallePartido(partidoId: string): Promise<DetalleParti
     plan: plan.data,
     informe: informe.data,
     abp: abp.data ?? [],
-    alineacion: alineacion.data,
+    alineacion: alineacion.data as AlineacionPartido | null,
     eventos: eventos.data ?? [],
   };
 }

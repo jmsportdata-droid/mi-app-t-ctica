@@ -5,16 +5,15 @@ import Link from "next/link";
 import {
   obtenerFichaJugador,
   type FichaJugadorResult,
-} from "@/app/(dashboard)/plantilla/atributos-actions";
+} from "@/app/(dashboard)/plantilla/ficha-actions";
+import { BUCKETS, urlImagen } from "@/lib/storage/config";
 import { calcularEdad } from "@/lib/utils/edad";
-import { GRUPOS_ATRIBUTOS } from "@/types/atributos";
 import { POSICION_NOMBRE, type Jugador } from "@/types/jugador";
 import { Avatar } from "@/components/ui/Avatar";
 import { Modal } from "@/components/ui/Modal";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Dorsal } from "./Dorsal";
 import { PosicionBadge } from "./PosicionBadge";
-import { RadarAtributos } from "./RadarAtributos";
 
 interface Props {
   jugador: Jugador;
@@ -45,12 +44,12 @@ export function JugadorModal({ jugador, abierto, onCerrar }: Props) {
       abierto={abierto}
       onCerrar={onCerrar}
       titulo={`Ficha de ${jugador.nombre}`}
-      className="max-w-5xl"
+      className="max-w-3xl"
     >
       <div className="bg-gradient-to-br from-slate-900 to-slate-700 px-6 pb-6 pt-8 text-white">
         <div className="flex flex-wrap items-center gap-5">
           <Avatar
-            src={jugador.foto_url}
+            src={urlImagen(BUCKETS.fotosJugadores, jugador.foto_ruta)}
             nombre={jugador.nombre}
             tamano="lg"
             className="ring-4 ring-white/20"
@@ -79,36 +78,16 @@ export function JugadorModal({ jugador, abierto, onCerrar }: Props) {
         ) : !ficha.ok ? (
           <p className="rounded-lg bg-red-50 p-4 text-sm text-red-700">{ficha.error}</p>
         ) : (
-          <>
-            <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <Cifra label="Partidos" valor={ficha.estadisticas.partidos} />
-              <Cifra label="Titular" valor={ficha.estadisticas.titular} />
-              <Cifra
-                label="Minutos"
-                valor={ficha.estadisticas.minutos}
-                nota="Estimado: 90' por titularidad"
-              />
-              <Cifra label="Goles" valor={ficha.estadisticas.goles} />
-            </dl>
-
-            {!ficha.atributos && (
-              <p className="rounded-lg border border-dashed border-slate-300 p-3 text-sm text-slate-500">
-                Este jugador aún no tiene atributos valorados.{" "}
-                <Link
-                  href={`/plantilla/${jugador.id}#atributos`}
-                  className="font-medium text-brand-600 hover:underline"
-                >
-                  Valorar ahora
-                </Link>
-              </p>
-            )}
-
-            <div className="grid gap-4 lg:grid-cols-3">
-              {GRUPOS_ATRIBUTOS.map((grupo) => (
-                <RadarAtributos key={grupo.clave} grupo={grupo} valores={ficha.atributos} />
-              ))}
-            </div>
-          </>
+          <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <Cifra label="Partidos" valor={ficha.estadisticas.partidos} />
+            <Cifra label="Titular" valor={ficha.estadisticas.titular} />
+            <Cifra
+              label="Minutos"
+              valor={ficha.estadisticas.minutos}
+              nota="Estimado: 90' por titularidad"
+            />
+            <Cifra label="Goles" valor={ficha.estadisticas.goles} />
+          </dl>
         )}
       </div>
     </Modal>
@@ -136,11 +115,6 @@ function FichaSkeleton() {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {Array.from({ length: 4 }, (_, i) => (
           <Skeleton key={i} className="h-24 rounded-xl" />
-        ))}
-      </div>
-      <div className="grid gap-4 lg:grid-cols-3">
-        {Array.from({ length: 3 }, (_, i) => (
-          <Skeleton key={i} className="h-96 rounded-xl" />
         ))}
       </div>
     </div>

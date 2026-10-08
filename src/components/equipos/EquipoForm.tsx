@@ -14,6 +14,8 @@ import { Alert } from "@/components/ui/Alert";
 import { ImageUpload } from "@/components/ui/ImageUpload";
 
 interface EquipoFormProps {
+  /** Carpeta de Storage donde se sube el escudo */
+  cuerpoTecnicoId: string;
   /** Si se pasa, el formulario edita ese equipo; si no, crea uno nuevo. */
   equipo?: Equipo;
 }
@@ -24,7 +26,7 @@ interface Valores {
   estadio: string;
 }
 
-export function EquipoForm({ equipo }: EquipoFormProps) {
+export function EquipoForm({ cuerpoTecnicoId, equipo }: EquipoFormProps) {
   const router = useRouter();
   const [pendiente, startTransition] = useTransition();
   const [valores, setValores] = useState<Valores>({
@@ -34,7 +36,7 @@ export function EquipoForm({ equipo }: EquipoFormProps) {
   });
   const [escudo, setEscudo] = useState<ImagenValor>({
     archivo: null,
-    url: equipo?.escudo_url ?? null,
+    ruta: equipo?.escudo_ruta ?? null,
   });
   const [errores, setErrores] = useState<EquipoErrores>({});
   const [errorGeneral, setErrorGeneral] = useState<string | null>(null);
@@ -50,10 +52,10 @@ export function EquipoForm({ equipo }: EquipoFormProps) {
     e.preventDefault();
     setErrorGeneral(null);
 
-    // Si hay archivo nuevo, la URL aún no existe: se valida el resto y el escudo se sube después.
+    // Si hay archivo nuevo, la ruta aún no existe: se valida el resto y el escudo se sube después.
     const parsed = equipoSchema.safeParse({
       ...valores,
-      escudo_url: escudo.archivo ? null : escudo.url,
+      escudo_ruta: escudo.archivo ? null : escudo.ruta,
     });
     if (!parsed.success) {
       setErrores(erroresDeZod(parsed.error));
@@ -61,10 +63,15 @@ export function EquipoForm({ equipo }: EquipoFormProps) {
     }
 
     startTransition(async () => {
-      const resultado = await guardarConImagen(BUCKETS.escudosEquipos, escudo, (escudoUrl) => {
-        const input: EquipoInput = { ...parsed.data, escudo_url: escudoUrl };
-        return guardarEquipo(equipo?.id ?? null, input);
-      });
+      const resultado = await guardarConImagen(
+        BUCKETS.escudos,
+        cuerpoTecnicoId,
+        escudo,
+        (escudoRuta) => {
+          const input: EquipoInput = { ...parsed.data, escudo_ruta: escudoRuta };
+          return guardarEquipo(equipo?.id ?? null, input);
+        },
+      );
 
       if (!resultado.ok) {
         setErrorGeneral(resultado.error);
@@ -86,10 +93,11 @@ export function EquipoForm({ equipo }: EquipoFormProps) {
 
       <ImageUpload
         label="Escudo"
+        bucket={BUCKETS.escudos}
         value={escudo}
         onChange={setEscudo}
         ajuste="contain"
-        error={errores.escudo_url}
+        error={errores.escudo_ruta}
         disabled={pendiente}
       />
 

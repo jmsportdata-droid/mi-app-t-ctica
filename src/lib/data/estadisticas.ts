@@ -1,23 +1,8 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
-import type { EstadisticasJugador, JugadorAtributos } from "@/types/atributos";
+import type { EstadisticasJugador } from "@/types/jugador";
 
 const MINUTOS_POR_PARTIDO = 90;
-
-export async function getAtributos(jugadorId: string): Promise<JugadorAtributos | null> {
-  const supabase = createClient();
-  const { data, error } = await supabase
-    .from("jugador_atributos")
-    .select("*")
-    .eq("jugador_id", jugadorId)
-    .maybeSingle();
-
-  if (error) {
-    console.error("[getAtributos]", error.message);
-    throw new Error("No se pudieron cargar los atributos");
-  }
-  return data;
-}
 
 /**
  * Cifras del jugador a partir de los partidos marcados como "jugado":
@@ -29,8 +14,22 @@ export async function getAtributos(jugadorId: string): Promise<JugadorAtributos 
 export async function getEstadisticasJugador(jugadorId: string): Promise<EstadisticasJugador> {
   const supabase = createClient();
 
+  const { data: jugador, error: errorJugador } = await supabase
+    .from("jugadores")
+    .select("temporada_id")
+    .eq("id", jugadorId)
+    .maybeSingle();
+  if (errorJugador || !jugador) {
+    console.error("[getEstadisticasJugador] jugador", errorJugador?.message);
+    throw new Error("No se pudieron cargar las estadísticas");
+  }
+
   const [jugados, goles] = await Promise.all([
-    supabase.from("partidos").select("id").eq("estado", "jugado"),
+    supabase
+      .from("partidos")
+      .select("id")
+      .eq("temporada_id", jugador.temporada_id)
+      .eq("estado", "jugado"),
     supabase
       .from("eventos_partido")
       .select("id", { count: "exact", head: true })

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getJugador } from "@/lib/data/jugadores";
-import { getAtributos } from "@/lib/data/atributos";
+import { BUCKETS, urlImagen } from "@/lib/storage/config";
 import { calcularEdad, formatearFecha } from "@/lib/utils/edad";
 import { POSICION_LABEL } from "@/types/jugador";
 import { BackLink } from "@/components/ui/BackLink";
@@ -10,7 +10,6 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Dorsal } from "@/components/jugadores/Dorsal";
 import { PosicionBadge } from "@/components/jugadores/PosicionBadge";
 import { EliminarJugadorButton } from "@/components/jugadores/EliminarJugadorButton";
-import { AtributosEditor } from "@/components/jugadores/AtributosEditor";
 
 interface Props {
   params: { id: string };
@@ -25,7 +24,6 @@ export default async function JugadorPage({ params }: Props) {
   const jugador = await getJugador(params.id);
   if (!jugador) notFound();
 
-  const atributos = await getAtributos(jugador.id);
   const edad = calcularEdad(jugador.fecha_nac);
   const datos = [
     { label: "Posición", valor: POSICION_LABEL[jugador.posicion] },
@@ -39,7 +37,11 @@ export default async function JugadorPage({ params }: Props) {
 
       <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex flex-wrap items-center gap-5">
-          <Avatar src={jugador.foto_url} nombre={jugador.nombre} tamano="lg" />
+          <Avatar
+            src={urlImagen(BUCKETS.fotosJugadores, jugador.foto_ruta)}
+            nombre={jugador.nombre}
+            tamano="lg"
+          />
           <div className="min-w-0 flex-1">
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">{jugador.nombre}</h1>
             <div className="mt-2 flex items-center gap-2">
@@ -70,10 +72,6 @@ export default async function JugadorPage({ params }: Props) {
           <EliminarJugadorButton id={jugador.id} nombre={jugador.nombre} />
         </div>
       </article>
-
-      <div className="mt-6">
-        <AtributosEditor jugadorId={jugador.id} atributos={atributos} />
-      </div>
     </>
   );
 }

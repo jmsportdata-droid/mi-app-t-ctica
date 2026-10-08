@@ -1,8 +1,7 @@
 import { z } from "zod";
 import { POSICIONES, type JugadorInput } from "@/types/jugador";
 import { calcularEdad } from "@/lib/utils/edad";
-import { BUCKETS } from "@/lib/storage/config";
-import { urlImagenSchema } from "./comun";
+import { rutaImagenSchema } from "./comun";
 
 export { erroresDeZod } from "./comun";
 
@@ -29,7 +28,7 @@ export const jugadorSchema = z.object({
     .min(1, "El dorsal debe estar entre 1 y 99")
     .max(99, "El dorsal debe estar entre 1 y 99")
     .nullable(),
-  foto_url: urlImagenSchema(BUCKETS.fotosJugadores),
+  foto_ruta: rutaImagenSchema,
 }) satisfies z.ZodType<JugadorInput>;
 
 export type JugadorErrores = Partial<Record<keyof JugadorInput, string>>;

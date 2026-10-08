@@ -5,7 +5,7 @@ import { LoginForm } from "@/components/auth/LoginForm";
 export const metadata: Metadata = { title: "Iniciar sesión" };
 
 interface LoginPageProps {
-  searchParams: { next?: string; error?: string };
+  searchParams: { next?: string };
 }
 
 export default function LoginPage({ searchParams }: LoginPageProps) {
@@ -17,8 +17,10 @@ export default function LoginPage({ searchParams }: LoginPageProps) {
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-lg">
           <h1 className="text-xl font-semibold text-slate-900">Bienvenido</h1>
-          <p className="mb-6 mt-1 text-sm text-slate-500">Accede para gestionar tu equipo</p>
-          <LoginForm next={searchParams.next} errorInicial={searchParams.error} />
+          <p className="mb-6 mt-1 text-sm text-slate-500">
+            Entrá con la cuenta de tu cuerpo técnico
+          </p>
+          <LoginForm next={searchParams.next} />
         </div>
       </div>
     </main>

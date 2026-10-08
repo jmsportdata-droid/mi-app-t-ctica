@@ -1,6 +1,13 @@
 # Táctica FC
 
-Webapp de análisis táctico para un equipo de fútbol. Next.js 14 (App Router) + TypeScript + Tailwind CSS + Supabase Auth.
+App del cuerpo técnico de un plantel principal: plantel, partidos, rivales y (próximamente)
+planificación y cargas. Next.js 14 (App Router) + TypeScript + Tailwind CSS + Supabase.
+
+Los datos se separan en dos capas:
+
+- **Permanente** (cuelga del cuerpo técnico, viaja de club en club): equipos rivales; más adelante
+  modelo de juego, banco de tareas, informes.
+- **Club-temporada** (cuelga de la temporada, queda en cada club): plantel, partidos y su detalle.
 
 ## Puesta en marcha
 
@@ -28,50 +35,67 @@ Webapp de análisis táctico para un equipo de fútbol. Next.js 14 (App Router) 
    npx supabase link --project-ref <ref>       # <ref> es el subdominio de NEXT_PUBLIC_SUPABASE_URL; pide la contraseña de la base
    ```
 
-4. **Google OAuth**
-   - Supabase → Authentication → Providers → Google: activa e introduce Client ID / Secret de Google Cloud.
-   - En Google Cloud, añade como _Authorized redirect URI_: `https://<tu-proyecto>.supabase.co/auth/v1/callback`
-   - Supabase → Authentication → URL Configuration: añade `http://localhost:3000/auth/callback`
-     (y la URL de producción) a _Redirect URLs_.
+4. **Supabase Auth**: en Authentication → Sign In / Providers, desactivá _Allow new users to sign
+   up_ y el proveedor Google. No hay registro público: las cuentas las crea el entrenador.
 
 5. **Arrancar**
    ```bash
    npm run dev
    ```
 
+## Cuentas y permisos
+
+- La primera vez que alguien entra sin pertenecer a un cuerpo técnico, la app le pide crearlo
+  (`/bienvenida`): queda como **entrenador** y crea la temporada activa.
+- El entrenador suma al resto desde **Cuerpo técnico → Agregar miembro** (email, rol y una
+  contraseña inicial que le pasa a la persona). También puede cambiar roles, restablecer
+  contraseñas y quitar miembros. Cada uno cambia su contraseña en **Mi cuenta**.
+- Roles: entrenador, ayudante técnico, preparador físico y analista. Cualquier miembro edita todo
+  lo de su cuerpo técnico; solo el entrenador gestiona miembros y temporadas.
+- Los permisos los aplica la base (RLS en todas las tablas y en Storage), no solo la interfaz.
+  `./scripts/probar-permisos.sh` los verifica contra la base remota dentro de una transacción que
+  se deshace al final (ver `supabase/tests/permisos.sql`).
+- Las imágenes (fotos y escudos) están en buckets **privados**, en una carpeta por cuerpo técnico, y
+  se sirven desde `/imagenes/...` con la sesión del usuario.
+
 ## Estructura
 
 ```
 src/
-├── middleware.ts                  # Protege todo excepto /login y /auth/callback
+├── middleware.ts                  # Protege todo excepto /login
 ├── app/
-│   ├── login/                     # Email + contraseña y "Continuar con Google"
-│   ├── auth/callback/route.ts     # Intercambia el code OAuth por sesión
-│   └── (dashboard)/               # Layout con sidebar fijo (requiere sesión)
+│   ├── login/                     # Email + contraseña (sin registro público)
+│   ├── bienvenida/                # Alta del cuerpo técnico en el primer ingreso
+│   ├── imagenes/                  # Sirve las imágenes privadas de Storage
+│   └── (dashboard)/               # Sidebar + barra de temporada (requiere cuerpo técnico)
 │       ├── plantilla/             # Grid por posición, loading skeleton, error boundary
 │       │   ├── actions.ts         # Server Actions: crear / editar / eliminar
 │       │   ├── nuevo/             # Alta de jugador
 │       │   └── [id]/              # Ficha ("Ver") y [id]/editar
 │       ├── equipos/               # Grid de rivales, nuevo, [id]/editar, modal de borrado
-│       └── partidos/              # Grid, nuevo, [id] con pestañas (Informe, Plan, ABP, Alineación, Eventos)
+│       ├── partidos/              # Grid, nuevo, [id] con pestañas (Informe, Plan, ABP, Alineación, Eventos)
+│       ├── cuerpo-tecnico/        # Miembros (alta, rol, contraseña) y temporadas
+│       └── cuenta/                # Datos propios y cambio de contraseña
 ├── components/
 │   ├── ui/                        # Button, Input/Select, Alert, Skeleton...
 │   ├── layout/                    # Sidebar, LogoutButton
-│   ├── auth/                      # LoginForm
+│   ├── auth/                      # LoginForm, CambiarPasswordForm
+│   ├── cuerpo-tecnico/            # BarraTemporada, MiembroForm/Fila, TemporadaForm/Card, alta inicial
 │   ├── jugadores/                 # JugadorCard, PlantillaGrid, JugadorForm, Skeletons
 │   ├── equipos/                   # EquipoCard, EquipoForm, EquipoAcciones, EquiposSkeleton
 │   ├── partidos/                  # PartidoCard, PartidoForm, PartidoTabs, paneles, AlineacionEditor, eventos/
 │   └── campo/                     # CampoFutbol (SVG reutilizable)
 ├── lib/
-│   ├── supabase/                  # Clientes browser / server / middleware
+│   ├── supabase/                  # Clientes browser / server / middleware / admin (service role)
+│   ├── contexto.ts                # Sesión: miembro, cuerpo técnico y temporada seleccionada
 │   ├── alineacion.ts              # Lógica pura de mover jugadores (campo / banquillo)
 │   ├── export.ts                  # CSV / JSON de eventos
 │   ├── embeds.ts                  # URLs de Vimeo / Google Slides → URL de embed segura
 │   ├── storage/                   # Validación, subida (cliente) y borrado (servidor) de imágenes
-│   ├── data/jugadores.ts          # Lecturas (server-only)
+│   ├── data/                      # Lecturas (server-only)
 │   ├── validations/jugador.ts     # Esquema Zod compartido cliente/servidor
 │   └── utils/                     # calcularEdad, rutaSegura, cn
-└── types/                         # Jugador, Database
+└── types/                         # database.ts (generado) y tipos de dominio derivados
 ```
 
 ## Base de datos y migraciones

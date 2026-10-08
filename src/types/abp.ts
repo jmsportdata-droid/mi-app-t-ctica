@@ -1,3 +1,5 @@
+import type { Tables } from "./database";
+
 export const TIPOS_ABP = [
   { valor: "ofensivo", label: "Ofensivo" },
   { valor: "defensivo", label: "Defensivo" },
@@ -14,15 +16,7 @@ export const CAMPOS_ABP = ["descripcion", "vimeo_url"] as const;
 export type CampoAbp = (typeof CAMPOS_ABP)[number];
 
 /** Fila de la tabla "abp_partido" (una por tarjeta). */
-export type AbpPartido = {
-  partido_id: string;
-  tipo: TipoAbp;
-  categoria: CategoriaAbp;
-  indice: number;
-  descripcion: string | null;
-  vimeo_url: string | null;
-  updated_at: string;
-};
+export type AbpPartido = Tables<"abp_partido">;
 
 export interface ClaveAbp {
   tipo: TipoAbp;

@@ -13,6 +13,8 @@ import { BUCKETS } from "@/lib/storage/config";
 import { guardarConImagen, type ImagenValor } from "@/lib/storage/client";
 
 interface JugadorFormProps {
+  /** Carpeta de Storage donde se sube la foto */
+  cuerpoTecnicoId: string;
   /** Si se pasa, el formulario edita ese jugador; si no, crea uno nuevo. */
   jugador?: Jugador;
 }
@@ -34,9 +36,9 @@ function valoresIniciales(jugador?: Jugador): Valores {
 }
 
 /** Convierte los valores del formulario (strings) al shape tipado de entrada. */
-function aInput(v: Valores, fotoUrl: string | null): unknown {
+function aInput(v: Valores, fotoRuta: string | null): unknown {
   return {
-    foto_url: fotoUrl,
+    foto_ruta: fotoRuta,
     nombre: v.nombre,
     fecha_nac: v.fecha_nac,
     posicion: v.posicion,
@@ -44,13 +46,16 @@ function aInput(v: Valores, fotoUrl: string | null): unknown {
   };
 }
 
-export function JugadorForm({ jugador }: JugadorFormProps) {
+export function JugadorForm({ cuerpoTecnicoId, jugador }: JugadorFormProps) {
   const router = useRouter();
   const [pendiente, startTransition] = useTransition();
   const [valores, setValores] = useState<Valores>(() => valoresIniciales(jugador));
   const [errores, setErrores] = useState<JugadorErrores>({});
   const [errorGeneral, setErrorGeneral] = useState<string | null>(null);
-  const [foto, setFoto] = useState<ImagenValor>({ archivo: null, url: jugador?.foto_url ?? null });
+  const [foto, setFoto] = useState<ImagenValor>({
+    archivo: null,
+    ruta: jugador?.foto_ruta ?? null,
+  });
 
   const esEdicion = Boolean(jugador);
 
@@ -63,18 +68,23 @@ export function JugadorForm({ jugador }: JugadorFormProps) {
     e.preventDefault();
     setErrorGeneral(null);
 
-    // Si hay archivo nuevo, la URL aún no existe: se valida el resto y la foto se sube después.
-    const parsed = jugadorSchema.safeParse(aInput(valores, foto.archivo ? null : foto.url));
+    // Si hay archivo nuevo, la ruta aún no existe: se valida el resto y la foto se sube después.
+    const parsed = jugadorSchema.safeParse(aInput(valores, foto.archivo ? null : foto.ruta));
     if (!parsed.success) {
       setErrores(erroresDeZod(parsed.error));
       return;
     }
 
     startTransition(async () => {
-      const resultado = await guardarConImagen(BUCKETS.fotosJugadores, foto, (fotoUrl) => {
-        const input: JugadorInput = { ...parsed.data, foto_url: fotoUrl };
-        return guardarJugador(jugador?.id ?? null, input);
-      });
+      const resultado = await guardarConImagen(
+        BUCKETS.fotosJugadores,
+        cuerpoTecnicoId,
+        foto,
+        (fotoRuta) => {
+          const input: JugadorInput = { ...parsed.data, foto_ruta: fotoRuta };
+          return guardarJugador(jugador?.id ?? null, input);
+        },
+      );
 
       if (!resultado.ok) {
         setErrorGeneral(resultado.error);
@@ -96,9 +106,10 @@ export function JugadorForm({ jugador }: JugadorFormProps) {
 
       <ImageUpload
         label="Foto"
+        bucket={BUCKETS.fotosJugadores}
         value={foto}
         onChange={setFoto}
-        error={errores.foto_url}
+        error={errores.foto_ruta}
         disabled={pendiente}
       />
 

@@ -1,4 +1,4 @@
-import { MI_EQUIPO } from "@/lib/config";
+import { BUCKETS, urlImagen } from "@/lib/storage/config";
 import { cn } from "@/lib/utils/cn";
 import type { PartidoConRival } from "@/types/partido";
 import { Avatar } from "@/components/ui/Avatar";
@@ -9,18 +9,26 @@ interface Lado {
   esNuestro: boolean;
 }
 
+/** Nuestro club en la temporada (nombre y escudo). */
+export interface ClubPropio {
+  nombre: string;
+  escudo_url: string | null;
+}
+
 /** Escudo local vs escudo visitante, según si jugamos en casa o fuera. */
 export function Enfrentamiento({
   partido,
+  club,
   tamano = "md",
 }: {
   partido: PartidoConRival;
+  club: ClubPropio;
   tamano?: "md" | "lg";
 }) {
-  const nosotros: Lado = { ...MI_EQUIPO, esNuestro: true };
+  const nosotros: Lado = { ...club, esNuestro: true };
   const rival: Lado = {
     nombre: partido.rival?.nombre ?? "Rival eliminado",
-    escudo_url: partido.rival?.escudo_url ?? null,
+    escudo_url: urlImagen(BUCKETS.escudos, partido.rival?.escudo_ruta),
     esNuestro: false,
   };
   const [local, visitante] = partido.es_local ? [nosotros, rival] : [rival, nosotros];

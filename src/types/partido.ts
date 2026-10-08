@@ -1,3 +1,4 @@
+import type { Tables } from "./database";
 import type { Equipo } from "./equipo";
 
 // ---------- Partido ----------------------------------------------
@@ -10,27 +11,15 @@ export const ESTADO_LABEL: Record<EstadoPartido, string> = {
   jugado: "Jugado",
 };
 
-/** Fila de la tabla "partidos". */
-export type Partido = {
-  id: string;
-  /** Fecha ISO "YYYY-MM-DD" */
-  fecha: string;
-  rival_id: string;
-  estadio: string | null;
-  competicion: string | null;
-  es_local: boolean;
-  estado: EstadoPartido;
-  /** URL del vídeo del partido (Vimeo o YouTube) */
-  video_url: string | null;
-  created_at: string;
-};
+/** Fila de la tabla "partidos" (cuelga de la temporada). fecha: ISO "YYYY-MM-DD". */
+export type Partido = Tables<"partidos">;
 
 export type PartidoInput = Pick<
   Partido,
   "fecha" | "rival_id" | "estadio" | "competicion" | "es_local" | "estado"
 >;
 
-export type RivalResumen = Pick<Equipo, "id" | "nombre" | "escudo_url" | "estadio">;
+export type RivalResumen = Pick<Equipo, "id" | "nombre" | "escudo_ruta" | "estadio">;
 
 export type PartidoConRival = Partido & { rival: RivalResumen | null };
 
@@ -54,9 +43,7 @@ export const CAMPOS_PLAN: readonly CampoPlan[] = BLOQUES_PLAN.flatMap(({ clave }
 );
 
 /** Fila de la tabla "plan_partido". */
-export type PlanPartido = { partido_id: string; updated_at: string } & {
-  [K in CampoPlan]: string | null;
-};
+export type PlanPartido = Tables<"plan_partido">;
 
 // ---------- Informe del rival ------------------------------------
 
@@ -72,13 +59,7 @@ export const CAMPOS_INFORME = ["slides_url", "vimeo_url"] as const;
 export type CampoInforme = (typeof CAMPOS_INFORME)[number];
 
 /** Fila de la tabla "informe_rival". */
-export type InformeRival = {
-  partido_id: string;
-  tags: TagInforme[];
-  slides_url: string | null;
-  vimeo_url: string | null;
-  updated_at: string;
-};
+export type InformeRival = Tables<"informe_rival">;
 
 // ---------- Pestañas del detalle ---------------------------------
 

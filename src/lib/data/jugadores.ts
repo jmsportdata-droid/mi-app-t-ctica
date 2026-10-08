@@ -3,11 +3,12 @@ import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import type { Jugador } from "@/types/jugador";
 
-export async function getJugadores(): Promise<Jugador[]> {
+export async function getJugadores(temporadaId: string): Promise<Jugador[]> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("jugadores")
     .select("*")
+    .eq("temporada_id", temporadaId)
     .order("numero", { ascending: true, nullsFirst: false })
     .order("nombre", { ascending: true });
 

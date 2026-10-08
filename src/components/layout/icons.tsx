@@ -44,3 +44,21 @@ export function IconLogout({ className }: IconProps) {
     </svg>
   );
 }
+
+export function IconCuerpoTecnico({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <rect x="5" y="4" width="14" height="17" rx="2" />
+      <path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h3" />
+    </svg>
+  );
+}
+
+export function IconCuenta({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 21a8 8 0 0 1 16 0" />
+    </svg>
+  );
+}

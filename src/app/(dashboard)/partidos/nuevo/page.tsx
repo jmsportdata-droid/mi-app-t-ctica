@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { requerirTemporada } from "@/lib/contexto";
 import { getEquipos } from "@/lib/data/equipos";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { BackLink } from "@/components/ui/BackLink";
@@ -9,6 +10,7 @@ import { PartidoForm } from "@/components/partidos/PartidoForm";
 export const metadata: Metadata = { title: "Nuevo partido" };
 
 export default async function NuevoPartidoPage() {
+  await requerirTemporada();
   const equipos = await getEquipos();
 
   return (

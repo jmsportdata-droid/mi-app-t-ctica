@@ -1,3 +1,5 @@
+import type { Tables } from "./database";
+
 export const POSICIONES = ["POR", "DEF", "CEN", "DEL"] as const;
 
 export type Posicion = (typeof POSICIONES)[number];
@@ -16,21 +18,23 @@ export const POSICION_NOMBRE: Record<Posicion, string> = {
   DEL: "Delantero",
 };
 
-/** Fila de la tabla "jugadores" tal y como la devuelve Supabase. */
-export type Jugador = {
-  id: string;
-  nombre: string;
-  /** Fecha ISO "YYYY-MM-DD" */
-  fecha_nac: string;
-  posicion: Posicion;
-  numero: number | null;
-  /** URL pública en el bucket "player-photos" */
-  foto_url: string | null;
-  created_at: string;
-};
+/**
+ * Fila de la tabla "jugadores" (cuelga de la temporada).
+ * fecha_nac: ISO "YYYY-MM-DD". foto_ruta: ruta en el bucket "fotos-jugadores".
+ */
+export type Jugador = Tables<"jugadores">;
 
-/** Datos necesarios para crear o editar un jugador. */
+/** Datos necesarios para crear o editar un jugador (la temporada la pone el servidor). */
 export type JugadorInput = Pick<
   Jugador,
-  "nombre" | "fecha_nac" | "posicion" | "numero" | "foto_url"
+  "nombre" | "fecha_nac" | "posicion" | "numero" | "foto_ruta"
 >;
+
+/** Cifras de uso del jugador (derivadas de alineaciones y eventos). */
+export interface EstadisticasJugador {
+  partidos: number;
+  titular: number;
+  /** Estimación: 90 minutos por partido como titular */
+  minutos: number;
+  goles: number;
+}
