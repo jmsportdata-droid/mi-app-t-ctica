@@ -105,6 +105,47 @@ export type Database = {
         }
         Relationships: []
       }
+      disponibilidad: {
+        Row: {
+          actualizado_en: string
+          cargado_por: string | null
+          creado_en: string
+          estado: Database["public"]["Enums"]["estado_disponibilidad"]
+          fecha: string
+          fecha_regreso: string | null
+          id: string
+          jugador_id: string
+        }
+        Insert: {
+          actualizado_en?: string
+          cargado_por?: string | null
+          creado_en?: string
+          estado: Database["public"]["Enums"]["estado_disponibilidad"]
+          fecha: string
+          fecha_regreso?: string | null
+          id?: string
+          jugador_id: string
+        }
+        Update: {
+          actualizado_en?: string
+          cargado_por?: string | null
+          creado_en?: string
+          estado?: Database["public"]["Enums"]["estado_disponibilidad"]
+          fecha?: string
+          fecha_regreso?: string | null
+          id?: string
+          jugador_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disponibilidad_jugador_id_fkey"
+            columns: ["jugador_id"]
+            isOneToOne: false
+            referencedRelation: "jugadores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       equipos: {
         Row: {
           creado_en: string
@@ -231,36 +272,48 @@ export type Database = {
       }
       jugadores: {
         Row: {
+          altura_cm: number | null
           creado_en: string
-          fecha_nac: string
+          fecha_nac: string | null
           foto_ruta: string | null
           id: string
           ids_externos: Json
+          nacionalidad: string | null
           nombre: string
           numero: number | null
+          pie_habil: Database["public"]["Enums"]["pie_habil"] | null
           posicion: Database["public"]["Enums"]["linea_jugador"]
+          posiciones: string[]
           temporada_id: string
         }
         Insert: {
+          altura_cm?: number | null
           creado_en?: string
-          fecha_nac: string
+          fecha_nac?: string | null
           foto_ruta?: string | null
           id?: string
           ids_externos?: Json
+          nacionalidad?: string | null
           nombre: string
           numero?: number | null
+          pie_habil?: Database["public"]["Enums"]["pie_habil"] | null
           posicion: Database["public"]["Enums"]["linea_jugador"]
+          posiciones?: string[]
           temporada_id: string
         }
         Update: {
+          altura_cm?: number | null
           creado_en?: string
-          fecha_nac?: string
+          fecha_nac?: string | null
           foto_ruta?: string | null
           id?: string
           ids_externos?: Json
+          nacionalidad?: string | null
           nombre?: string
           numero?: number | null
+          pie_habil?: Database["public"]["Enums"]["pie_habil"] | null
           posicion?: Database["public"]["Enums"]["linea_jugador"]
+          posiciones?: string[]
           temporada_id?: string
         }
         Relationships: [
@@ -446,6 +499,7 @@ export type Database = {
           fecha_fin: string
           fecha_inicio: string
           id: string
+          ids_externos: Json
         }
         Insert: {
           activa?: boolean
@@ -459,6 +513,7 @@ export type Database = {
           fecha_fin: string
           fecha_inicio: string
           id?: string
+          ids_externos?: Json
         }
         Update: {
           activa?: boolean
@@ -472,6 +527,7 @@ export type Database = {
           fecha_fin?: string
           fecha_inicio?: string
           id?: string
+          ids_externos?: Json
         }
         Relationships: [
           {
@@ -500,8 +556,18 @@ export type Database = {
         }
         Returns: string
       }
+      disponibilidad_del_dia: {
+        Args: { p_fecha: string; p_temporada: string }
+        Returns: {
+          desde: string
+          estado: Database["public"]["Enums"]["estado_disponibilidad"]
+          fecha_regreso: string
+          jugador_id: string
+        }[]
+      }
       es_entrenador: { Args: { p_cuerpo_tecnico: string }; Returns: boolean }
       es_miembro: { Args: { p_cuerpo_tecnico: string }; Returns: boolean }
+      es_miembro_jugador: { Args: { p_jugador: string }; Returns: boolean }
       es_miembro_partido: { Args: { p_partido: string }; Returns: boolean }
       es_miembro_temporada: { Args: { p_temporada: string }; Returns: boolean }
       jugador_del_partido: {
@@ -523,6 +589,7 @@ export type Database = {
     }
     Enums: {
       categoria_abp: "corner" | "falta_lateral"
+      estado_disponibilidad: "disponible" | "limitado" | "baja" | "sancionado"
       estado_partido: "planificado" | "jugado"
       etiqueta_informe:
         | "salida_balon"
@@ -531,6 +598,7 @@ export type Database = {
         | "linea_defensiva"
       formacion: "4-3-3" | "4-4-2" | "4-2-3-1" | "5-3-2"
       linea_jugador: "POR" | "DEF" | "CEN" | "DEL"
+      pie_habil: "derecho" | "izquierdo" | "ambos"
       rol_miembro: "entrenador" | "ayudante" | "preparador_fisico" | "analista"
       tipo_abp: "ofensivo" | "defensivo"
       tipo_evento: "gol" | "ocasion" | "duelo" | "nota"
@@ -662,6 +730,7 @@ export const Constants = {
   public: {
     Enums: {
       categoria_abp: ["corner", "falta_lateral"],
+      estado_disponibilidad: ["disponible", "limitado", "baja", "sancionado"],
       estado_partido: ["planificado", "jugado"],
       etiqueta_informe: [
         "salida_balon",
@@ -671,6 +740,7 @@ export const Constants = {
       ],
       formacion: ["4-3-3", "4-4-2", "4-2-3-1", "5-3-2"],
       linea_jugador: ["POR", "DEF", "CEN", "DEL"],
+      pie_habil: ["derecho", "izquierdo", "ambos"],
       rol_miembro: ["entrenador", "ayudante", "preparador_fisico", "analista"],
       tipo_abp: ["ofensivo", "defensivo"],
       tipo_evento: ["gol", "ocasion", "duelo", "nota"],

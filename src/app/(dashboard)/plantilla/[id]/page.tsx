@@ -1,10 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getHistorialDisponibilidad } from "@/lib/data/disponibilidad";
 import { getJugador } from "@/lib/data/jugadores";
+import { hoyISO } from "@/lib/utils/fecha";
 import { BUCKETS, urlImagen } from "@/lib/storage/config";
 import { calcularEdad, formatearFecha } from "@/lib/utils/edad";
-import { POSICION_LABEL } from "@/types/jugador";
+import {
+  PIE_LABEL,
+  POSICION_ESPECIFICA_LABEL,
+  POSICION_NOMBRE,
+  type PosicionEspecifica,
+} from "@/types/jugador";
+import { SIN_REGISTRO } from "@/types/disponibilidad";
+import { EstadoChip } from "@/components/disponibilidad/EstadoChip";
 import { BackLink } from "@/components/ui/BackLink";
 import { Avatar } from "@/components/ui/Avatar";
 import { Dorsal } from "@/components/jugadores/Dorsal";
@@ -24,11 +33,26 @@ export default async function JugadorPage({ params }: Props) {
   const jugador = await getJugador(params.id);
   if (!jugador) notFound();
 
+  const historial = await getHistorialDisponibilidad(jugador.id);
+  const hoy = hoyISO();
+  // El estado vigente es el último registro que no sea a futuro
+  const vigente = historial.find((r) => r.fecha <= hoy);
+  const estadoHoy = vigente
+    ? { estado: vigente.estado, fecha_regreso: vigente.fecha_regreso }
+    : SIN_REGISTRO;
+
   const edad = calcularEdad(jugador.fecha_nac);
+  const posiciones = jugador.posiciones
+    .map((p) => POSICION_ESPECIFICA_LABEL[p as PosicionEspecifica] ?? p)
+    .join(", ");
   const datos = [
-    { label: "Posición", valor: POSICION_LABEL[jugador.posicion] },
+    { label: "Posición", valor: POSICION_NOMBRE[jugador.posicion] },
+    { label: "Juega de", valor: posiciones || "—" },
     { label: "Fecha de nacimiento", valor: formatearFecha(jugador.fecha_nac) },
     { label: "Edad", valor: edad !== null ? `${edad} años` : "—" },
+    { label: "Pie hábil", valor: jugador.pie_habil ? PIE_LABEL[jugador.pie_habil] : "—" },
+    { label: "Altura", valor: jugador.altura_cm ? `${jugador.altura_cm} cm` : "—" },
+    { label: "Nacionalidad", valor: jugador.nacionalidad ?? "—" },
   ];
 
   return (
@@ -44,9 +68,10 @@ export default async function JugadorPage({ params }: Props) {
           />
           <div className="min-w-0 flex-1">
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">{jugador.nombre}</h1>
-            <div className="mt-2 flex items-center gap-2">
+            <div className="mt-2 flex flex-wrap items-center gap-2">
               <Dorsal numero={jugador.numero} tamano="sm" />
               <PosicionBadge posicion={jugador.posicion} />
+              <EstadoChip estado={estadoHoy.estado} fechaRegreso={estadoHoy.fecha_regreso} />
             </div>
           </div>
           <Link
@@ -57,7 +82,7 @@ export default async function JugadorPage({ params }: Props) {
           </Link>
         </div>
 
-        <dl className="mt-8 grid gap-4 sm:grid-cols-3">
+        <dl className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
           {datos.map(({ label, valor }) => (
             <div key={label} className="rounded-xl bg-slate-50 p-4">
               <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">
@@ -72,6 +97,38 @@ export default async function JugadorPage({ params }: Props) {
           <EliminarJugadorButton id={jugador.id} nombre={jugador.nombre} />
         </div>
       </article>
+
+      <section
+        aria-labelledby="titulo-historial"
+        className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+      >
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <h2 id="titulo-historial" className="font-semibold text-slate-900">
+            Disponibilidad
+          </h2>
+          <Link
+            href="/plantilla/disponibilidad"
+            className="text-sm font-medium text-brand-700 hover:underline"
+          >
+            Cargar disponibilidad
+          </Link>
+        </div>
+        {historial.length === 0 ? (
+          <p className="text-sm text-slate-500">
+            Nunca se le cargó un estado: figura como disponible.
+          </p>
+        ) : (
+          <ol className="space-y-2">
+            {historial.map((r) => (
+              <li key={r.id} className="flex flex-wrap items-center gap-3 text-sm">
+                <span className="w-24 tabular-nums text-slate-500">{formatearFecha(r.fecha)}</span>
+                <EstadoChip estado={r.estado} fechaRegreso={r.fecha_regreso} />
+                {r.fecha > hoy && <span className="text-xs text-slate-400">(a futuro)</span>}
+              </li>
+            ))}
+          </ol>
+        )}
+      </section>
     </>
   );
 }

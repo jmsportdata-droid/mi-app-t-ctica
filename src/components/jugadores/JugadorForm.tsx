@@ -4,7 +4,16 @@ import { useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { guardarJugador } from "@/app/(dashboard)/plantilla/actions";
 import { erroresDeZod, jugadorSchema, type JugadorErrores } from "@/lib/validations/jugador";
-import { POSICIONES, POSICION_LABEL, type Jugador, type JugadorInput } from "@/types/jugador";
+import {
+  MAX_POSICIONES,
+  PIES_HABILES,
+  POSICIONES,
+  POSICIONES_ESPECIFICAS,
+  POSICION_LABEL,
+  type Jugador,
+  type JugadorInput,
+} from "@/types/jugador";
+import { cn } from "@/lib/utils/cn";
 import { Button } from "@/components/ui/Button";
 import { Input, Select } from "@/components/ui/Field";
 import { Alert } from "@/components/ui/Alert";
@@ -24,6 +33,10 @@ interface Valores {
   fecha_nac: string;
   posicion: string;
   numero: string;
+  posiciones: string[];
+  pie_habil: string;
+  altura_cm: string;
+  nacionalidad: string;
 }
 
 function valoresIniciales(jugador?: Jugador): Valores {
@@ -32,17 +45,27 @@ function valoresIniciales(jugador?: Jugador): Valores {
     fecha_nac: jugador?.fecha_nac ?? "",
     posicion: jugador?.posicion ?? "",
     numero: jugador?.numero != null ? String(jugador.numero) : "",
+    posiciones: jugador?.posiciones ?? [],
+    pie_habil: jugador?.pie_habil ?? "",
+    altura_cm: jugador?.altura_cm != null ? String(jugador.altura_cm) : "",
+    nacionalidad: jugador?.nacionalidad ?? "",
   };
 }
+
+const numeroONull = (v: string) => (v.trim() === "" ? null : Number(v));
 
 /** Convierte los valores del formulario (strings) al shape tipado de entrada. */
 function aInput(v: Valores, fotoRuta: string | null): unknown {
   return {
     foto_ruta: fotoRuta,
     nombre: v.nombre,
-    fecha_nac: v.fecha_nac,
+    fecha_nac: v.fecha_nac === "" ? null : v.fecha_nac,
     posicion: v.posicion,
-    numero: v.numero.trim() === "" ? null : Number(v.numero),
+    numero: numeroONull(v.numero),
+    posiciones: v.posiciones,
+    pie_habil: v.pie_habil === "" ? null : v.pie_habil,
+    altura_cm: numeroONull(v.altura_cm),
+    nacionalidad: v.nacionalidad,
   };
 }
 
@@ -62,6 +85,18 @@ export function JugadorForm({ cuerpoTecnicoId, jugador }: JugadorFormProps) {
   function actualizar<K extends keyof Valores>(campo: K, valor: Valores[K]) {
     setValores((prev) => ({ ...prev, [campo]: valor }));
     if (errores[campo]) setErrores((prev) => ({ ...prev, [campo]: undefined }));
+  }
+
+  function alternarPosicion(codigo: string) {
+    const actuales = valores.posiciones;
+    if (actuales.includes(codigo)) {
+      actualizar(
+        "posiciones",
+        actuales.filter((p) => p !== codigo),
+      );
+    } else if (actuales.length < MAX_POSICIONES) {
+      actualizar("posiciones", [...actuales, codigo]);
+    }
   }
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -133,7 +168,7 @@ export function JugadorForm({ cuerpoTecnicoId, jugador }: JugadorFormProps) {
           value={valores.fecha_nac}
           onChange={(e) => actualizar("fecha_nac", e.target.value)}
           error={errores.fecha_nac}
-          required
+          ayuda="Opcional, pero sirve para las edades del plantel."
         />
         <Select
           label="Posición"
@@ -148,10 +183,80 @@ export function JugadorForm({ cuerpoTecnicoId, jugador }: JugadorFormProps) {
           </option>
           {POSICIONES.map((p) => (
             <option key={p} value={p}>
-              {p} — {POSICION_LABEL[p]}
+              {POSICION_LABEL[p]}
             </option>
           ))}
         </Select>
+      </div>
+
+      <fieldset className="space-y-2">
+        <legend className="text-sm font-medium text-slate-700">
+          Posiciones donde juega{" "}
+          <span className="font-normal text-slate-500">(opcional, hasta {MAX_POSICIONES})</span>
+        </legend>
+        <div className="flex flex-wrap gap-2">
+          {POSICIONES_ESPECIFICAS.map((p) => {
+            const elegida = valores.posiciones.includes(p.codigo);
+            const lleno = !elegida && valores.posiciones.length >= MAX_POSICIONES;
+            return (
+              <button
+                key={p.codigo}
+                type="button"
+                aria-pressed={elegida}
+                onClick={() => alternarPosicion(p.codigo)}
+                disabled={lleno || pendiente}
+                className={cn(
+                  "rounded-full px-3 py-1.5 text-sm font-medium ring-1 ring-inset transition-colors disabled:opacity-40",
+                  elegida
+                    ? "bg-brand-600 text-white ring-brand-600"
+                    : "bg-white text-slate-700 ring-slate-300 hover:bg-slate-50",
+                )}
+              >
+                {p.label}
+              </button>
+            );
+          })}
+        </div>
+        {errores.posiciones && <p className="text-xs text-red-600">{errores.posiciones}</p>}
+      </fieldset>
+
+      <div className="grid gap-5 sm:grid-cols-3">
+        <Select
+          label="Pie hábil"
+          name="pie_habil"
+          value={valores.pie_habil}
+          onChange={(e) => actualizar("pie_habil", e.target.value)}
+          error={errores.pie_habil}
+        >
+          <option value="">Sin dato</option>
+          {PIES_HABILES.map((p) => (
+            <option key={p.valor} value={p.valor}>
+              {p.label}
+            </option>
+          ))}
+        </Select>
+        <Input
+          label="Altura (cm)"
+          type="number"
+          name="altura_cm"
+          inputMode="numeric"
+          min={140}
+          max={220}
+          step={1}
+          placeholder="Ej. 182"
+          value={valores.altura_cm}
+          onChange={(e) => actualizar("altura_cm", e.target.value)}
+          error={errores.altura_cm}
+        />
+        <Input
+          label="Nacionalidad"
+          name="nacionalidad"
+          placeholder="Ej. Uruguay"
+          value={valores.nacionalidad}
+          onChange={(e) => actualizar("nacionalidad", e.target.value)}
+          error={errores.nacionalidad}
+          maxLength={60}
+        />
       </div>
 
       <Input

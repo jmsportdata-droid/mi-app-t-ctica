@@ -1,11 +1,13 @@
 import { BUCKETS, urlImagen } from "@/lib/storage/config";
 import { calcularEdad } from "@/lib/utils/edad";
+import type { EstadoDelDia } from "@/types/disponibilidad";
 import type { Jugador } from "@/types/jugador";
+import { EstadoChip } from "@/components/disponibilidad/EstadoChip";
 import { Avatar } from "@/components/ui/Avatar";
 import { PosicionBadge } from "./PosicionBadge";
 import { VerJugadorButton } from "./VerJugadorButton";
 
-export function JugadorCard({ jugador }: { jugador: Jugador }) {
+export function JugadorCard({ jugador, estado }: { jugador: Jugador; estado: EstadoDelDia }) {
   const edad = calcularEdad(jugador.fecha_nac);
 
   return (
@@ -32,6 +34,7 @@ export function JugadorCard({ jugador }: { jugador: Jugador }) {
             <PosicionBadge posicion={jugador.posicion} />
             {edad !== null && <span>{edad} años</span>}
           </div>
+          <EstadoChip estado={estado.estado} fechaRegreso={estado.fecha_regreso} className="mt-2" />
         </div>
       </div>
       <div className="mt-auto">

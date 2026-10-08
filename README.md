@@ -24,6 +24,7 @@ Los datos se separan en dos capas:
    | `NEXT_PUBLIC_SUPABASE_URL`      | Cliente y servidor                                                     |
    | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Cliente y servidor                                                     |
    | `SUPABASE_SERVICE_ROLE_KEY`     | **Solo servidor** (alta de usuarios). Nunca con prefijo `NEXT_PUBLIC_` |
+   | `API_FOOTBALL_KEY`              | **Solo servidor**: importar planteles y rivales desde API-Football     |
 
    Las mismas variables tienen que estar cargadas en Vercel → Settings → Environment Variables.
 
@@ -57,6 +58,19 @@ Los datos se separan en dos capas:
   se deshace al final (ver `supabase/tests/permisos.sql`).
 - Las imágenes (fotos y escudos) están en buckets **privados**, en una carpeta por cuerpo técnico, y
   se sirven desde `/imagenes/...` con la sesión del usuario.
+
+## Importación desde API-Football
+
+**Plantel → Importar** y **Equipos → Importar** traen jugadores y rivales desde
+[API-Football](https://www.api-football.com) (cliente en `src/lib/externos/api-football.ts`).
+
+- Plan gratuito: 100 consultas por día y 10 por minuto. Alcanza para el buscador, el plantel
+  actual de un equipo (1 consulta) y el perfil de cada jugador (1 consulta: nombre completo,
+  fecha de nacimiento, nacionalidad y altura). No incluye fixture ni estadísticas de la
+  temporada en curso.
+- Cada jugador y rival guarda su id en `ids_externos.api_football`: volver a importar actualiza
+  en vez de duplicar. Número y línea se actualizan; el resto solo se completa si falta.
+- Fotos y escudos se copian al Storage privado del cuerpo técnico.
 
 ## Estructura
 

@@ -41,6 +41,9 @@ insert into public.partidos (id, temporada_id, fecha, rival_id) values
   ('00000000-0000-4000-f000-00000000000a', '00000000-0000-4000-c000-00000000000a', '2026-05-01', '00000000-0000-4000-d000-00000000000a'),
   ('00000000-0000-4000-f000-00000000000b', '00000000-0000-4000-c000-00000000000b', '2026-05-01', '00000000-0000-4000-d000-00000000000b');
 
+insert into public.disponibilidad (jugador_id, fecha, estado) values
+  ('00000000-0000-4000-e000-00000000000b', '2026-04-01', 'limitado');
+
 -- Analista A2: ve y edita lo de su cuerpo técnico, nada de B ----------
 set local role authenticated;
 set local request.jwt.claims to '{"sub":"00000000-0000-4000-a000-0000000000a2","role":"authenticated"}';
@@ -110,6 +113,23 @@ begin
     raise exception 'FALLA: se pudo cargar un evento con un jugador de otra temporada';
   exception when insufficient_privilege then null;
   end;
+
+  -- Disponibilidad: solo de jugadores propios
+  insert into public.disponibilidad (jugador_id, fecha, estado, fecha_regreso)
+    values ('00000000-0000-4000-e000-00000000000a', '2026-05-01', 'baja', '2026-05-20');
+  if (select estado from public.disponibilidad_del_dia('00000000-0000-4000-c000-00000000000a', '2026-05-10')
+      where jugador_id = '00000000-0000-4000-e000-00000000000a') <> 'baja' then
+    raise exception 'FALLA: el estado de disponibilidad no se arrastra a los días siguientes';
+  end if;
+  begin
+    insert into public.disponibilidad (jugador_id, fecha, estado)
+      values ('00000000-0000-4000-e000-00000000000b', '2026-05-01', 'baja');
+    raise exception 'FALLA: el analista A pudo cargar la disponibilidad de un jugador de B';
+  exception when insufficient_privilege then null;
+  end;
+  if exists (select 1 from public.disponibilidad_del_dia('00000000-0000-4000-c000-00000000000b', '2026-12-31')) then
+    raise exception 'FALLA: el analista A ve la disponibilidad de B';
+  end if;
 
   -- Solo el entrenador gestiona miembros y temporadas
   begin
