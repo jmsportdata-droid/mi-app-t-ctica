@@ -5,7 +5,9 @@ import dynamic from "next/dynamic";
 import type { Jugador } from "@/types/jugador";
 
 // Recharts solo se descarga al abrir el primer popup
-const JugadorModal = dynamic(() => import("./JugadorModal").then((m) => m.JugadorModal), { ssr: false });
+const JugadorModal = dynamic(() => import("./JugadorModal").then((m) => m.JugadorModal), {
+  ssr: false,
+});
 
 /** Botón "Ver" de la tarjeta: abre el popup con la ficha del jugador. */
 export function VerJugadorButton({ jugador }: { jugador: Jugador }) {
@@ -20,7 +22,9 @@ export function VerJugadorButton({ jugador }: { jugador: Jugador }) {
       >
         Ver
       </button>
-      {abierto && <JugadorModal jugador={jugador} abierto={abierto} onCerrar={() => setAbierto(false)} />}
+      {abierto && (
+        <JugadorModal jugador={jugador} abierto={abierto} onCerrar={() => setAbierto(false)} />
+      )}
     </>
   );
 }

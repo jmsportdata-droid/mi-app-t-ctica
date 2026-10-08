@@ -31,7 +31,10 @@ function errorDeBD(error: PostgrestError, contexto: string): { ok: false; error:
 
 // ---------- Alineación -------------------------------------------
 
-export async function guardarAlineacion(partidoId: string, input: AlineacionInput): Promise<Resultado> {
+export async function guardarAlineacion(
+  partidoId: string,
+  input: AlineacionInput,
+): Promise<Resultado> {
   const parsed = alineacionSchema.safeParse(input);
   if (!idSchema.safeParse(partidoId).success || !parsed.success) {
     return { ok: false, error: parsed.error?.issues[0]?.message ?? "Alineación no válida" };
@@ -90,7 +93,10 @@ export async function guardarCampoAbp(
 
 // ---------- Vídeo y eventos --------------------------------------
 
-export async function guardarVideoPartido(partidoId: string, valor: string): Promise<GuardadoResult> {
+export async function guardarVideoPartido(
+  partidoId: string,
+  valor: string,
+): Promise<GuardadoResult> {
   if (!idSchema.safeParse(partidoId).success) return { ok: false, error: "Partido no válido" };
   const parsed = videoPartidoSchema.safeParse(valor);
   if (!parsed.success) {
@@ -100,7 +106,10 @@ export async function guardarVideoPartido(partidoId: string, valor: string): Pro
   const supabase = await getClienteAutenticado();
   if (!supabase) return SESION_EXPIRADA;
 
-  const { error } = await supabase.from("partidos").update({ video_url: parsed.data }).eq("id", partidoId);
+  const { error } = await supabase
+    .from("partidos")
+    .update({ video_url: parsed.data })
+    .eq("id", partidoId);
   if (error) return errorDeBD(error, "video");
 
   revalidatePath(`/partidos/${partidoId}`);
@@ -108,10 +117,12 @@ export async function guardarVideoPartido(partidoId: string, valor: string): Pro
 }
 
 export type CrearEventoResult =
-  | { ok: true; evento: EventoPartido }
-  | { ok: false; error: string; campo?: keyof EventoInput };
+  { ok: true; evento: EventoPartido } | { ok: false; error: string; campo?: keyof EventoInput };
 
-export async function crearEvento(partidoId: string, input: EventoInput): Promise<CrearEventoResult> {
+export async function crearEvento(
+  partidoId: string,
+  input: EventoInput,
+): Promise<CrearEventoResult> {
   if (!idSchema.safeParse(partidoId).success) return { ok: false, error: "Partido no válido" };
   const parsed = eventoSchema.safeParse(input);
   if (!parsed.success) {

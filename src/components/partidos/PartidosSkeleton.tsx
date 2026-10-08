@@ -10,7 +10,10 @@ export function PartidoCardSkeleton() {
       </div>
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
         {[0, 1].map((i) => (
-          <div key={i} className={`flex flex-col items-center gap-2 ${i === 1 ? "col-start-3" : ""}`}>
+          <div
+            key={i}
+            className={`flex flex-col items-center gap-2 ${i === 1 ? "col-start-3" : ""}`}
+          >
             <Skeleton className="h-16 w-16 rounded-full" />
             <Skeleton className="h-3 w-20" />
           </div>

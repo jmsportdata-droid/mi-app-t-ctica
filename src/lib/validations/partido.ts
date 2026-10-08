@@ -39,7 +39,10 @@ const nulable = (schema: z.ZodType<string>) =>
 const URL_MAX = 2000;
 
 const urlVimeo = nulable(
-  z.string().max(URL_MAX).refine((v) => vimeoEmbedUrl(v) !== null, "Pega un enlace válido de Vimeo"),
+  z
+    .string()
+    .max(URL_MAX)
+    .refine((v) => vimeoEmbedUrl(v) !== null, "Pega un enlace válido de Vimeo"),
 );
 const urlSlides = nulable(
   z

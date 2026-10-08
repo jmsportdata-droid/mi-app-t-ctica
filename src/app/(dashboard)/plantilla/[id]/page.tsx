@@ -58,7 +58,9 @@ export default async function JugadorPage({ params }: Props) {
         <dl className="mt-8 grid gap-4 sm:grid-cols-3">
           {datos.map(({ label, valor }) => (
             <div key={label} className="rounded-xl bg-slate-50 p-4">
-              <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</dt>
+              <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                {label}
+              </dt>
               <dd className="mt-1 font-semibold text-slate-900">{valor}</dd>
             </div>
           ))}

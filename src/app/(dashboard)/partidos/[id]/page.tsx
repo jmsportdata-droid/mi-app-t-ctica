@@ -42,7 +42,11 @@ export default async function PartidoPage({ params, searchParams }: Props) {
           <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
             {partido.competicion ?? "Sin competición"}
           </span>
-          <PartidoAcciones id={partido.id} estado={partido.estado} titulo={tituloPartido(partido)} />
+          <PartidoAcciones
+            id={partido.id}
+            estado={partido.estado}
+            titulo={tituloPartido(partido)}
+          />
         </div>
 
         <div className="mx-auto max-w-lg">
@@ -64,7 +68,11 @@ export default async function PartidoPage({ params, searchParams }: Props) {
         videoUrl={partido.video_url}
         tabInicial={tabInicial}
         exportacion={{
-          nombreArchivo: nombreArchivoSeguro("eventos", partido.rival?.nombre ?? "rival", partido.fecha),
+          nombreArchivo: nombreArchivoSeguro(
+            "eventos",
+            partido.rival?.nombre ?? "rival",
+            partido.fecha,
+          ),
           meta: {
             partido: tituloPartido(partido),
             fecha: partido.fecha,

@@ -76,10 +76,20 @@ export function ImageUpload({
             <img
               src={preview}
               alt="Vista previa"
-              className={cn("h-full w-full", ajuste === "cover" ? "object-cover" : "object-contain p-1.5")}
+              className={cn(
+                "h-full w-full",
+                ajuste === "cover" ? "object-cover" : "object-contain p-1.5",
+              )}
             />
           ) : (
-            <svg viewBox="0 0 24 24" className="h-7 w-7 text-slate-400" fill="none" stroke="currentColor" strokeWidth={1.6} aria-hidden>
+            <svg
+              viewBox="0 0 24 24"
+              className="h-7 w-7 text-slate-400"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.6}
+              aria-hidden
+            >
               <path d="M4 16l4.6-4.6a2 2 0 0 1 2.8 0L16 16m-2-2 1.6-1.6a2 2 0 0 1 2.8 0L20 14M14 8h.01M6 20h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z" />
             </svg>
           )}

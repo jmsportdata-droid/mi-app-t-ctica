@@ -37,7 +37,11 @@ const EJE = { fontSize: 12, fill: "#64748b" };
 
 export function EventosGraficas({ eventos }: { eventos: EventoPartido[] }) {
   if (eventos.length === 0) {
-    return <p className="py-10 text-center text-sm text-slate-400">Registra eventos para ver las gráficas.</p>;
+    return (
+      <p className="py-10 text-center text-sm text-slate-400">
+        Registra eventos para ver las gráficas.
+      </p>
+    );
   }
 
   const porTipo = TIPOS_EVENTO.map((t) => ({
@@ -49,7 +53,9 @@ export function EventosGraficas({ eventos }: { eventos: EventoPartido[] }) {
   return (
     <div className="grid gap-6 xl:grid-cols-2">
       <figure className="rounded-xl border border-slate-200 p-4">
-        <figcaption className="mb-3 text-sm font-semibold text-slate-700">Eventos por tipo</figcaption>
+        <figcaption className="mb-3 text-sm font-semibold text-slate-700">
+          Eventos por tipo
+        </figcaption>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={porTipo} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
@@ -68,7 +74,9 @@ export function EventosGraficas({ eventos }: { eventos: EventoPartido[] }) {
       </figure>
 
       <figure className="rounded-xl border border-slate-200 p-4">
-        <figcaption className="mb-3 text-sm font-semibold text-slate-700">Distribución por tramos de 15&apos;</figcaption>
+        <figcaption className="mb-3 text-sm font-semibold text-slate-700">
+          Distribución por tramos de 15&apos;
+        </figcaption>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={porTramos(eventos)} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>

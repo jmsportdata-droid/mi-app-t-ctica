@@ -25,6 +25,9 @@ export type EventoPartido = {
   created_at: string;
 };
 
-export type EventoInput = Pick<EventoPartido, "tipo" | "minuto" | "descripcion" | "jugador_id" | "x" | "y">;
+export type EventoInput = Pick<
+  EventoPartido,
+  "tipo" | "minuto" | "descripcion" | "jugador_id" | "x" | "y"
+>;
 
 export const MINUTO_MAX = 130;

@@ -21,7 +21,14 @@ interface Props {
   tabInicial: TabPartido;
 }
 
-export function PartidoTabs({ partidoId, detalle, jugadores, videoUrl, exportacion, tabInicial }: Props) {
+export function PartidoTabs({
+  partidoId,
+  detalle,
+  jugadores,
+  videoUrl,
+  exportacion,
+  tabInicial,
+}: Props) {
   const [activa, setActiva] = useState<TabPartido>(tabInicial);
   // Cada panel se monta la primera vez que se visita y después se mantiene montado
   // (no se pierde lo escrito, y las gráficas se miden con el panel ya visible).
@@ -92,7 +99,11 @@ export function PartidoTabs({ partidoId, detalle, jugadores, videoUrl, exportaci
         <AbpPanel partidoId={partidoId} abp={detalle.abp} />
       </Panel>
       <Panel id="alineacion" activa={activa} visitadas={visitadas}>
-        <AlineacionEditor partidoId={partidoId} alineacion={detalle.alineacion} jugadores={jugadores} />
+        <AlineacionEditor
+          partidoId={partidoId}
+          alineacion={detalle.alineacion}
+          jugadores={jugadores}
+        />
       </Panel>
       <Panel id="eventos" activa={activa} visitadas={visitadas}>
         <EventosPanel

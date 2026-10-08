@@ -21,7 +21,13 @@ function valoresDe(fila: JugadorAtributos | null): ValoresAtributos {
 }
 
 /** Valoración 0-100 de los 15 atributos con deslizadores. */
-export function AtributosEditor({ jugadorId, atributos }: { jugadorId: string; atributos: JugadorAtributos | null }) {
+export function AtributosEditor({
+  jugadorId,
+  atributos,
+}: {
+  jugadorId: string;
+  atributos: JugadorAtributos | null;
+}) {
   const router = useRouter();
   const [valores, setValores] = useState<ValoresAtributos>(() => valoresDe(atributos));
   const [guardados, setGuardados] = useState<ValoresAtributos>(() => valoresDe(atributos));
@@ -54,7 +60,10 @@ export function AtributosEditor({ jugadorId, atributos }: { jugadorId: string; a
   }
 
   return (
-    <section id="atributos" className="scroll-mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <section
+      id="atributos"
+      className="scroll-mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+    >
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold text-slate-900">Atributos</h2>
@@ -66,7 +75,11 @@ export function AtributosEditor({ jugadorId, atributos }: { jugadorId: string; a
               Descartar
             </Button>
           )}
-          <Button onClick={guardar} cargando={pendiente} disabled={!hayCambios && atributos !== null}>
+          <Button
+            onClick={guardar}
+            cargando={pendiente}
+            disabled={!hayCambios && atributos !== null}
+          >
             Guardar atributos
           </Button>
         </div>
@@ -81,7 +94,10 @@ export function AtributosEditor({ jugadorId, atributos }: { jugadorId: string; a
       <div className="grid gap-6 lg:grid-cols-3">
         {GRUPOS_ATRIBUTOS.map((grupo) => (
           <fieldset key={grupo.clave} className="space-y-4">
-            <legend className="mb-2 text-sm font-semibold uppercase tracking-wide" style={{ color: grupo.color }}>
+            <legend
+              className="mb-2 text-sm font-semibold uppercase tracking-wide"
+              style={{ color: grupo.color }}
+            >
               {grupo.titulo}
             </legend>
             {grupo.atributos.map(({ campo, label }) => (

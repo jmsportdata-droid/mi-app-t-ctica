@@ -1,6 +1,13 @@
 "use client";
 
-import { PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ResponsiveContainer } from "recharts";
+import {
+  PolarAngleAxis,
+  PolarGrid,
+  PolarRadiusAxis,
+  Radar,
+  RadarChart,
+  ResponsiveContainer,
+} from "recharts";
 import type { GrupoAtributos, ValoresAtributos } from "@/types/atributos";
 
 interface Props {
@@ -18,9 +25,15 @@ export function RadarAtributos({ grupo, valores }: Props) {
   const datos = grupo.atributos.map((a) => ({ atributo: a.label, valor: valores?.[a.campo] ?? 0 }));
 
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-4" aria-labelledby={`radar-${grupo.clave}`}>
+    <section
+      className="rounded-xl border border-slate-200 bg-white p-4"
+      aria-labelledby={`radar-${grupo.clave}`}
+    >
       <div className="flex items-baseline justify-between">
-        <h3 id={`radar-${grupo.clave}`} className="text-sm font-semibold uppercase tracking-wide text-slate-700">
+        <h3
+          id={`radar-${grupo.clave}`}
+          className="text-sm font-semibold uppercase tracking-wide text-slate-700"
+        >
           {grupo.titulo}
         </h3>
         {valores && (

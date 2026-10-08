@@ -17,9 +17,17 @@ export function CampoFutbol({ className, children, onClick }: CampoFutbolProps) 
   return (
     <div
       onClick={onClick}
-      className={cn("relative aspect-[68/105] w-full overflow-hidden rounded-xl shadow-inner", className)}
+      className={cn(
+        "relative aspect-[68/105] w-full overflow-hidden rounded-xl shadow-inner",
+        className,
+      )}
     >
-      <svg viewBox="0 0 68 105" className="absolute inset-0 h-full w-full" aria-hidden preserveAspectRatio="none">
+      <svg
+        viewBox="0 0 68 105"
+        className="absolute inset-0 h-full w-full"
+        aria-hidden
+        preserveAspectRatio="none"
+      >
         {/* Césped con franjas */}
         <rect width="68" height="105" fill="#15803d" />
         {Array.from({ length: 7 }, (_, i) => (
@@ -45,7 +53,13 @@ export function CampoFutbol({ className, children, onClick }: CampoFutbolProps) 
               d={`M 26.7 ${y + dir * 16.5} A 9.15 9.15 0 0 ${dir === 1 ? 0 : 1} 41.3 ${y + dir * 16.5}`}
               {...LINEA}
             />
-            <rect x={30.34} y={dir === 1 ? y - 1.5 : y} width={7.32} height={1.5} fill="rgba(255,255,255,0.5)" />
+            <rect
+              x={30.34}
+              y={dir === 1 ? y - 1.5 : y}
+              width={7.32}
+              height={1.5}
+              fill="rgba(255,255,255,0.5)"
+            />
           </g>
         ))}
       </svg>

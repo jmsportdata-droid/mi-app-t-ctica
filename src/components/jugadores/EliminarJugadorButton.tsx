@@ -30,7 +30,11 @@ export function EliminarJugadorButton({ id, nombre }: { id: string; nombre: stri
 
   if (!confirmando) {
     return (
-      <Button variante="ghost" className="text-red-600 hover:bg-red-50" onClick={() => setConfirmando(true)}>
+      <Button
+        variante="ghost"
+        className="text-red-600 hover:bg-red-50"
+        onClick={() => setConfirmando(true)}
+      >
         Eliminar
       </Button>
     );

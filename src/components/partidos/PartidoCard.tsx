@@ -41,7 +41,14 @@ export function PartidoCard({ partido }: { partido: PartidoConRival }) {
 
 function IconoCalendario() {
   return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0 text-slate-400" fill="none" stroke="currentColor" strokeWidth={1.8} aria-hidden>
+    <svg
+      viewBox="0 0 24 24"
+      className="h-4 w-4 shrink-0 text-slate-400"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      aria-hidden
+    >
       <rect x="3" y="4" width="18" height="17" rx="2" />
       <path d="M16 2v4M8 2v4M3 10h18" />
     </svg>
@@ -50,7 +57,14 @@ function IconoCalendario() {
 
 function IconoEstadio() {
   return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0 text-slate-400" fill="none" stroke="currentColor" strokeWidth={1.8} aria-hidden>
+    <svg
+      viewBox="0 0 24 24"
+      className="h-4 w-4 shrink-0 text-slate-400"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      aria-hidden
+    >
       <path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z" />
       <circle cx="12" cy="9.5" r="2.5" />
     </svg>

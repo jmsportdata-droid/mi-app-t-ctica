@@ -13,7 +13,10 @@ export function EstadoBadge({ estado }: { estado: EstadoPartido }) {
     >
       <span
         aria-hidden
-        className={cn("h-1.5 w-1.5 rounded-full", estado === "planificado" ? "bg-sky-500" : "bg-slate-400")}
+        className={cn(
+          "h-1.5 w-1.5 rounded-full",
+          estado === "planificado" ? "bg-sky-500" : "bg-slate-400",
+        )}
       />
       {ESTADO_LABEL[estado]}
     </span>

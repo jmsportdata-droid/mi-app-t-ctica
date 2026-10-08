@@ -17,8 +17,7 @@ import {
 import { ESTADOS_PARTIDO, type EstadoPartido, type PartidoInput } from "@/types/partido";
 
 export type PartidoActionResult =
-  | { ok: true; id: string }
-  | { ok: false; error: string; errores?: PartidoErrores };
+  { ok: true; id: string } | { ok: false; error: string; errores?: PartidoErrores };
 
 /** Resultado de los guardados automáticos campo a campo. */
 export type GuardadoResult = { ok: true; valor: string | null } | { ok: false; error: string };
@@ -60,7 +59,11 @@ export async function guardarPartido(
   const { data, error } = await consulta;
   if (error) {
     if (error.code === "23503") {
-      return { ok: false, error: "Revisa los campos marcados", errores: { rival_id: "Ese rival ya no existe" } };
+      return {
+        ok: false,
+        error: "Revisa los campos marcados",
+        errores: { rival_id: "Ese rival ya no existe" },
+      };
     }
     return errorDeBD(error, "guardar");
   }
@@ -69,7 +72,10 @@ export async function guardarPartido(
   return { ok: true, id: data.id };
 }
 
-export async function cambiarEstadoPartido(id: string, estado: EstadoPartido): Promise<GuardadoResult> {
+export async function cambiarEstadoPartido(
+  id: string,
+  estado: EstadoPartido,
+): Promise<GuardadoResult> {
   if (!idSchema.safeParse(id).success || !ESTADOS_PARTIDO.includes(estado)) {
     return { ok: false, error: "Datos no válidos" };
   }
@@ -116,10 +122,12 @@ export async function guardarCampoPlan(
   if (!supabase) return SESION_EXPIRADA;
 
   // Upsert: la fila del plan se crea en el primer guardado
-  const { error } = await supabase.from("plan_partido").upsert(
-    { partido_id: partidoId, [campo]: parsed.data, updated_at: new Date().toISOString() },
-    { onConflict: "partido_id" },
-  );
+  const { error } = await supabase
+    .from("plan_partido")
+    .upsert(
+      { partido_id: partidoId, [campo]: parsed.data, updated_at: new Date().toISOString() },
+      { onConflict: "partido_id" },
+    );
   if (error) return errorDeBD(error, `plan.${campo}`);
 
   revalidatePath(`/partidos/${partidoId}`);
@@ -144,10 +152,12 @@ export async function guardarCampoInforme(
   const supabase = await clienteAutenticado();
   if (!supabase) return SESION_EXPIRADA;
 
-  const { error } = await supabase.from("informe_rival").upsert(
-    { partido_id: partidoId, [campo]: parsed.data, updated_at: new Date().toISOString() },
-    { onConflict: "partido_id" },
-  );
+  const { error } = await supabase
+    .from("informe_rival")
+    .upsert(
+      { partido_id: partidoId, [campo]: parsed.data, updated_at: new Date().toISOString() },
+      { onConflict: "partido_id" },
+    );
   if (error) return errorDeBD(error, `informe.${campo}`);
 
   revalidatePath(`/partidos/${partidoId}`);

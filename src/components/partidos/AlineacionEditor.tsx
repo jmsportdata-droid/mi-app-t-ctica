@@ -2,7 +2,12 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { guardarAlineacion } from "@/app/(dashboard)/partidos/avanzado-actions";
-import { limpiarAlineacion, moverJugador, normalizarTitulares, type Destino } from "@/lib/alineacion";
+import {
+  limpiarAlineacion,
+  moverJugador,
+  normalizarTitulares,
+  type Destino,
+} from "@/lib/alineacion";
 import { cn } from "@/lib/utils/cn";
 import {
   FORMACIONES,
@@ -152,7 +157,8 @@ export function AlineacionEditor({ partidoId, alineacion, jugadores }: Props) {
 
       {error && <p className="text-sm text-red-600">{error}</p>}
       <p className="text-xs text-slate-500">
-        Arrastra jugadores al campo o al banquillo. En móvil: toca un jugador y después el hueco destino.
+        Arrastra jugadores al campo o al banquillo. En móvil: toca un jugador y después el hueco
+        destino.
       </p>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
@@ -174,7 +180,9 @@ export function AlineacionEditor({ partidoId, alineacion, jugadores }: Props) {
                     type="button"
                     {...(jugador ? propsArrastre(jugador.id) : {})}
                     onClick={() => clicDestino({ tipo: "slot", indice: i }, id)}
-                    aria-label={jugador ? `${slot.label}: ${jugador.nombre}` : `${slot.label}: vacío`}
+                    aria-label={
+                      jugador ? `${slot.label}: ${jugador.nombre}` : `${slot.label}: vacío`
+                    }
                     className={cn(
                       "flex w-16 flex-col items-center gap-0.5 rounded-lg p-0.5 transition-transform",
                       destinoHover === clave && "scale-110",
@@ -230,7 +238,9 @@ export function AlineacionEditor({ partidoId, alineacion, jugadores }: Props) {
 
           <ZonaJugadores
             titulo="Disponibles"
-            vacio={jugadores.length === 0 ? "No hay jugadores en la plantilla" : "Todos están convocados"}
+            vacio={
+              jugadores.length === 0 ? "No hay jugadores en la plantilla" : "Todos están convocados"
+            }
             resaltada={destinoHover === "disponibles"}
             seleccionActiva={seleccionado !== null}
             onClickZona={() => clicDestino({ tipo: "disponibles" })}
@@ -306,7 +316,11 @@ function ZonaJugadores({
         )}
       </div>
       <div className={cn("space-y-1.5", scroll && "max-h-[420px] overflow-y-auto pr-1")}>
-        {hijos.length > 0 ? children : <p className="py-3 text-center text-xs text-slate-400">{vacio}</p>}
+        {hijos.length > 0 ? (
+          children
+        ) : (
+          <p className="py-3 text-center text-xs text-slate-400">{vacio}</p>
+        )}
       </div>
     </section>
   );
@@ -346,7 +360,9 @@ function FichaJugador({
 }
 
 function IndicadorGuardado({ estado }: { estado: EstadoGuardado }) {
-  const texto = { idle: "", guardando: "Guardando…", guardado: "Guardado ✓", error: "No guardado" }[estado];
+  const texto = { idle: "", guardando: "Guardando…", guardado: "Guardado ✓", error: "No guardado" }[
+    estado
+  ];
   return (
     <span
       aria-live="polite"

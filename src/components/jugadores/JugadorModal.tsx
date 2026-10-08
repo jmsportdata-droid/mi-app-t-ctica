@@ -2,7 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { obtenerFichaJugador, type FichaJugadorResult } from "@/app/(dashboard)/plantilla/atributos-actions";
+import {
+  obtenerFichaJugador,
+  type FichaJugadorResult,
+} from "@/app/(dashboard)/plantilla/atributos-actions";
 import { calcularEdad } from "@/lib/utils/edad";
 import { GRUPOS_ATRIBUTOS } from "@/types/atributos";
 import { POSICION_NOMBRE, type Jugador } from "@/types/jugador";
@@ -38,10 +41,20 @@ export function JugadorModal({ jugador, abierto, onCerrar }: Props) {
   const edad = calcularEdad(jugador.fecha_nac);
 
   return (
-    <Modal abierto={abierto} onCerrar={onCerrar} titulo={`Ficha de ${jugador.nombre}`} className="max-w-5xl">
+    <Modal
+      abierto={abierto}
+      onCerrar={onCerrar}
+      titulo={`Ficha de ${jugador.nombre}`}
+      className="max-w-5xl"
+    >
       <div className="bg-gradient-to-br from-slate-900 to-slate-700 px-6 pb-6 pt-8 text-white">
         <div className="flex flex-wrap items-center gap-5">
-          <Avatar src={jugador.foto_url} nombre={jugador.nombre} tamano="lg" className="ring-4 ring-white/20" />
+          <Avatar
+            src={jugador.foto_url}
+            nombre={jugador.nombre}
+            tamano="lg"
+            className="ring-4 ring-white/20"
+          />
           <div className="min-w-0 flex-1">
             <h2 className="text-2xl font-bold tracking-tight">{jugador.nombre}</h2>
             <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-slate-300">
@@ -70,14 +83,21 @@ export function JugadorModal({ jugador, abierto, onCerrar }: Props) {
             <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <Cifra label="Partidos" valor={ficha.estadisticas.partidos} />
               <Cifra label="Titular" valor={ficha.estadisticas.titular} />
-              <Cifra label="Minutos" valor={ficha.estadisticas.minutos} nota="Estimado: 90' por titularidad" />
+              <Cifra
+                label="Minutos"
+                valor={ficha.estadisticas.minutos}
+                nota="Estimado: 90' por titularidad"
+              />
               <Cifra label="Goles" valor={ficha.estadisticas.goles} />
             </dl>
 
             {!ficha.atributos && (
               <p className="rounded-lg border border-dashed border-slate-300 p-3 text-sm text-slate-500">
                 Este jugador aún no tiene atributos valorados.{" "}
-                <Link href={`/plantilla/${jugador.id}#atributos`} className="font-medium text-brand-600 hover:underline">
+                <Link
+                  href={`/plantilla/${jugador.id}#atributos`}
+                  className="font-medium text-brand-600 hover:underline"
+                >
                   Valorar ahora
                 </Link>
               </p>
@@ -98,7 +118,9 @@ export function JugadorModal({ jugador, abierto, onCerrar }: Props) {
 function Cifra({ label, valor, nota }: { label: string; valor: number; nota?: string }) {
   return (
     <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-center" title={nota}>
-      <dd className="text-3xl font-bold tabular-nums text-slate-900">{valor.toLocaleString("es-ES")}</dd>
+      <dd className="text-3xl font-bold tabular-nums text-slate-900">
+        {valor.toLocaleString("es-ES")}
+      </dd>
       <dt className="mt-1 text-xs font-medium uppercase tracking-wide text-slate-500">
         {label}
         {nota && <span aria-hidden> *</span>}

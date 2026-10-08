@@ -6,12 +6,7 @@ import { guardarPartido } from "@/app/(dashboard)/partidos/actions";
 import { erroresDeZod } from "@/lib/validations/comun";
 import { partidoSchema, type PartidoErrores } from "@/lib/validations/partido";
 import { cn } from "@/lib/utils/cn";
-import {
-  ESTADOS_PARTIDO,
-  ESTADO_LABEL,
-  type Partido,
-  type RivalResumen,
-} from "@/types/partido";
+import { ESTADOS_PARTIDO, ESTADO_LABEL, type Partido, type RivalResumen } from "@/types/partido";
 import { Button } from "@/components/ui/Button";
 import { Input, Select } from "@/components/ui/Field";
 import { Alert } from "@/components/ui/Alert";
@@ -187,7 +182,9 @@ export function PartidoForm({ rivales, partido }: PartidoFormProps) {
           actualizar("estadio", e.target.value);
         }}
         error={errores.estadio}
-        ayuda={!valores.es_local && !estadioManual ? "Se rellena con el estadio del rival." : undefined}
+        ayuda={
+          !valores.es_local && !estadioManual ? "Se rellena con el estadio del rival." : undefined
+        }
         maxLength={100}
       />
 

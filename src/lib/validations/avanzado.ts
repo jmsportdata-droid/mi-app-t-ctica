@@ -19,7 +19,10 @@ const valorAtributo = z
   .max(100, "Máximo 100");
 
 export const atributosSchema = z.object(
-  Object.fromEntries(ATRIBUTOS.map((a) => [a, valorAtributo])) as Record<Atributo, typeof valorAtributo>,
+  Object.fromEntries(ATRIBUTOS.map((a) => [a, valorAtributo])) as Record<
+    Atributo,
+    typeof valorAtributo
+  >,
 );
 
 // ---------- Alineación -------------------------------------------
@@ -67,7 +70,10 @@ const nulable = (schema: z.ZodType<string>) =>
 export const SCHEMA_VALOR_ABP = {
   descripcion: nulable(z.string().max(2000, "Máximo 2.000 caracteres")),
   vimeo_url: nulable(
-    z.string().max(2000).refine((v) => vimeoEmbedUrl(v) !== null, "Pega un enlace válido de Vimeo"),
+    z
+      .string()
+      .max(2000)
+      .refine((v) => vimeoEmbedUrl(v) !== null, "Pega un enlace válido de Vimeo"),
   ),
 } as const;
 

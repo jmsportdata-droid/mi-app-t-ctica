@@ -9,8 +9,7 @@ import { erroresDeZod, jugadorSchema, type JugadorErrores } from "@/lib/validati
 import type { JugadorInput } from "@/types/jugador";
 
 export type ActionResult =
-  | { ok: true; id: string }
-  | { ok: false; error: string; errores?: JugadorErrores };
+  { ok: true; id: string } | { ok: false; error: string; errores?: JugadorErrores };
 
 const SESION_EXPIRADA: ActionResult = {
   ok: false,
@@ -30,7 +29,10 @@ function errorDeBD(error: PostgrestError): ActionResult {
 }
 
 /** Crea (id = null) o actualiza un jugador. Valida de nuevo en servidor. */
-export async function guardarJugador(id: string | null, input: JugadorInput): Promise<ActionResult> {
+export async function guardarJugador(
+  id: string | null,
+  input: JugadorInput,
+): Promise<ActionResult> {
   const parsed = jugadorSchema.safeParse(input);
   if (!parsed.success) {
     return { ok: false, error: "Revisa los campos marcados", errores: erroresDeZod(parsed.error) };

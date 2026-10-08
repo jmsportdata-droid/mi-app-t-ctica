@@ -4,7 +4,8 @@ import { useEffect, useId, useRef, useState } from "react";
 import { cn } from "@/lib/utils/cn";
 import { claseControl } from "./Field";
 
-export type ResultadoAutoguardado = { ok: true; valor: string | null } | { ok: false; error: string };
+export type ResultadoAutoguardado =
+  { ok: true; valor: string | null } | { ok: false; error: string };
 
 type EstadoGuardado = "idle" | "guardando" | "guardado" | "error";
 

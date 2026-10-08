@@ -39,7 +39,8 @@ export function vimeoEmbedUrl(raw: string): string | null {
   if (!id) return null;
 
   const siguiente = segmentos[indice + 1];
-  const hash = url.searchParams.get("h") ?? (siguiente && /^[a-f0-9]+$/i.test(siguiente) ? siguiente : null);
+  const hash =
+    url.searchParams.get("h") ?? (siguiente && /^[a-f0-9]+$/i.test(siguiente) ? siguiente : null);
 
   const embed = new URL(`https://player.vimeo.com/video/${id}`);
   if (hash && /^[a-f0-9]+$/i.test(hash)) embed.searchParams.set("h", hash);

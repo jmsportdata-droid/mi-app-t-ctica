@@ -28,13 +28,23 @@ export function Enfrentamiento({
   return (
     <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
       <EquipoLado lado={local} tamano={tamano} etiqueta="Local" />
-      <span className={cn("font-bold text-slate-300", tamano === "lg" ? "text-2xl" : "text-sm")}>VS</span>
+      <span className={cn("font-bold text-slate-300", tamano === "lg" ? "text-2xl" : "text-sm")}>
+        VS
+      </span>
       <EquipoLado lado={visitante} tamano={tamano} etiqueta="Visitante" />
     </div>
   );
 }
 
-function EquipoLado({ lado, tamano, etiqueta }: { lado: Lado; tamano: "md" | "lg"; etiqueta: string }) {
+function EquipoLado({
+  lado,
+  tamano,
+  etiqueta,
+}: {
+  lado: Lado;
+  tamano: "md" | "lg";
+  etiqueta: string;
+}) {
   return (
     <div className="flex min-w-0 flex-col items-center gap-2 text-center">
       <Avatar

@@ -66,7 +66,11 @@ export function EventosCampo({ eventos, nombreJugador }: Props) {
                   activo ? "border-slate-300 bg-white" : "border-slate-200 bg-slate-50 opacity-50",
                 )}
               >
-                <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: t.color }} aria-hidden />
+                <span
+                  className="h-2.5 w-2.5 rounded-full"
+                  style={{ backgroundColor: t.color }}
+                  aria-hidden
+                />
                 {t.label} <span className="tabular-nums text-slate-500">({total})</span>
               </button>
             );
@@ -74,7 +78,8 @@ export function EventosCampo({ eventos, nombreJugador }: Props) {
         </div>
         {sinPosicion > 0 && (
           <p className="text-xs text-slate-500">
-            {sinPosicion} evento{sinPosicion === 1 ? "" : "s"} sin posición en el campo (no se muestra
+            {sinPosicion} evento{sinPosicion === 1 ? "" : "s"} sin posición en el campo (no se
+            muestra
             {sinPosicion === 1 ? "" : "n"}).
           </p>
         )}

@@ -20,7 +20,14 @@ interface Props {
 
 const redondear = (v: number) => Math.round(Math.min(100, Math.max(0, v)) * 10) / 10;
 
-export function NuevoEventoForm({ partidoId, tipo, jugadores, minutoSugerido, onCreado, onCancelar }: Props) {
+export function NuevoEventoForm({
+  partidoId,
+  tipo,
+  jugadores,
+  minutoSugerido,
+  onCreado,
+  onCancelar,
+}: Props) {
   const info = INFO_EVENTO[tipo];
   const [minuto, setMinuto] = useState(String(minutoSugerido));
   const [jugadorId, setJugadorId] = useState("");
@@ -41,7 +48,12 @@ export function NuevoEventoForm({ partidoId, tipo, jugadores, minutoSugerido, on
     e.preventDefault();
     setError(null);
     const valorMinuto = Number(minuto);
-    if (minuto.trim() === "" || !Number.isInteger(valorMinuto) || valorMinuto < 0 || valorMinuto > MINUTO_MAX) {
+    if (
+      minuto.trim() === "" ||
+      !Number.isInteger(valorMinuto) ||
+      valorMinuto < 0 ||
+      valorMinuto > MINUTO_MAX
+    ) {
       setError(`El minuto debe ser un número entero entre 0 y ${MINUTO_MAX}`);
       return;
     }
@@ -75,7 +87,11 @@ export function NuevoEventoForm({ partidoId, tipo, jugadores, minutoSugerido, on
       aria-label={`Nuevo evento: ${info.label}`}
     >
       <h3 className="mb-4 flex items-center gap-2 font-semibold text-slate-900">
-        <span className="h-3 w-3 rounded-full" style={{ backgroundColor: info.color }} aria-hidden />
+        <span
+          className="h-3 w-3 rounded-full"
+          style={{ backgroundColor: info.color }}
+          aria-hidden
+        />
         Nuevo evento · {info.label}
       </h3>
 
@@ -119,7 +135,10 @@ export function NuevoEventoForm({ partidoId, tipo, jugadores, minutoSugerido, on
             </div>
           </div>
           <div className="space-y-1.5">
-            <label htmlFor="evento-descripcion" className="block text-sm font-medium text-slate-700">
+            <label
+              htmlFor="evento-descripcion"
+              className="block text-sm font-medium text-slate-700"
+            >
               Descripción
             </label>
             <input
@@ -157,7 +176,10 @@ export function NuevoEventoForm({ partidoId, tipo, jugadores, minutoSugerido, on
           <button
             type="button"
             onClick={() => setPunto(null)}
-            className={cn("mt-1 text-xs text-slate-500 hover:text-slate-800", !punto && "invisible")}
+            className={cn(
+              "mt-1 text-xs text-slate-500 hover:text-slate-800",
+              !punto && "invisible",
+            )}
           >
             Quitar posición
           </button>

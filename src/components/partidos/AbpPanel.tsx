@@ -63,7 +63,12 @@ export function AbpPanel({ partidoId, abp }: Props) {
               >
                 {cat.titulo}
               </h3>
-              <div className={cn("grid gap-4", cat.tarjetas === 4 ? "md:grid-cols-2 2xl:grid-cols-4" : "md:grid-cols-2")}>
+              <div
+                className={cn(
+                  "grid gap-4",
+                  cat.tarjetas === 4 ? "md:grid-cols-2 2xl:grid-cols-4" : "md:grid-cols-2",
+                )}
+              >
                 {Array.from({ length: cat.tarjetas }, (_, i) => {
                   const clave: ClaveAbp = { tipo: t.valor, categoria: cat.valor, indice: i + 1 };
                   return (

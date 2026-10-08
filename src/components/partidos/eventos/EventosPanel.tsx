@@ -39,20 +39,34 @@ interface Props {
 }
 
 function ordenar(eventos: EventoPartido[]): EventoPartido[] {
-  return [...eventos].sort((a, b) => a.minuto - b.minuto || a.created_at.localeCompare(b.created_at));
+  return [...eventos].sort(
+    (a, b) => a.minuto - b.minuto || a.created_at.localeCompare(b.created_at),
+  );
 }
 
-export function EventosPanel({ partidoId, videoUrl, eventos: iniciales, jugadores, nombreArchivo, meta }: Props) {
+export function EventosPanel({
+  partidoId,
+  videoUrl,
+  eventos: iniciales,
+  jugadores,
+  nombreArchivo,
+  meta,
+}: Props) {
   const [eventos, setEventos] = useState(() => ordenar(iniciales));
   const [tipoNuevo, setTipoNuevo] = useState<TipoEvento | null>(null);
   const [vista, setVista] = useState<Vista>("lista");
 
   const nombres = useMemo(() => new Map(jugadores.map((j) => [j.id, j.nombre])), [jugadores]);
-  const nombreJugador = (id: string | null) => (id ? (nombres.get(id) ?? "Jugador eliminado") : null);
+  const nombreJugador = (id: string | null) =>
+    id ? (nombres.get(id) ?? "Jugador eliminado") : null;
   const ultimoMinuto = eventos.reduce((max, e) => Math.max(max, e.minuto), 0);
 
   function exportarCsv() {
-    descargarArchivo(`${nombreArchivo}.csv`, eventosACsv(eventos, nombreJugador), "text/csv;charset=utf-8");
+    descargarArchivo(
+      `${nombreArchivo}.csv`,
+      eventosACsv(eventos, nombreJugador),
+      "text/csv;charset=utf-8",
+    );
   }
   function exportarJson() {
     descargarArchivo(
@@ -121,10 +135,16 @@ export function EventosPanel({ partidoId, videoUrl, eventos: iniciales, jugadore
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <h3 className="font-semibold text-slate-900">Historial</h3>
-            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">{eventos.length}</span>
+            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
+              {eventos.length}
+            </span>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <div role="tablist" aria-label="Vista del historial" className="inline-flex rounded-lg bg-slate-100 p-1">
+            <div
+              role="tablist"
+              aria-label="Vista del historial"
+              className="inline-flex rounded-lg bg-slate-100 p-1"
+            >
               {VISTAS.map((v) => (
                 <button
                   key={v.id}
@@ -134,7 +154,9 @@ export function EventosPanel({ partidoId, videoUrl, eventos: iniciales, jugadore
                   onClick={() => setVista(v.id)}
                   className={cn(
                     "rounded-md px-3 py-1 text-sm font-medium transition-colors",
-                    vista === v.id ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-800",
+                    vista === v.id
+                      ? "bg-white text-slate-900 shadow-sm"
+                      : "text-slate-500 hover:text-slate-800",
                   )}
                 >
                   {v.label}
@@ -181,7 +203,14 @@ function BotonExportar({
       disabled={disabled}
       className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
     >
-      <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
+      <svg
+        viewBox="0 0 24 24"
+        className="h-4 w-4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={2}
+        aria-hidden
+      >
         <path d="M12 3v12m0 0-4-4m4 4 4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
       </svg>
       {children}

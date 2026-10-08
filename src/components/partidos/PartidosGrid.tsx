@@ -26,7 +26,9 @@ function Grupo({ titulo, partidos }: { titulo: string; partidos: PartidoConRival
         className="mb-4 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-slate-500"
       >
         {titulo}
-        <span className="rounded-full bg-slate-200 px-2 py-0.5 text-xs text-slate-600">{partidos.length}</span>
+        <span className="rounded-full bg-slate-200 px-2 py-0.5 text-xs text-slate-600">
+          {partidos.length}
+        </span>
       </h2>
       <div className={CLASE_GRID_PARTIDOS}>
         {partidos.map((partido) => (

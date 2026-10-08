@@ -51,7 +51,8 @@ export async function guardarAtributos(
     console.error("[guardarAtributos]", error.code, error.message);
     return {
       ok: false,
-      error: error.code === "23503" ? "El jugador ya no existe" : "No se pudieron guardar los atributos",
+      error:
+        error.code === "23503" ? "El jugador ya no existe" : "No se pudieron guardar los atributos",
     };
   }
 

@@ -10,8 +10,7 @@ import { equipoSchema, type EquipoErrores } from "@/lib/validations/equipo";
 import type { EquipoInput } from "@/types/equipo";
 
 export type EquipoActionResult =
-  | { ok: true; id: string }
-  | { ok: false; error: string; errores?: EquipoErrores };
+  { ok: true; id: string } | { ok: false; error: string; errores?: EquipoErrores };
 
 const SESION_EXPIRADA: EquipoActionResult = {
   ok: false,
@@ -29,7 +28,8 @@ function errorDeBD(error: PostgrestError): EquipoActionResult {
   if (error.code === "23503") {
     return {
       ok: false,
-      error: "No se puede eliminar: este equipo tiene partidos asociados. Elimina antes esos partidos.",
+      error:
+        "No se puede eliminar: este equipo tiene partidos asociados. Elimina antes esos partidos.",
     };
   }
   console.error("[equipos action]", error.code, error.message);
@@ -53,7 +53,11 @@ export async function guardarEquipo(
   if (!user) return SESION_EXPIRADA;
 
   if (!id) {
-    const { data, error } = await supabase.from("equipos").insert(parsed.data).select("id").single();
+    const { data, error } = await supabase
+      .from("equipos")
+      .insert(parsed.data)
+      .select("id")
+      .single();
     if (error) return errorDeBD(error);
 
     revalidatePath("/equipos", "layout");

@@ -45,7 +45,14 @@ export function Modal({ abierto, onCerrar, titulo, className, children }: ModalP
         aria-label="Cerrar"
         className="absolute right-3 top-3 z-10 rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
       >
-        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
+        <svg
+          viewBox="0 0 24 24"
+          className="h-5 w-5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          aria-hidden
+        >
           <path d="M18 6 6 18M6 6l12 12" />
         </svg>
       </button>

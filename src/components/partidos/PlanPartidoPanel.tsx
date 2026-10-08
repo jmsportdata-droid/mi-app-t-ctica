@@ -2,12 +2,7 @@
 
 import { guardarCampoPlan } from "@/app/(dashboard)/partidos/actions";
 import { cn } from "@/lib/utils/cn";
-import {
-  BLOQUES_PLAN,
-  type BloquePlan,
-  type CampoPlan,
-  type PlanPartido,
-} from "@/types/partido";
+import { BLOQUES_PLAN, type BloquePlan, type CampoPlan, type PlanPartido } from "@/types/partido";
 import { AutoSaveField } from "@/components/ui/AutoSaveField";
 import { ImagenPreview, PdfEnlace, VimeoEmbed } from "./Embeds";
 
@@ -26,7 +21,13 @@ export function PlanPartidoPanel({ partidoId, plan }: Props) {
   return (
     <div className="space-y-6">
       {BLOQUES_PLAN.map(({ clave, titulo }) => (
-        <BloquePlanCard key={clave} bloque={clave} titulo={titulo} partidoId={partidoId} plan={plan} />
+        <BloquePlanCard
+          key={clave}
+          bloque={clave}
+          titulo={titulo}
+          partidoId={partidoId}
+          plan={plan}
+        />
       ))}
     </div>
   );
@@ -51,9 +52,15 @@ function BloquePlanCard({
   return (
     <section
       aria-labelledby={`bloque-${bloque}`}
-      className={cn("rounded-2xl border border-t-4 border-slate-200 bg-white p-6 shadow-sm", ACENTO[bloque])}
+      className={cn(
+        "rounded-2xl border border-t-4 border-slate-200 bg-white p-6 shadow-sm",
+        ACENTO[bloque],
+      )}
     >
-      <h3 id={`bloque-${bloque}`} className="mb-5 text-lg font-bold uppercase tracking-wide text-slate-900">
+      <h3
+        id={`bloque-${bloque}`}
+        className="mb-5 text-lg font-bold uppercase tracking-wide text-slate-900"
+      >
         {titulo}
       </h3>
 

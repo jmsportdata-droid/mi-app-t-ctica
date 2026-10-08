@@ -13,7 +13,9 @@ interface Props {
 
 export function EventosLista({ partidoId, eventos, nombreJugador, onEliminado }: Props) {
   if (eventos.length === 0) {
-    return <p className="py-10 text-center text-sm text-slate-400">Aún no hay eventos registrados.</p>;
+    return (
+      <p className="py-10 text-center text-sm text-slate-400">Aún no hay eventos registrados.</p>
+    );
   }
 
   return (
@@ -105,7 +107,14 @@ function FilaEvento({
           aria-label={`Eliminar evento del minuto ${evento.minuto}`}
           className="shrink-0 rounded-md p-1 text-slate-400 hover:bg-red-50 hover:text-red-600"
         >
-          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
+          <svg
+            viewBox="0 0 24 24"
+            className="h-4 w-4"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            aria-hidden
+          >
             <path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14" />
           </svg>
         </button>

@@ -5,21 +5,24 @@ Webapp de análisis táctico para un equipo de fútbol. Next.js 14 (App Router) 
 ## Puesta en marcha
 
 1. **Instalar dependencias**
+
    ```bash
    npm install
    ```
 
 2. **Variables de entorno**: copiá `.env.example` a `.env.local` y completá:
-   | Variable | Dónde se usa |
-   | --- | --- |
-   | `NEXT_PUBLIC_SUPABASE_URL` | Cliente y servidor |
-   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Cliente y servidor |
-   | `SUPABASE_SERVICE_ROLE_KEY` | **Solo servidor** (alta de usuarios). Nunca con prefijo `NEXT_PUBLIC_` |
+
+   | Variable                        | Dónde se usa                                                           |
+   | ------------------------------- | ---------------------------------------------------------------------- |
+   | `NEXT_PUBLIC_SUPABASE_URL`      | Cliente y servidor                                                     |
+   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Cliente y servidor                                                     |
+   | `SUPABASE_SERVICE_ROLE_KEY`     | **Solo servidor** (alta de usuarios). Nunca con prefijo `NEXT_PUBLIC_` |
 
    Las mismas variables tienen que estar cargadas en Vercel → Settings → Environment Variables.
 
 3. **Vincular la base de datos** (una sola vez por máquina). La CLI de Supabase viene como
    dependencia del proyecto, se usa con `npx supabase`:
+
    ```bash
    npx supabase login                          # abre el navegador para autorizar
    npx supabase link --project-ref <ref>       # <ref> es el subdominio de NEXT_PUBLIC_SUPABASE_URL; pide la contraseña de la base
@@ -27,9 +30,9 @@ Webapp de análisis táctico para un equipo de fútbol. Next.js 14 (App Router) 
 
 4. **Google OAuth**
    - Supabase → Authentication → Providers → Google: activa e introduce Client ID / Secret de Google Cloud.
-   - En Google Cloud, añade como *Authorized redirect URI*: `https://<tu-proyecto>.supabase.co/auth/v1/callback`
+   - En Google Cloud, añade como _Authorized redirect URI_: `https://<tu-proyecto>.supabase.co/auth/v1/callback`
    - Supabase → Authentication → URL Configuration: añade `http://localhost:3000/auth/callback`
-     (y la URL de producción) a *Redirect URLs*.
+     (y la URL de producción) a _Redirect URLs_.
 
 5. **Arrancar**
    ```bash
@@ -86,14 +89,14 @@ npm run db:tipos                        # regenera src/types/database.ts desde l
 
 ## Scripts
 
-| Script                 | Descripción                                   |
-| ---------------------- | --------------------------------------------- |
-| `npm run dev`          | Servidor de desarrollo                        |
-| `npm run build`        | Build de producción                           |
-| `npm run typecheck`    | Comprobación de tipos                         |
-| `npm run lint`         | ESLint                                        |
-| `npm run format`       | Formatea todo con Prettier                    |
-| `npm run format:check` | Verifica el formato sin tocar archivos        |
-| `npm run db:nueva`     | Crea una migración vacía                      |
-| `npm run db:push`      | Aplica las migraciones pendientes en remoto   |
-| `npm run db:tipos`     | Regenera los tipos de TypeScript de la base   |
+| Script                 | Descripción                                 |
+| ---------------------- | ------------------------------------------- |
+| `npm run dev`          | Servidor de desarrollo                      |
+| `npm run build`        | Build de producción                         |
+| `npm run typecheck`    | Comprobación de tipos                       |
+| `npm run lint`         | ESLint                                      |
+| `npm run format`       | Formatea todo con Prettier                  |
+| `npm run format:check` | Verifica el formato sin tocar archivos      |
+| `npm run db:nueva`     | Crea una migración vacía                    |
+| `npm run db:push`      | Aplica las migraciones pendientes en remoto |
+| `npm run db:tipos`     | Regenera los tipos de TypeScript de la base |

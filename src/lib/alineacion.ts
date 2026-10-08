@@ -1,9 +1,7 @@
 import { TITULARES, type AlineacionInput } from "@/types/alineacion";
 
 export type Destino =
-  | { tipo: "slot"; indice: number }
-  | { tipo: "banquillo" }
-  | { tipo: "disponibles" };
+  { tipo: "slot"; indice: number } | { tipo: "banquillo" } | { tipo: "disponibles" };
 
 type Estado = Pick<AlineacionInput, "titulares" | "suplentes">;
 
@@ -15,7 +13,9 @@ export function normalizarTitulares(titulares: readonly (string | null)[]): (str
 /** Quita de la alineación los ids que ya no existen (jugadores eliminados). */
 export function limpiarAlineacion(estado: Estado, idsValidos: ReadonlySet<string>): Estado {
   return {
-    titulares: normalizarTitulares(estado.titulares).map((id) => (id && idsValidos.has(id) ? id : null)),
+    titulares: normalizarTitulares(estado.titulares).map((id) =>
+      id && idsValidos.has(id) ? id : null,
+    ),
     suplentes: estado.suplentes.filter((id) => idsValidos.has(id)),
   };
 }
