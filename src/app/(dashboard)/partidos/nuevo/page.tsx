@@ -16,11 +16,11 @@ export default async function NuevoPartidoPage() {
   return (
     <>
       <BackLink href="/partidos">Partidos</BackLink>
-      <PageHeader titulo="Nuevo partido" descripcion="Programa un partido contra un rival" />
+      <PageHeader titulo="Nuevo partido" descripcion="Programá un partido contra un rival" />
       {equipos.length === 0 ? (
         <EmptyState
-          titulo="Primero necesitas un rival"
-          descripcion="Para crear un partido, añade antes el equipo rival en la sección Equipos."
+          titulo="Primero necesitás un rival"
+          descripcion="Para crear un partido, primero agregá el equipo rival en la sección Equipos."
           accion={
             <Link
               href="/equipos/nuevo"

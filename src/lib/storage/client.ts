@@ -39,7 +39,7 @@ export async function resolverImagen(
   });
   if (error) {
     console.error("[storage upload]", error.message);
-    throw new Error("No se pudo subir la imagen. Inténtalo de nuevo.");
+    throw new Error("No se pudo subir la imagen. Probá de nuevo.");
   }
 
   return { ruta, rutaSubida: ruta };
@@ -77,6 +77,6 @@ export async function guardarConImagen<R extends { ok: boolean }>(
     return resultado;
   } catch {
     await descartarSubida(bucket, resuelta.rutaSubida);
-    return { ok: false, error: "Error de conexión. Comprueba tu red e inténtalo de nuevo." };
+    return { ok: false, error: "Error de conexión. Revisá tu conexión y probá de nuevo." };
   }
 }

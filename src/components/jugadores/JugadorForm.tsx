@@ -116,7 +116,7 @@ export function JugadorForm({ cuerpoTecnicoId, jugador }: JugadorFormProps) {
       <Input
         label="Nombre completo"
         name="nombre"
-        placeholder="Ej. Andrés Iniesta Luján"
+        placeholder="Ej. Luis Alberto Suárez Díaz"
         value={valores.nombre}
         onChange={(e) => actualizar("nombre", e.target.value)}
         error={errores.nombre}
@@ -144,7 +144,7 @@ export function JugadorForm({ cuerpoTecnicoId, jugador }: JugadorFormProps) {
           required
         >
           <option value="" disabled>
-            Selecciona…
+            Elegí…
           </option>
           {POSICIONES.map((p) => (
             <option key={p} value={p}>
@@ -155,7 +155,7 @@ export function JugadorForm({ cuerpoTecnicoId, jugador }: JugadorFormProps) {
       </div>
 
       <Input
-        label="Dorsal"
+        label="Número de camiseta"
         type="number"
         name="numero"
         inputMode="numeric"
@@ -166,13 +166,13 @@ export function JugadorForm({ cuerpoTecnicoId, jugador }: JugadorFormProps) {
         value={valores.numero}
         onChange={(e) => actualizar("numero", e.target.value)}
         error={errores.numero}
-        ayuda="Opcional. Debe ser único en la plantilla."
+        ayuda="Opcional. No se puede repetir en el plantel."
         className="sm:w-40"
       />
 
       <div className="flex items-center gap-3 border-t border-slate-100 pt-5">
         <Button type="submit" cargando={pendiente}>
-          {esEdicion ? "Guardar cambios" : "Añadir jugador"}
+          {esEdicion ? "Guardar cambios" : "Agregar jugador"}
         </Button>
         <Button type="button" variante="ghost" onClick={() => router.back()} disabled={pendiente}>
           Cancelar

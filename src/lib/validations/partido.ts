@@ -13,13 +13,13 @@ import {
 import { textoOpcionalSchema } from "./comun";
 
 export const partidoSchema = z.object({
-  rival_id: z.string({ required_error: "Selecciona un rival" }).uuid("Selecciona un rival"),
+  rival_id: z.string({ required_error: "Elegí un rival" }).uuid("Elegí un rival"),
   fecha: z
     .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Introduce una fecha válida")
-    .refine((v) => !Number.isNaN(Date.parse(v)), "Introduce una fecha válida"),
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Ingresá una fecha válida")
+    .refine((v) => !Number.isNaN(Date.parse(v)), "Ingresá una fecha válida"),
   estadio: textoOpcionalSchema(100, "El estadio"),
-  competicion: textoOpcionalSchema(80, "La competición"),
+  competicion: textoOpcionalSchema(80, "La competencia"),
   es_local: z.boolean(),
   estado: z.enum(ESTADOS_PARTIDO),
 }) satisfies z.ZodType<PartidoInput, z.ZodTypeDef, unknown>;
@@ -42,16 +42,16 @@ const urlVimeo = nulable(
   z
     .string()
     .max(URL_MAX)
-    .refine((v) => vimeoEmbedUrl(v) !== null, "Pega un enlace válido de Vimeo"),
+    .refine((v) => vimeoEmbedUrl(v) !== null, "Pegá un enlace válido de Vimeo"),
 );
 const urlSlides = nulable(
   z
     .string()
     .max(URL_MAX)
-    .refine((v) => slidesEmbedUrl(v) !== null, "Pega un enlace válido de Google Slides"),
+    .refine((v) => slidesEmbedUrl(v) !== null, "Pegá un enlace válido de Google Slides"),
 );
 const urlHttps = nulable(
-  z.string().max(URL_MAX).refine(esUrlHttps, "Introduce una URL válida que empiece por https://"),
+  z.string().max(URL_MAX).refine(esUrlHttps, "Ingresá una URL válida que empiece con https://"),
 );
 const notas = nulable(z.string().max(10_000, "Las notas no pueden superar 10.000 caracteres"));
 

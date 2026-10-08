@@ -57,17 +57,17 @@ export const SCHEMA_VALOR_ABP = {
     z
       .string()
       .max(2000)
-      .refine((v) => vimeoEmbedUrl(v) !== null, "Pega un enlace válido de Vimeo"),
+      .refine((v) => vimeoEmbedUrl(v) !== null, "Pegá un enlace válido de Vimeo"),
   ),
 } as const;
 
-// ---------- Vídeo y eventos del partido --------------------------
+// ---------- Video y eventos del partido --------------------------
 
 export const videoPartidoSchema = nulable(
   z
     .string()
     .max(2000)
-    .refine((v) => videoEmbedUrl(v) !== null, "Pega un enlace válido de Vimeo o YouTube"),
+    .refine((v) => videoEmbedUrl(v) !== null, "Pegá un enlace válido de Vimeo o YouTube"),
 );
 
 const coordenada = z.number().min(0).max(100).nullable();
@@ -75,7 +75,7 @@ const coordenada = z.number().min(0).max(100).nullable();
 export const eventoSchema = z.object({
   tipo: enumDe(TIPOS_EVENTO.map((t) => t.valor)),
   minuto: z
-    .number({ invalid_type_error: "Indica el minuto" })
+    .number({ invalid_type_error: "Indicá el minuto" })
     .int("El minuto debe ser un número entero")
     .min(0, "El minuto no puede ser negativo")
     .max(MINUTO_MAX, `El minuto máximo es ${MINUTO_MAX}`),

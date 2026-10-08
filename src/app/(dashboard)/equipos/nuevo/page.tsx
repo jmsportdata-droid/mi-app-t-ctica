@@ -12,7 +12,7 @@ export default async function NuevoEquipoPage() {
   return (
     <>
       <BackLink href="/equipos">Equipos</BackLink>
-      <PageHeader titulo="Nuevo equipo" descripcion="Añade un equipo rival" />
+      <PageHeader titulo="Nuevo equipo" descripcion="Agregá un equipo rival" />
       <EquipoForm cuerpoTecnicoId={cuerpoTecnico.id} />
     </>
   );

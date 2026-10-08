@@ -58,7 +58,7 @@ export default async function PartidoPage({ params, searchParams }: Props) {
       <header className="mb-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-            {partido.competicion ?? "Sin competición"}
+            {partido.competicion ?? "Sin competencia"}
           </span>
           <PartidoAcciones id={partido.id} estado={partido.estado} titulo={titulo} />
         </div>

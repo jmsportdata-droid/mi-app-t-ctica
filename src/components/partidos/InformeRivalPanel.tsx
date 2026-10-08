@@ -18,7 +18,7 @@ export function InformeRivalPanel({ partidoId, informe }: Props) {
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <h3 className="font-semibold text-slate-900">Aspectos a analizar</h3>
         <p className="mb-4 mt-1 text-sm text-slate-500">
-          Marca las fases del juego del rival que cubre este informe.
+          Marcá las fases del juego del rival que cubre este informe.
         </p>
         <TagPills partidoId={partidoId} iniciales={informe?.tags ?? []} />
       </section>
@@ -43,7 +43,7 @@ export function InformeRivalPanel({ partidoId, informe }: Props) {
 
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <AutoSaveField
-            label="Vídeo (Vimeo)"
+            label="Video (Vimeo)"
             tipo="url"
             placeholder="https://vimeo.com/123456789"
             valorInicial={informe?.vimeo_url ?? null}
@@ -51,7 +51,7 @@ export function InformeRivalPanel({ partidoId, informe }: Props) {
           >
             {(url) => (
               <div className="pt-2">
-                <VimeoEmbed url={url} titulo="Vídeo del informe rival" />
+                <VimeoEmbed url={url} titulo="Video del informe rival" />
               </div>
             )}
           </AutoSaveField>

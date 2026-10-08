@@ -5,16 +5,16 @@ export const POSICIONES = ["POR", "DEF", "CEN", "DEL"] as const;
 export type Posicion = (typeof POSICIONES)[number];
 
 export const POSICION_LABEL: Record<Posicion, string> = {
-  POR: "Porteros",
-  DEF: "Defensas",
-  CEN: "Centrocampistas",
+  POR: "Arqueros",
+  DEF: "Defensores",
+  CEN: "Mediocampistas",
   DEL: "Delanteros",
 };
 
 export const POSICION_NOMBRE: Record<Posicion, string> = {
-  POR: "Portero",
-  DEF: "Defensa",
-  CEN: "Centrocampista",
+  POR: "Arquero",
+  DEF: "Defensor",
+  CEN: "Mediocampista",
   DEL: "Delantero",
 };
 

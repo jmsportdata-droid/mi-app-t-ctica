@@ -23,10 +23,10 @@ const idSchema = z.string().uuid();
 
 function errorDeBD(error: PostgrestError, contexto: string): { ok: false; error: string } {
   if (error.code === "23503") {
-    return { ok: false, error: "El partido o el jugador ya no existe. Recarga la página." };
+    return { ok: false, error: "El partido o el jugador ya no existe. Recargá la página." };
   }
   console.error(`[partidos ${contexto}]`, error.code, error.message);
-  return { ok: false, error: "No se pudo guardar. Inténtalo de nuevo." };
+  return { ok: false, error: "No se pudo guardar. Probá de nuevo." };
 }
 
 // ---------- Alineación -------------------------------------------
@@ -89,7 +89,7 @@ export async function guardarCampoAbp(
   return { ok: true, valor: parsed.data };
 }
 
-// ---------- Vídeo y eventos --------------------------------------
+// ---------- Video y eventos --------------------------------------
 
 export async function guardarVideoPartido(
   partidoId: string,

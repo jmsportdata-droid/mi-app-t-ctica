@@ -83,7 +83,7 @@ export function PartidoForm({ rivales, partido }: PartidoFormProps) {
         router.push(`/partidos/${resultado.id}`);
         router.refresh();
       } catch {
-        setErrorGeneral("Error de conexión. Comprueba tu red e inténtalo de nuevo.");
+        setErrorGeneral("Error de conexión. Revisá tu conexión y probá de nuevo.");
       }
     });
   }
@@ -105,7 +105,7 @@ export function PartidoForm({ rivales, partido }: PartidoFormProps) {
         required
       >
         <option value="" disabled>
-          Selecciona un equipo…
+          Elegí un equipo…
         </option>
         {rivales.map((r) => (
           <option key={r.id} value={r.id}>
@@ -155,7 +155,7 @@ export function PartidoForm({ rivales, partido }: PartidoFormProps) {
         />
         <div>
           <Input
-            label="Competición"
+            label="Competencia"
             name="competicion"
             list="competiciones-sugeridas"
             placeholder="Ej. Liga"
@@ -183,7 +183,7 @@ export function PartidoForm({ rivales, partido }: PartidoFormProps) {
         }}
         error={errores.estadio}
         ayuda={
-          !valores.es_local && !estadioManual ? "Se rellena con el estadio del rival." : undefined
+          !valores.es_local && !estadioManual ? "Se completa con el estadio del rival." : undefined
         }
         maxLength={100}
       />

@@ -9,7 +9,7 @@ export function PartidoCard({ partido, club }: { partido: PartidoConRival; club:
     <article className="flex flex-col rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
       <div className="mb-4 flex items-center justify-between gap-2">
         <span className="truncate text-xs font-medium uppercase tracking-wide text-slate-500">
-          {partido.competicion ?? "Sin competición"}
+          {partido.competicion ?? "Sin competencia"}
         </span>
         <EstadoBadge estado={partido.estado} />
       </div>

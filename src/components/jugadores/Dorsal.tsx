@@ -18,7 +18,7 @@ export function Dorsal({ numero, tamano = "md" }: DorsalProps) {
         "flex shrink-0 items-center justify-center bg-slate-900 font-bold tabular-nums text-white",
         TAMANOS[tamano],
       )}
-      aria-label={numero !== null ? `Dorsal ${numero}` : "Sin dorsal"}
+      aria-label={numero !== null ? `Número ${numero}` : "Sin número"}
     >
       {numero ?? "–"}
     </span>

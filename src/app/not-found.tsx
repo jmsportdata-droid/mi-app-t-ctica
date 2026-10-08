@@ -6,7 +6,7 @@ export default function NotFound() {
       <p className="text-5xl font-bold text-slate-300">404</p>
       <h1 className="text-xl font-semibold">Página no encontrada</h1>
       <Link href="/plantilla" className="text-sm font-medium text-brand-600 hover:underline">
-        Volver a la plantilla
+        Volver al plantel
       </Link>
     </main>
   );

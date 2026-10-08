@@ -37,7 +37,7 @@ export function VimeoEmbed({ url, titulo }: { url: string | null; titulo: string
   );
 }
 
-/** Vídeo del partido: Vimeo o YouTube. */
+/** Video del partido: Vimeo o YouTube. */
 export function VideoEmbed({ url, titulo }: { url: string | null; titulo: string }) {
   const src = url ? videoEmbedUrl(url) : null;
   if (!src) return null;
@@ -73,7 +73,7 @@ export function ImagenPreview({ url, alt }: { url: string | null; alt: string })
   if (fallo === url) {
     return (
       <p className="rounded-lg border border-dashed border-slate-300 p-3 text-xs text-slate-500">
-        No se pudo cargar la imagen. Comprueba que la URL es pública y apunta a una imagen.
+        No se pudo cargar la imagen. Revisá que la URL sea pública y sea de una imagen.
       </p>
     );
   }

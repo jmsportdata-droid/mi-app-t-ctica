@@ -74,7 +74,7 @@ export function NuevoEventoForm({
         }
         onCreado(r.evento);
       } catch {
-        setError("Error de conexión. Inténtalo de nuevo.");
+        setError("Error de conexión. Probá de nuevo.");
       }
     });
   }
@@ -153,7 +153,7 @@ export function NuevoEventoForm({
           {error && <p className="text-sm text-red-600">{error}</p>}
           <div className="flex gap-2">
             <Button type="submit" cargando={pendiente}>
-              Añadir evento
+              Agregar evento
             </Button>
             <Button type="button" variante="ghost" onClick={onCancelar} disabled={pendiente}>
               Cancelar

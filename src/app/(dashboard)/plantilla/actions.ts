@@ -15,12 +15,12 @@ function errorDeBD(error: PostgrestError): ActionResult {
   if (error.code === "23505") {
     return {
       ok: false,
-      error: "Revisa los campos marcados",
-      errores: { numero: "Ese dorsal ya está asignado a otro jugador" },
+      error: "Revisá los campos marcados",
+      errores: { numero: "Ese número ya lo tiene otro jugador" },
     };
   }
   console.error("[jugadores action]", error.code, error.message);
-  return { ok: false, error: "No se pudo guardar el jugador. Inténtalo de nuevo." };
+  return { ok: false, error: "No se pudo guardar el jugador. Probá de nuevo." };
 }
 
 /** Crea (id = null) o actualiza un jugador. Valida de nuevo en servidor. */
@@ -30,7 +30,7 @@ export async function guardarJugador(
 ): Promise<ActionResult> {
   const parsed = jugadorSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: "Revisa los campos marcados", errores: erroresDeZod(parsed.error) };
+    return { ok: false, error: "Revisá los campos marcados", errores: erroresDeZod(parsed.error) };
   }
 
   const accion = await getAccion();

@@ -55,7 +55,7 @@ export function EquipoAcciones({ id, nombre }: { id: string; nombre: string }) {
         titulo="Eliminar equipo"
         descripcion={
           <>
-            ¿Seguro que quieres eliminar <strong className="text-slate-900">{nombre}</strong>? Se
+            ¿Seguro que querés eliminar <strong className="text-slate-900">{nombre}</strong>? Se
             borrará también su escudo. Esta acción no se puede deshacer.
           </>
         }

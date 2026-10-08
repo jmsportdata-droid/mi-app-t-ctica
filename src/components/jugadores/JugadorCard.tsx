@@ -19,7 +19,7 @@ export function JugadorCard({ jugador }: { jugador: Jugador }) {
           />
           <span
             className="absolute -bottom-1 -right-1 flex h-6 min-w-6 items-center justify-center rounded-full bg-slate-900 px-1.5 text-xs font-bold tabular-nums text-white ring-2 ring-white"
-            aria-label={jugador.numero !== null ? `Dorsal ${jugador.numero}` : "Sin dorsal"}
+            aria-label={jugador.numero !== null ? `Número ${jugador.numero}` : "Sin número"}
           >
             {jugador.numero ?? "–"}
           </span>

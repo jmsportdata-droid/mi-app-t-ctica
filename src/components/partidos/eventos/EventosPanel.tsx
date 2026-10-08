@@ -22,8 +22,8 @@ const EventosGraficas = dynamic(() => import("./EventosGraficas").then((m) => m.
 
 const VISTAS = [
   { id: "lista", label: "Lista" },
-  { id: "campo", label: "Campo" },
-  { id: "graficas", label: "Gráficas" },
+  { id: "campo", label: "Cancha" },
+  { id: "graficas", label: "Gráficos" },
 ] as const;
 type Vista = (typeof VISTAS)[number]["id"];
 
@@ -78,7 +78,7 @@ export function EventosPanel({
     <div className="space-y-6">
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <AutoSaveField
-          label="Vídeo del partido"
+          label="Video del partido"
           tipo="url"
           placeholder="https://vimeo.com/… o https://youtube.com/watch?v=…"
           ayuda="Vimeo o YouTube."
@@ -87,7 +87,7 @@ export function EventosPanel({
         >
           {(url) => (
             <div className="pt-2">
-              <VideoEmbed url={url} titulo="Vídeo del partido" />
+              <VideoEmbed url={url} titulo="Video del partido" />
             </div>
           )}
         </AutoSaveField>

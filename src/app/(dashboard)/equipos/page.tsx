@@ -29,8 +29,8 @@ export default async function EquiposPage() {
 
       {equipos.length === 0 ? (
         <EmptyState
-          titulo="Aún no hay equipos rivales"
-          descripcion="Añade los equipos contra los que juegas para analizarlos después."
+          titulo="Todavía no hay equipos rivales"
+          descripcion="Agregá los equipos contra los que jugás para analizarlos después."
           accion={
             <Link href="/equipos/nuevo" className={CLASE_BOTON}>
               Nuevo equipo

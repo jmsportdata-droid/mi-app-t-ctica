@@ -104,7 +104,7 @@ export function EquipoForm({ cuerpoTecnicoId, equipo }: EquipoFormProps) {
       <Input
         label="Nombre del equipo"
         name="nombre"
-        placeholder="Ej. Real Betis Balompié"
+        placeholder="Ej. Club Atlético Peñarol"
         value={valores.nombre}
         onChange={(e) => actualizar("nombre", e.target.value)}
         error={errores.nombre}

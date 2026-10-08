@@ -71,7 +71,7 @@ export function AutoSaveField({
         setEstado("guardado");
       } catch {
         setEstado("error");
-        setError("Error de conexión. Vuelve a salir del campo para reintentar.");
+        setError("Error de conexión. Salí de nuevo del campo para reintentar.");
       }
     });
   }

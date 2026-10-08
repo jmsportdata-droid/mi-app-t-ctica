@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PlantillaGrid } from "@/components/jugadores/PlantillaGrid";
 
-export const metadata: Metadata = { title: "Plantilla" };
+export const metadata: Metadata = { title: "Plantel" };
 
 const CLASE_BOTON =
   "inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-brand-700";
@@ -18,22 +18,22 @@ export default async function PlantillaPage() {
   return (
     <>
       <PageHeader
-        titulo="Plantilla"
+        titulo="Plantel"
         descripcion={`${jugadores.length} jugador${jugadores.length === 1 ? "" : "es"} · ${temporada.club} ${temporada.etiqueta}`}
         acciones={
           <Link href="/plantilla/nuevo" className={CLASE_BOTON}>
-            <span aria-hidden>+</span> Añadir jugador
+            <span aria-hidden>+</span> Agregar jugador
           </Link>
         }
       />
 
       {jugadores.length === 0 ? (
         <EmptyState
-          titulo="Aún no hay jugadores"
-          descripcion="Añade el primer jugador para empezar a construir tu plantilla."
+          titulo="Todavía no hay jugadores"
+          descripcion="Agregá el primer jugador para armar el plantel."
           accion={
             <Link href="/plantilla/nuevo" className={CLASE_BOTON}>
-              Añadir jugador
+              Agregar jugador
             </Link>
           }
         />

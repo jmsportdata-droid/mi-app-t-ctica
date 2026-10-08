@@ -16,9 +16,9 @@ export function ErrorState({ error, reset }: ErrorStateProps) {
 
   return (
     <div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center">
-      <h2 className="font-semibold text-red-800">Algo ha fallado</h2>
+      <h2 className="font-semibold text-red-800">Algo falló</h2>
       <p className="mt-1 text-sm text-red-700">
-        No se pudieron cargar los datos. Comprueba tu conexión e inténtalo de nuevo.
+        No se pudieron cargar los datos. Revisá tu conexión y probá de nuevo.
       </p>
       <Button variante="secondary" className="mt-4" onClick={reset}>
         Reintentar

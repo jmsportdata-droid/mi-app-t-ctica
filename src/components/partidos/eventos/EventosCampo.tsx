@@ -50,7 +50,7 @@ export function EventosCampo({ eventos, nombreJugador }: Props) {
       </CampoFutbol>
 
       <div className="space-y-3">
-        <p className="text-sm font-medium text-slate-700">Leyenda (pulsa para filtrar)</p>
+        <p className="text-sm font-medium text-slate-700">Leyenda (tocá para filtrar)</p>
         <div className="flex flex-wrap gap-2">
           {TIPOS_EVENTO.map((t) => {
             const total = conPosicion.filter((e) => e.tipo === t.valor).length;
@@ -78,12 +78,12 @@ export function EventosCampo({ eventos, nombreJugador }: Props) {
         </div>
         {sinPosicion > 0 && (
           <p className="text-xs text-slate-500">
-            {sinPosicion} evento{sinPosicion === 1 ? "" : "s"} sin posición en el campo (no se
+            {sinPosicion} evento{sinPosicion === 1 ? "" : "s"} sin posición en la cancha (no se
             muestra
             {sinPosicion === 1 ? "" : "n"}).
           </p>
         )}
-        <p className="text-xs text-slate-400">Arriba: portería rival · Abajo: nuestra portería.</p>
+        <p className="text-xs text-slate-400">Arriba: arco rival · Abajo: nuestro arco.</p>
       </div>
     </div>
   );

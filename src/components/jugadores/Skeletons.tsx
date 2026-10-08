@@ -17,7 +17,7 @@ export function JugadorCardSkeleton() {
 
 export function PlantillaSkeleton() {
   return (
-    <div className="space-y-10" role="status" aria-label="Cargando plantilla">
+    <div className="space-y-10" role="status" aria-label="Cargando plantel">
       {[4, 3].map((cantidad, grupo) => (
         <section key={grupo}>
           <Skeleton className="mb-4 h-4 w-32" />

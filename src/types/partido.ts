@@ -66,7 +66,7 @@ export type InformeRival = Tables<"informe_rival">;
 export const TABS_PARTIDO = [
   { id: "informe", label: "Informe rival" },
   { id: "plan", label: "Plan de partido" },
-  { id: "abp", label: "ABP" },
+  { id: "abp", label: "Pelota parada" },
   { id: "alineacion", label: "Alineación" },
   { id: "eventos", label: "Eventos" },
 ] as const;

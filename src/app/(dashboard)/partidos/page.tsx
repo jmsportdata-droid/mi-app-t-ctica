@@ -30,8 +30,8 @@ export default async function PartidosPage() {
 
       {partidos.length === 0 ? (
         <EmptyState
-          titulo="Aún no hay partidos"
-          descripcion="Crea el primer partido para preparar el informe del rival y el plan de juego."
+          titulo="Todavía no hay partidos"
+          descripcion="Creá el primer partido para preparar el informe del rival y el plan de juego."
           accion={
             <Link href="/partidos/nuevo" className={CLASE_BOTON}>
               Nuevo partido

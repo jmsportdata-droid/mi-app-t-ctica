@@ -16,19 +16,18 @@ function errorDeBD(error: PostgrestError): EquipoActionResult {
   if (error.code === "23505") {
     return {
       ok: false,
-      error: "Revisa los campos marcados",
+      error: "Revisá los campos marcados",
       errores: { nombre: "Ya existe un equipo con ese nombre" },
     };
   }
   if (error.code === "23503") {
     return {
       ok: false,
-      error:
-        "No se puede eliminar: este equipo tiene partidos asociados. Elimina antes esos partidos.",
+      error: "No se puede eliminar: este equipo tiene partidos. Primero eliminá esos partidos.",
     };
   }
   console.error("[equipos action]", error.code, error.message);
-  return { ok: false, error: "No se pudo completar la operación. Inténtalo de nuevo." };
+  return { ok: false, error: "No se pudo completar la operación. Probá de nuevo." };
 }
 
 /** Crea (id = null) o actualiza un equipo. Valida de nuevo en servidor. */
@@ -38,7 +37,7 @@ export async function guardarEquipo(
 ): Promise<EquipoActionResult> {
   const parsed = equipoSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: "Revisa los campos marcados", errores: erroresDeZod(parsed.error) };
+    return { ok: false, error: "Revisá los campos marcados", errores: erroresDeZod(parsed.error) };
   }
 
   const accion = await getAccion();

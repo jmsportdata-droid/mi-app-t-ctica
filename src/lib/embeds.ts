@@ -19,7 +19,7 @@ export function esUrlHttps(raw: string): boolean {
 /**
  * Admite:
  *   https://vimeo.com/123456789
- *   https://vimeo.com/123456789/abcdef1234          (vídeo oculto con hash)
+ *   https://vimeo.com/123456789/abcdef1234          (video oculto con hash)
  *   https://vimeo.com/channels/x/123456789
  *   https://player.vimeo.com/video/123456789?h=abcdef1234
  */
@@ -70,7 +70,7 @@ export function youtubeEmbedUrl(raw: string): string | null {
   return `https://www.youtube-nocookie.com/embed/${id}`;
 }
 
-/** Vídeo de partido: Vimeo o YouTube. */
+/** Video de partido: Vimeo o YouTube. */
 export function videoEmbedUrl(raw: string): string | null {
   return vimeoEmbedUrl(raw) ?? youtubeEmbedUrl(raw);
 }

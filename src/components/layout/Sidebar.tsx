@@ -9,7 +9,7 @@ import { ROL_LABEL, type Rol } from "@/types/cuerpo-tecnico";
 import { IconCuenta, IconCuerpoTecnico, IconEquipos, IconPartidos, IconPlantilla } from "./icons";
 
 const NAVEGACION = [
-  { href: "/plantilla", label: "Plantilla", Icono: IconPlantilla },
+  { href: "/plantilla", label: "Plantel", Icono: IconPlantilla },
   { href: "/equipos", label: "Equipos", Icono: IconEquipos },
   { href: "/partidos", label: "Partidos", Icono: IconPartidos },
   { href: "/cuerpo-tecnico", label: "Cuerpo técnico", Icono: IconCuerpoTecnico },

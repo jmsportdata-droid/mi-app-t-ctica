@@ -31,10 +31,10 @@ const idSchema = z.string().uuid();
 
 function errorDeBD(error: PostgrestError, contexto: string): { ok: false; error: string } {
   if (error.code === "23503") {
-    return { ok: false, error: "El partido o el rival ya no existe. Recarga la página." };
+    return { ok: false, error: "El partido o el rival ya no existe. Recargá la página." };
   }
   console.error(`[partidos ${contexto}]`, error.code, error.message);
-  return { ok: false, error: "No se pudo guardar. Inténtalo de nuevo." };
+  return { ok: false, error: "No se pudo guardar. Probá de nuevo." };
 }
 
 function revalidarPartido(id: string) {
@@ -51,7 +51,7 @@ export async function guardarPartido(
 ): Promise<PartidoActionResult> {
   const parsed = partidoSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: "Revisa los campos marcados", errores: erroresDeZod(parsed.error) };
+    return { ok: false, error: "Revisá los campos marcados", errores: erroresDeZod(parsed.error) };
   }
 
   const accion = await getAccion();
@@ -73,7 +73,7 @@ export async function guardarPartido(
     if (error.code === "23503" || error.code === "42501") {
       return {
         ok: false,
-        error: "Revisa los campos marcados",
+        error: "Revisá los campos marcados",
         errores: { rival_id: "Ese rival ya no existe" },
       };
     }

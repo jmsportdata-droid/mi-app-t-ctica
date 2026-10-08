@@ -101,7 +101,7 @@ export function PartidoAcciones({ id, estado: estadoInicial, titulo }: Props) {
         titulo="Eliminar partido"
         descripcion={
           <>
-            ¿Seguro que quieres eliminar <strong className="text-slate-900">{titulo}</strong>? Se
+            ¿Seguro que querés eliminar <strong className="text-slate-900">{titulo}</strong>? Se
             borrarán también el informe del rival y el plan de partido.
           </>
         }

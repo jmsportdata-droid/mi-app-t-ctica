@@ -98,7 +98,7 @@ function Cifra({ label, valor, nota }: { label: string; valor: number; nota?: st
   return (
     <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-center" title={nota}>
       <dd className="text-3xl font-bold tabular-nums text-slate-900">
-        {valor.toLocaleString("es-ES")}
+        {valor.toLocaleString("es-UY")}
       </dd>
       <dt className="mt-1 text-xs font-medium uppercase tracking-wide text-slate-500">
         {label}

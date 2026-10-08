@@ -28,7 +28,7 @@ export function AbpPanel({ partidoId, abp }: Props) {
     <div className="space-y-6">
       <div
         role="radiogroup"
-        aria-label="Tipo de ABP"
+        aria-label="Tipo de pelota parada"
         className="inline-flex rounded-xl border border-slate-200 bg-white p-1 shadow-sm"
       >
         {TIPOS_ABP.map((t) => (
@@ -113,7 +113,7 @@ function TarjetaAbp({
         onGuardar={(v) => guardarCampoAbp(partidoId, clave, "descripcion", v)}
       />
       <AutoSaveField
-        label="Vídeo (Vimeo)"
+        label="Video (Vimeo)"
         tipo="url"
         placeholder="https://vimeo.com/123456789"
         valorInicial={fila?.vimeo_url ?? null}

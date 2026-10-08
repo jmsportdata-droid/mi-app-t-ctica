@@ -87,13 +87,13 @@ function BloquePlanCard({
 
         <div className="space-y-5">
           <AutoSaveField
-            label="Vídeo (Vimeo)"
+            label="Video (Vimeo)"
             tipo="url"
             placeholder="https://vimeo.com/123456789"
             valorInicial={valor(campo("vimeo"))}
             onGuardar={guardar(campo("vimeo"))}
           >
-            {(url) => <VimeoEmbed url={url} titulo={`Vídeo de ${titulo.toLowerCase()}`} />}
+            {(url) => <VimeoEmbed url={url} titulo={`Video de ${titulo.toLowerCase()}`} />}
           </AutoSaveField>
 
           <div className="grid gap-5 sm:grid-cols-2">

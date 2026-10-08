@@ -11,7 +11,7 @@ export default async function NuevoJugadorPage() {
 
   return (
     <>
-      <BackLink href="/plantilla">Plantilla</BackLink>
+      <BackLink href="/plantilla">Plantel</BackLink>
       <PageHeader
         titulo="Nuevo jugador"
         descripcion={`Plantel de ${temporada.club} ${temporada.etiqueta}`}

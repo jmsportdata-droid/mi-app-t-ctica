@@ -157,8 +157,8 @@ export function AlineacionEditor({ partidoId, alineacion, jugadores }: Props) {
 
       {error && <p className="text-sm text-red-600">{error}</p>}
       <p className="text-xs text-slate-500">
-        Arrastra jugadores al campo o al banquillo. En móvil: toca un jugador y después el hueco
-        destino.
+        Arrastrá jugadores a la cancha o al banco. En el celular: tocá un jugador y después el
+        lugar.
       </p>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
@@ -215,8 +215,8 @@ export function AlineacionEditor({ partidoId, alineacion, jugadores }: Props) {
         {/* Panel lateral */}
         <aside className="space-y-4">
           <ZonaJugadores
-            titulo="Banquillo"
-            vacio="Arrastra aquí a los suplentes"
+            titulo="Banco"
+            vacio="Arrastrá acá a los suplentes"
             resaltada={destinoHover === "banquillo"}
             seleccionActiva={seleccionado !== null}
             onClickZona={() => clicDestino({ tipo: "banquillo" })}
@@ -239,7 +239,7 @@ export function AlineacionEditor({ partidoId, alineacion, jugadores }: Props) {
           <ZonaJugadores
             titulo="Disponibles"
             vacio={
-              jugadores.length === 0 ? "No hay jugadores en la plantilla" : "Todos están convocados"
+              jugadores.length === 0 ? "No hay jugadores en el plantel" : "Todos están convocados"
             }
             resaltada={destinoHover === "disponibles"}
             seleccionActiva={seleccionado !== null}
@@ -311,7 +311,7 @@ function ZonaJugadores({
             onClick={onClickZona}
             className="rounded-md bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800 hover:bg-amber-200"
           >
-            Mover aquí
+            Mover acá
           </button>
         )}
       </div>
