@@ -87,6 +87,13 @@ npm run db:tipos                        # regenera src/types/database.ts desde l
 
 `npx supabase migration list` muestra qué migraciones están aplicadas en local y en remoto.
 
+Para consultar la base remota **en modo solo lectura** (la base rechaza cualquier escritura), con
+`SUPABASE_ACCESS_TOKEN` en `.env.local`:
+
+```bash
+./scripts/db-leer.sh "select count(*) from public.jugadores"
+```
+
 ## Scripts
 
 | Script                 | Descripción                                 |
