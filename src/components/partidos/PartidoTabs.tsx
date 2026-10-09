@@ -8,11 +8,13 @@ import type { Jugador } from "@/types/jugador";
 import type { PrincipioJuego } from "@/types/modelo-juego";
 import { TABS_PARTIDO, type PartidoConRival, type TabPartido } from "@/types/partido";
 import { AbpPanel } from "./AbpPanel";
+import { EmparejamientoMarcas } from "./EmparejamientoMarcas";
 import { AnalisisVideoPanel } from "./AnalisisVideoPanel";
 import { ConvocatoriaPanel } from "./ConvocatoriaPanel";
 import { InformeRivalPanel } from "./InformeRivalPanel";
 import { InformeSofascore } from "./InformeSofascore";
 import type { InformeSofascore as DatosSofascore } from "@/lib/data/informe";
+import type { MarcasPartido } from "@/lib/data/marcas";
 import { PlanPartidoEditor, type TareaSugerida } from "./PlanPartidoEditor";
 import { JugadasPartidoPanel, type JugadaElegida } from "@/components/pizarra/JugadasPartidoPanel";
 import type { Jugada } from "@/types/jugada";
@@ -34,6 +36,7 @@ interface Props {
   resumenPrevia: string[];
   jugadasPartido: JugadaElegida[];
   sofascore: DatosSofascore;
+  marcas: MarcasPartido;
   bibliotecaJugadas: Jugada[];
   colorClub: string;
   partidoId: string;
@@ -56,6 +59,7 @@ export function PartidoTabs({
   resumenPrevia,
   jugadasPartido,
   sofascore,
+  marcas,
   bibliotecaJugadas,
   colorClub,
   partidoId,
@@ -184,10 +188,15 @@ export function PartidoTabs({
             convocados={[...convocados]}
             color={colorClub}
           />
-          <Proximamente>
-            Después de conectar Sofascore: características y amenazas aéreas del rival,
-            emparejamiento de marcas con ventaja por altura y penales.
-          </Proximamente>
+          <EmparejamientoMarcas
+            partidoId={partidoId}
+            plantelRival={sofascore.plantel}
+            informe={sofascore.informe}
+            jugadores={jugadores}
+            titulares={(detalle.alineacion?.titulares ?? []).filter((x): x is string => Boolean(x))}
+            convocados={[...convocados]}
+            marcas={marcas}
+          />
           <div>
             <h2 className="mb-3 text-lg font-semibold text-slate-900">ABP del rival</h2>
             <AbpPanel partidoId={partidoId} abp={detalle.abp} />

@@ -7,6 +7,7 @@ import { getModeloJuego } from "@/lib/data/modelo-juego";
 import { getTareas } from "@/lib/data/tareas";
 import { getJugadas, getJugadasPartido } from "@/lib/data/jugadas";
 import { getInformeSofascore } from "@/lib/data/informe";
+import { getMarcasPartido } from "@/lib/data/marcas";
 import { nombreArchivoSeguro } from "@/lib/export";
 import { clubDeTemporada } from "@/lib/club";
 import { requerirContexto } from "@/lib/contexto";
@@ -66,6 +67,7 @@ export default async function PartidoPage({ params, searchParams }: Props) {
     jugadasPartido,
     biblioteca,
     sofascore,
+    marcas,
   ] = await Promise.all([
     getDetallePartido(partido.id),
     getJugadores(partido.temporada_id),
@@ -75,6 +77,7 @@ export default async function PartidoPage({ params, searchParams }: Props) {
     getJugadasPartido(partido.id),
     getJugadas(cuerpoTecnico.id),
     getInformeSofascore(partido.id, partido.rival_id, cuerpoTecnico.id),
+    getMarcasPartido(partido.id),
   ]);
   const tabInicial = esTabPartido(searchParams.tab) ? searchParams.tab : "previa";
 
@@ -163,6 +166,7 @@ export default async function PartidoPage({ params, searchParams }: Props) {
         resumenPrevia={resumenPrevia}
         jugadasPartido={jugadasPartido}
         sofascore={sofascore}
+        marcas={marcas}
         bibliotecaJugadas={biblioteca}
         colorClub={temporada.color_principal}
         partidoId={partido.id}

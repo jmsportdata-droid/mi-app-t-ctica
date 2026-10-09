@@ -889,6 +889,35 @@ export type Database = {
           },
         ]
       }
+      marcas_partido: {
+        Row: {
+          actualizado_en: string
+          parejas: Json
+          partido_id: string
+          rivales: string[] | null
+        }
+        Insert: {
+          actualizado_en?: string
+          parejas?: Json
+          partido_id: string
+          rivales?: string[] | null
+        }
+        Update: {
+          actualizado_en?: string
+          parejas?: Json
+          partido_id?: string
+          rivales?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marcas_partido_partido_id_fkey"
+            columns: ["partido_id"]
+            isOneToOne: true
+            referencedRelation: "partidos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       miembros: {
         Row: {
           creado_en: string
