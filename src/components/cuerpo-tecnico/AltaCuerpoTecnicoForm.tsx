@@ -50,7 +50,7 @@ export function AltaCuerpoTecnicoForm() {
         setErrores(resultado.errores ?? {});
         return;
       }
-      router.replace("/plantilla");
+      router.replace("/hoy");
       router.refresh();
     });
   }

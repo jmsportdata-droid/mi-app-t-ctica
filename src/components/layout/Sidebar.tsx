@@ -11,6 +11,7 @@ import {
   IconCuenta,
   IconCuerpoTecnico,
   IconEquipos,
+  IconHoy,
   IconMicrociclo,
   IconModeloJuego,
   IconPartidos,
@@ -20,6 +21,7 @@ import {
 } from "./icons";
 
 const NAVEGACION = [
+  { href: "/hoy", label: "Hoy", Icono: IconHoy },
   { href: "/calendario", label: "Calendario", Icono: IconCalendario },
   { href: "/microciclo", label: "Microciclo", Icono: IconMicrociclo },
   { href: "/plantilla", label: "Plantel", Icono: IconPlantilla },

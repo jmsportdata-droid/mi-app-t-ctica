@@ -48,7 +48,7 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
 
   if (user && pathname === "/login") {
     const homeUrl = request.nextUrl.clone();
-    homeUrl.pathname = "/plantilla";
+    homeUrl.pathname = "/hoy";
     homeUrl.search = "";
     return redirectConCookies(homeUrl, response);
   }

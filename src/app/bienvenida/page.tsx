@@ -11,7 +11,7 @@ export const metadata: Metadata = { title: "Bienvenida" };
 export default async function BienvenidaPage() {
   const sesion = await getSesion();
   if (sesion.estado === "sin_sesion") redirect("/login");
-  if (sesion.estado === "ok") redirect("/plantilla");
+  if (sesion.estado === "ok") redirect("/hoy");
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-brand-50 via-white to-slate-100 p-4">
