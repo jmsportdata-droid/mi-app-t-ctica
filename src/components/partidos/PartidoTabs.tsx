@@ -12,6 +12,8 @@ import { AnalisisVideoPanel } from "./AnalisisVideoPanel";
 import { ConvocatoriaPanel } from "./ConvocatoriaPanel";
 import { InformeRivalPanel } from "./InformeRivalPanel";
 import { PlanPartidoEditor, type TareaSugerida } from "./PlanPartidoEditor";
+import { JugadasPartidoPanel, type JugadaElegida } from "@/components/pizarra/JugadasPartidoPanel";
+import type { Jugada } from "@/types/jugada";
 import { PostPartidoPanel } from "./PostPartidoPanel";
 import { PreviaPanel } from "./PreviaPanel";
 import { VestuarioPanel } from "./VestuarioPanel";
@@ -28,6 +30,9 @@ interface Props {
   principios: PrincipioJuego[];
   tareasSugeridas: TareaSugerida[];
   resumenPrevia: string[];
+  jugadasPartido: JugadaElegida[];
+  bibliotecaJugadas: Jugada[];
+  colorClub: string;
   partidoId: string;
   detalle: DetallePartido;
   jugadores: Jugador[];
@@ -46,6 +51,9 @@ export function PartidoTabs({
   principios,
   tareasSugeridas,
   resumenPrevia,
+  jugadasPartido,
+  bibliotecaJugadas,
+  colorClub,
   partidoId,
   detalle,
   jugadores,
@@ -159,12 +167,24 @@ export function PartidoTabs({
         <AnalisisVideoPanel partidoId={partidoId} analisis={detalle.analisis} />
       </Panel>
       <Panel id="abp" activa={activa} visitadas={visitadas}>
-        <Proximamente>
-          En la etapa P2: características del rival, sus ABP ofensivas y defensivas, emparejamiento
-          de marcas con ventaja por altura, roles de los nuestros, penales y la biblioteca de
-          jugadas con su PDF.
-        </Proximamente>
-        <AbpPanel partidoId={partidoId} abp={detalle.abp} />
+        <div className="space-y-6">
+          <JugadasPartidoPanel
+            partidoId={partidoId}
+            elegidas={jugadasPartido}
+            biblioteca={bibliotecaJugadas}
+            jugadores={jugadoresDelPlan}
+            convocados={[...convocados]}
+            color={colorClub}
+          />
+          <Proximamente>
+            Después de conectar Sofascore: características y amenazas aéreas del rival,
+            emparejamiento de marcas con ventaja por altura y penales.
+          </Proximamente>
+          <div>
+            <h2 className="mb-3 text-lg font-semibold text-slate-900">ABP del rival</h2>
+            <AbpPanel partidoId={partidoId} abp={detalle.abp} />
+          </div>
+        </div>
       </Panel>
       <Panel id="plan" activa={activa} visitadas={visitadas}>
         <PlanPartidoEditor

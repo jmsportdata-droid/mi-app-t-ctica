@@ -116,3 +116,13 @@ export function IconHoy({ className }: IconProps) {
     </svg>
   );
 }
+
+export function IconPelotaQuieta({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M3 4h18v14H3zM8 4v5h8V4" />
+      <circle cx="6" cy="15" r="1.5" />
+      <path d="M7.5 14c3-3 6-4 9-3" />
+    </svg>
+  );
+}

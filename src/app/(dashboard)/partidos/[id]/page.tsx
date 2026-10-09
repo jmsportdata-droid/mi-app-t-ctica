@@ -5,6 +5,7 @@ import { getDisponibilidadDelDia } from "@/lib/data/disponibilidad";
 import { getJugadores } from "@/lib/data/jugadores";
 import { getModeloJuego } from "@/lib/data/modelo-juego";
 import { getTareas } from "@/lib/data/tareas";
+import { getJugadas, getJugadasPartido } from "@/lib/data/jugadas";
 import { nombreArchivoSeguro } from "@/lib/export";
 import { clubDeTemporada } from "@/lib/club";
 import { requerirContexto } from "@/lib/contexto";
@@ -55,13 +56,16 @@ export default async function PartidoPage({ params, searchParams }: Props) {
   const { partido, temporada } = datos;
   const titulo = tituloPartido(partido, temporada.club);
 
-  const [detalle, jugadores, disponibilidad, { principios }, tareas] = await Promise.all([
-    getDetallePartido(partido.id),
-    getJugadores(partido.temporada_id),
-    getDisponibilidadDelDia(partido.temporada_id, partido.fecha),
-    getModeloJuego(cuerpoTecnico.id),
-    getTareas(cuerpoTecnico.id),
-  ]);
+  const [detalle, jugadores, disponibilidad, { principios }, tareas, jugadasPartido, biblioteca] =
+    await Promise.all([
+      getDetallePartido(partido.id),
+      getJugadores(partido.temporada_id),
+      getDisponibilidadDelDia(partido.temporada_id, partido.fecha),
+      getModeloJuego(cuerpoTecnico.id),
+      getTareas(cuerpoTecnico.id),
+      getJugadasPartido(partido.id),
+      getJugadas(cuerpoTecnico.id),
+    ]);
   const tabInicial = esTabPartido(searchParams.tab) ? searchParams.tab : "previa";
 
   const { previa, informe, plan } = detalle;
@@ -145,6 +149,9 @@ export default async function PartidoPage({ params, searchParams }: Props) {
         principios={principios}
         tareasSugeridas={tareasSugeridas}
         resumenPrevia={resumenPrevia}
+        jugadasPartido={jugadasPartido}
+        bibliotecaJugadas={biblioteca}
+        colorClub={temporada.color_principal}
         partidoId={partido.id}
         detalle={detalle}
         jugadores={jugadores}

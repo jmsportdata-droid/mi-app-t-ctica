@@ -48,6 +48,8 @@ insert into public.principios_juego (id, cuerpo_tecnico_id, momento, nombre) val
   ('00000000-0000-4000-9000-00000000000b', '00000000-0000-4000-b000-00000000000b', 'balon_parado', 'Principio de B');
 insert into public.tareas (id, cuerpo_tecnico_id, nombre, tipo) values
   ('00000000-0000-4000-8000-00000000000b', '00000000-0000-4000-b000-00000000000b', 'Tarea de B', 'rondo');
+insert into public.jugadas (id, cuerpo_tecnico_id, tipo, categoria, nombre) values
+  ('00000000-0000-4000-6000-00000000000b', '00000000-0000-4000-b000-00000000000b', 'ofensivo', 'corner', 'Jugada de B');
 insert into public.actividades (id, temporada_id, tipo, titulo, fecha) values
   ('00000000-0000-4000-7000-00000000000b', '00000000-0000-4000-c000-00000000000b', 'entrenamiento', 'Entrenamiento de B', '2026-04-29');
 
@@ -324,6 +326,28 @@ begin
   begin
     insert into public.concentraciones (partido_id, lugar) values ('00000000-0000-4000-f000-00000000000b', 'Intruso');
     raise exception 'FALLA: el analista A pudo cargar la concentración de un partido de B';
+  exception when insufficient_privilege then null;
+  end;
+
+  -- Pizarra: jugadas propias en partidos propios
+  insert into public.jugadas (tipo, categoria, nombre, roles)
+    values ('ofensivo', 'corner', 'Segundo palo', '[{"id":"r1","nombre":"Ejecutor","corto":"EJ"}]');
+  insert into public.partido_jugadas (partido_id, jugada_id, asignaciones)
+    select '00000000-0000-4000-f000-00000000000a', id, '{"r1":"00000000-0000-4000-e000-00000000000a"}'
+    from public.jugadas where nombre = 'Segundo palo';
+  if exists (select 1 from public.jugadas where nombre = 'Jugada de B') then
+    raise exception 'FALLA: el analista A ve jugadas de B';
+  end if;
+  begin
+    insert into public.partido_jugadas (partido_id, jugada_id)
+      values ('00000000-0000-4000-f000-00000000000a', '00000000-0000-4000-6000-00000000000b');
+    raise exception 'FALLA: se usó una jugada de B en un partido de A';
+  exception when insufficient_privilege then null;
+  end;
+  begin
+    insert into public.partido_jugadas (partido_id, jugada_id)
+      select '00000000-0000-4000-f000-00000000000b', id from public.jugadas where nombre = 'Segundo palo';
+    raise exception 'FALLA: el analista A eligió jugadas en un partido de B';
   exception when insufficient_privilege then null;
   end;
 

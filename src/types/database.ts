@@ -616,6 +616,65 @@ export type Database = {
           },
         ]
       }
+      jugadas: {
+        Row: {
+          actualizado_en: string
+          archivada: boolean
+          categoria: Database["public"]["Enums"]["categoria_jugada"]
+          creado_en: string
+          cuerpo_tecnico_id: string
+          descripcion: string | null
+          diagrama: Json
+          id: string
+          lado: Database["public"]["Enums"]["lado_jugada"]
+          nombre: string
+          numero: number | null
+          roles: Json
+          sena: string | null
+          tipo: Database["public"]["Enums"]["tipo_abp"]
+        }
+        Insert: {
+          actualizado_en?: string
+          archivada?: boolean
+          categoria: Database["public"]["Enums"]["categoria_jugada"]
+          creado_en?: string
+          cuerpo_tecnico_id?: string
+          descripcion?: string | null
+          diagrama?: Json
+          id?: string
+          lado?: Database["public"]["Enums"]["lado_jugada"]
+          nombre: string
+          numero?: number | null
+          roles?: Json
+          sena?: string | null
+          tipo: Database["public"]["Enums"]["tipo_abp"]
+        }
+        Update: {
+          actualizado_en?: string
+          archivada?: boolean
+          categoria?: Database["public"]["Enums"]["categoria_jugada"]
+          creado_en?: string
+          cuerpo_tecnico_id?: string
+          descripcion?: string | null
+          diagrama?: Json
+          id?: string
+          lado?: Database["public"]["Enums"]["lado_jugada"]
+          nombre?: string
+          numero?: number | null
+          roles?: Json
+          sena?: string | null
+          tipo?: Database["public"]["Enums"]["tipo_abp"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "jugadas_cuerpo_tecnico_id_fkey"
+            columns: ["cuerpo_tecnico_id"]
+            isOneToOne: false
+            referencedRelation: "cuerpos_tecnicos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       jugadores: {
         Row: {
           altura_cm: number | null
@@ -735,6 +794,42 @@ export type Database = {
             columns: ["cuerpo_tecnico_id"]
             isOneToOne: true
             referencedRelation: "cuerpos_tecnicos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partido_jugadas: {
+        Row: {
+          asignaciones: Json
+          jugada_id: string
+          orden: number
+          partido_id: string
+        }
+        Insert: {
+          asignaciones?: Json
+          jugada_id: string
+          orden?: number
+          partido_id: string
+        }
+        Update: {
+          asignaciones?: Json
+          jugada_id?: string
+          orden?: number
+          partido_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partido_jugadas_jugada_id_fkey"
+            columns: ["jugada_id"]
+            isOneToOne: false
+            referencedRelation: "jugadas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partido_jugadas_partido_id_fkey"
+            columns: ["partido_id"]
+            isOneToOne: false
+            referencedRelation: "partidos"
             referencedColumns: ["id"]
           },
         ]
@@ -1575,6 +1670,12 @@ export type Database = {
     }
     Enums: {
       categoria_abp: "corner" | "falta_lateral"
+      categoria_jugada:
+        | "corner"
+        | "falta_lateral"
+        | "falta_frontal"
+        | "lateral"
+        | "otro"
       competitividad_tarea:
         | "sin_oposicion"
         | "con_oposicion"
@@ -1612,6 +1713,7 @@ export type Database = {
         | "3-4-3"
         | "4-1-4-1"
         | "3-5-2"
+      lado_jugada: "izquierda" | "derecha" | "ambos"
       linea_jugador: "POR" | "DEF" | "CEN" | "DEL"
       momento_juego:
         | "organizacion_ofensiva"
@@ -1799,6 +1901,13 @@ export const Constants = {
   public: {
     Enums: {
       categoria_abp: ["corner", "falta_lateral"],
+      categoria_jugada: [
+        "corner",
+        "falta_lateral",
+        "falta_frontal",
+        "lateral",
+        "otro",
+      ],
       competitividad_tarea: [
         "sin_oposicion",
         "con_oposicion",
@@ -1841,6 +1950,7 @@ export const Constants = {
         "4-1-4-1",
         "3-5-2",
       ],
+      lado_jugada: ["izquierda", "derecha", "ambos"],
       linea_jugador: ["POR", "DEF", "CEN", "DEL"],
       momento_juego: [
         "organizacion_ofensiva",
