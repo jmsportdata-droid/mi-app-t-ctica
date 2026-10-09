@@ -7,6 +7,7 @@ import {
   BLOQUES_ANALISIS,
   VALORACIONES,
   type AnalisisRival,
+  type EquipoAnalisis,
   type FaseAnalisis,
   type ValoracionAnalisis,
 } from "@/types/partido";
@@ -20,16 +21,19 @@ const INFO_VALORACION = Object.fromEntries(VALORACIONES.map((v) => [v.valor, v])
 >;
 
 /**
- * Análisis de video del rival con la estructura del cuerpo técnico: fase ofensiva
+ * Análisis de video (del rival o nuestro) con la estructura del cuerpo técnico: fase ofensiva
  * (inicios, organización, finalización), fase defensiva (bloque alto, medio,
  * bajo) y transiciones. Cada conclusión puede llevar su clip.
  */
 export function AnalisisVideoPanel({
   partidoId,
   analisis,
+  equipo = "rival",
 }: {
   partidoId: string;
   analisis: AnalisisRival[];
+  /** Del rival (semana del partido) o de nuestro equipo (post partido) */
+  equipo?: EquipoAnalisis;
 }) {
   const conteo = VALORACIONES.map((v) => ({
     ...v,
@@ -72,6 +76,7 @@ export function AnalisisVideoPanel({
               <Fase
                 key={fase.valor}
                 partidoId={partidoId}
+                equipo={equipo}
                 fase={fase.valor}
                 label={fase.label}
                 items={analisis.filter((a) => a.fase === fase.valor)}
@@ -86,11 +91,13 @@ export function AnalisisVideoPanel({
 
 function Fase({
   partidoId,
+  equipo,
   fase,
   label,
   items,
 }: {
   partidoId: string;
+  equipo: EquipoAnalisis;
   fase: FaseAnalisis;
   label: string;
   items: AnalisisRival[];
@@ -108,7 +115,12 @@ function Fase({
         ))}
       </ul>
       {agregando ? (
-        <FormConclusion partidoId={partidoId} fase={fase} onListo={() => setAgregando(false)} />
+        <FormConclusion
+          partidoId={partidoId}
+          equipo={equipo}
+          fase={fase}
+          onListo={() => setAgregando(false)}
+        />
       ) : (
         <button
           type="button"
@@ -131,6 +143,7 @@ function Conclusion({ partidoId, item }: { partidoId: string; item: AnalisisRiva
       <li>
         <FormConclusion
           partidoId={partidoId}
+          equipo={item.equipo as EquipoAnalisis}
           fase={item.fase}
           item={item}
           onListo={() => setEditando(false)}
@@ -196,11 +209,13 @@ function Conclusion({ partidoId, item }: { partidoId: string; item: AnalisisRiva
 
 function FormConclusion({
   partidoId,
+  equipo,
   fase,
   item,
   onListo,
 }: {
   partidoId: string;
+  equipo: EquipoAnalisis;
   fase: FaseAnalisis;
   item?: AnalisisRival;
   onListo: () => void;
@@ -216,6 +231,7 @@ function FormConclusion({
     ejecutar(
       () =>
         guardarAnalisis(partidoId, item?.id ?? null, {
+          equipo,
           fase,
           texto,
           valoracion,

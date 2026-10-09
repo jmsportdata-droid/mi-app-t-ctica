@@ -10,8 +10,16 @@ import { useAccion } from "@/components/ui/useAccion";
 const texto = (n: number | null) => (n === null ? "" : String(n));
 const numero = (s: string) => (s.trim() === "" ? null : Number(s));
 
-/** Resultado del partido. Las estadísticas y la evaluación del plan llegan en la etapa P5. */
-export function PostPartidoPanel({ partido, club }: { partido: PartidoConRival; club: string }) {
+/** Resultado del partido; debajo, las estadísticas, el video propio, el plan y las conclusiones. */
+export function PostPartidoPanel({
+  partido,
+  club,
+  children,
+}: {
+  partido: PartidoConRival;
+  club: string;
+  children?: React.ReactNode;
+}) {
   const { pendiente, error, ejecutar } = useAccion();
   const [v, setV] = useState({
     goles_favor: texto(partido.goles_favor),
@@ -81,14 +89,7 @@ export function PostPartidoPanel({ partido, club }: { partido: PartidoConRival; 
         </p>
       </section>
 
-      <section className="rounded-2xl border-2 border-dashed border-slate-200 bg-white p-5 text-sm text-slate-500">
-        <h2 className="font-semibold text-slate-700">Próximamente</h2>
-        <p className="mt-1">
-          Estadísticas de Sofascore, el análisis de video de nuestro equipo, la evaluación del plan
-          (qué salió y qué no), minutos jugados y tarjetas. Todo eso alimenta el módulo de
-          rendimiento.
-        </p>
-      </section>
+      {children}
     </div>
   );
 }

@@ -197,6 +197,7 @@ export async function guardarResultado(
 // ---------- Análisis de video del rival ---------------------------
 
 const analisisSchema = z.object({
+  equipo: z.enum(["rival", "propio"]).default("rival"),
   fase: faseSchema,
   texto: z
     .string()
@@ -210,7 +211,7 @@ const analisisSchema = z.object({
 
 export type AnalisisInput = z.input<typeof analisisSchema>;
 
-/** Crea (id = null) o edita una conclusión del análisis del rival. */
+/** Crea (id = null) o edita una conclusión del análisis de video (del rival o nuestro). */
 export async function guardarAnalisis(
   partidoId: string,
   id: string | null,
@@ -234,6 +235,7 @@ export async function guardarAnalisis(
       .from("analisis_rival")
       .select("id", { count: "exact", head: true })
       .eq("partido_id", partidoId)
+      .eq("equipo", parsed.data.equipo)
       .eq("fase", parsed.data.fase);
     const { error } = await supabase
       .from("analisis_rival")

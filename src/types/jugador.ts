@@ -74,6 +74,9 @@ export type JugadorInput = Pick<
   | "pie_habil"
   | "altura_cm"
   | "nacionalidad"
+  | "formado_en_club"
+  | "fecha_debut"
+  | "seleccion"
 >;
 
 /** Cifras de uso del jugador (derivadas de alineaciones y eventos). */

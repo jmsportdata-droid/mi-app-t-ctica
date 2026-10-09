@@ -53,6 +53,9 @@ export const jugadorSchema = z.object({
     .max(220, "La altura va de 140 a 220 cm")
     .nullable(),
   nacionalidad: textoOpcionalSchema(60, "La nacionalidad"),
+  formado_en_club: z.boolean(),
+  fecha_debut: fechaSchema.nullable(),
+  seleccion: textoOpcionalSchema(200, "La selección"),
 }) satisfies z.ZodType<JugadorInput, z.ZodTypeDef, unknown>;
 
 export type JugadorErrores = Partial<Record<keyof JugadorInput, string>>;

@@ -139,6 +139,7 @@ export function esTabPartido(valor: unknown): valor is TabPartido {
 
 export type PartidoPrevia = Tables<"partido_previa">;
 export type AnalisisRival = Tables<"analisis_rival">;
+export type EquipoAnalisis = "rival" | "propio";
 export type EscenarioPartido = Tables<"escenarios_partido">;
 export type VideoVestuario = Tables<"videos_vestuario">;
 export type FaseAnalisis = Enums<"fase_analisis">;

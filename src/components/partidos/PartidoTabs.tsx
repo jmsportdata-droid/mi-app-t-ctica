@@ -19,6 +19,13 @@ import { PlanPartidoEditor, type TareaSugerida } from "./PlanPartidoEditor";
 import { JugadasPartidoPanel, type JugadaElegida } from "@/components/pizarra/JugadasPartidoPanel";
 import type { Jugada } from "@/types/jugada";
 import { PostPartidoPanel } from "./PostPartidoPanel";
+import { ConclusionesPost } from "@/components/post/ConclusionesPost";
+import { EstadisticasPost } from "@/components/post/EstadisticasPost";
+import { JugadoresPost } from "@/components/post/JugadoresPost";
+import { PlanVsRealidad } from "@/components/post/PlanVsRealidad";
+import type { DatosPostPartido } from "@/lib/data/post-partido";
+import type { EvaluacionPlan, InsightsPost } from "@/lib/post-partido";
+import { hoyISO } from "@/lib/utils/fecha";
 import { PreviaPanel } from "./PreviaPanel";
 import { VestuarioPanel } from "./VestuarioPanel";
 import { EventosPanel } from "./eventos/EventosPanel";
@@ -37,6 +44,7 @@ interface Props {
   jugadasPartido: JugadaElegida[];
   sofascore: DatosSofascore;
   marcas: MarcasPartido;
+  post: DatosPostPartido;
   bibliotecaJugadas: Jugada[];
   colorClub: string;
   partidoId: string;
@@ -60,6 +68,7 @@ export function PartidoTabs({
   jugadasPartido,
   sofascore,
   marcas,
+  post,
   bibliotecaJugadas,
   colorClub,
   partidoId,
@@ -176,7 +185,10 @@ export function PartidoTabs({
         </div>
       </Panel>
       <Panel id="video" activa={activa} visitadas={visitadas}>
-        <AnalisisVideoPanel partidoId={partidoId} analisis={detalle.analisis} />
+        <AnalisisVideoPanel
+          partidoId={partidoId}
+          analisis={detalle.analisis.filter((a) => a.equipo === "rival")}
+        />
       </Panel>
       <Panel id="abp" activa={activa} visitadas={visitadas}>
         <div className="space-y-6">
@@ -232,7 +244,54 @@ export function PartidoTabs({
         <VestuarioPanel partidoId={partidoId} videos={detalle.videos} />
       </Panel>
       <Panel id="post" activa={activa} visitadas={visitadas}>
-        <PostPartidoPanel partido={partido} club={club} />
+        <PostPartidoPanel partido={partido} club={club}>
+          <EstadisticasPost
+            partidoId={partidoId}
+            club={club}
+            rival={partido.rival?.nombre ?? "Rival"}
+            estadisticas={post.estadisticas}
+            previos={post.previos}
+            pedido={post.pedido}
+            macConectada={post.macConectada}
+            jugado={partido.fecha <= hoyISO()}
+          />
+          <JugadoresPost jugadores={post.jugadores} />
+          <div>
+            <h2 className="mb-1 text-lg font-semibold text-slate-900">
+              Análisis de video de nuestro equipo
+            </h2>
+            <p className="mb-3 text-xs text-slate-500">
+              Misma estructura que el del rival. Claude lo usa para el borrador de conclusiones:
+              cargalo antes de traer los datos (o volvé a traerlos).
+            </p>
+            <AnalisisVideoPanel
+              partidoId={partidoId}
+              equipo="propio"
+              analisis={detalle.analisis.filter((a) => a.equipo === "propio")}
+            />
+          </div>
+          <PlanVsRealidad
+            partidoId={partidoId}
+            plan={detalle.plan}
+            evaluaciones={
+              (post.post?.plan_vs_real ?? {}) as unknown as Record<string, EvaluacionPlan>
+            }
+            sugerencias={(post.estadisticas?.insights as InsightsPost | undefined)?.plan_vs_real}
+          />
+          <ConclusionesPost
+            partidoId={partidoId}
+            insights={(post.estadisticas?.insights ?? {}) as InsightsPost}
+            post={post.post}
+          />
+          <a
+            href={`/imprimir/post/${partidoId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            Informe post partido (PDF)
+          </a>
+        </PostPartidoPanel>
       </Panel>
       <Panel id="eventos" activa={activa} visitadas={visitadas}>
         <Proximamente>

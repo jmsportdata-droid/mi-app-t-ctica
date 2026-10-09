@@ -37,6 +37,9 @@ interface Valores {
   pie_habil: string;
   altura_cm: string;
   nacionalidad: string;
+  formado_en_club: boolean;
+  fecha_debut: string;
+  seleccion: string;
 }
 
 function valoresIniciales(jugador?: Jugador): Valores {
@@ -49,6 +52,9 @@ function valoresIniciales(jugador?: Jugador): Valores {
     pie_habil: jugador?.pie_habil ?? "",
     altura_cm: jugador?.altura_cm != null ? String(jugador.altura_cm) : "",
     nacionalidad: jugador?.nacionalidad ?? "",
+    formado_en_club: jugador?.formado_en_club ?? false,
+    fecha_debut: jugador?.fecha_debut ?? "",
+    seleccion: jugador?.seleccion ?? "",
   };
 }
 
@@ -66,6 +72,9 @@ function aInput(v: Valores, fotoRuta: string | null): unknown {
     pie_habil: v.pie_habil === "" ? null : v.pie_habil,
     altura_cm: numeroONull(v.altura_cm),
     nacionalidad: v.nacionalidad,
+    formado_en_club: v.formado_en_club,
+    fecha_debut: v.fecha_debut === "" ? null : v.fecha_debut,
+    seleccion: v.seleccion,
   };
 }
 
@@ -274,6 +283,42 @@ export function JugadorForm({ cuerpoTecnicoId, jugador }: JugadorFormProps) {
         ayuda="Opcional. No se puede repetir en el plantel."
         className="sm:w-40"
       />
+
+      <fieldset className="space-y-4 rounded-xl border border-slate-200 p-4">
+        <legend className="px-1 text-sm font-semibold text-slate-700">
+          Trayectoria (para la Memoria del ciclo)
+        </legend>
+        <label className="flex items-center gap-2 text-sm text-slate-700">
+          <input
+            type="checkbox"
+            name="formado_en_club"
+            checked={valores.formado_en_club}
+            onChange={(e) => actualizar("formado_en_club", e.target.checked)}
+            className="h-4 w-4 rounded border-slate-300 text-brand-600"
+          />
+          Formado en el club (juveniles)
+        </label>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Input
+            label="Debut en Primera"
+            type="date"
+            name="fecha_debut"
+            value={valores.fecha_debut}
+            onChange={(e) => actualizar("fecha_debut", e.target.value)}
+            error={errores.fecha_debut}
+            ayuda="Si debutó con este cuerpo técnico, cuenta como promovido."
+          />
+          <Input
+            label="Selección"
+            name="seleccion"
+            placeholder="Ej. Sub-20 de Uruguay (2026)"
+            value={valores.seleccion}
+            onChange={(e) => actualizar("seleccion", e.target.value)}
+            error={errores.seleccion}
+            maxLength={200}
+          />
+        </div>
+      </fieldset>
 
       <div className="flex items-center gap-3 border-t border-slate-100 pt-5">
         <Button type="submit" cargando={pendiente}>

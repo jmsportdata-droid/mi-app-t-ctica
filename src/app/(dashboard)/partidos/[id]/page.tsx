@@ -8,6 +8,7 @@ import { getTareas } from "@/lib/data/tareas";
 import { getJugadas, getJugadasPartido } from "@/lib/data/jugadas";
 import { getInformeSofascore } from "@/lib/data/informe";
 import { getMarcasPartido } from "@/lib/data/marcas";
+import { getPostPartido } from "@/lib/data/post-partido";
 import { nombreArchivoSeguro } from "@/lib/export";
 import { clubDeTemporada } from "@/lib/club";
 import { requerirContexto } from "@/lib/contexto";
@@ -68,6 +69,7 @@ export default async function PartidoPage({ params, searchParams }: Props) {
     biblioteca,
     sofascore,
     marcas,
+    post,
   ] = await Promise.all([
     getDetallePartido(partido.id),
     getJugadores(partido.temporada_id),
@@ -78,6 +80,7 @@ export default async function PartidoPage({ params, searchParams }: Props) {
     getJugadas(cuerpoTecnico.id),
     getInformeSofascore(partido.id, partido.rival_id, cuerpoTecnico.id),
     getMarcasPartido(partido.id),
+    getPostPartido(partido.id, partido.temporada_id, partido.fecha, cuerpoTecnico.id),
   ]);
   const tabInicial = esTabPartido(searchParams.tab) ? searchParams.tab : "previa";
 
@@ -92,7 +95,7 @@ export default async function PartidoPage({ params, searchParams }: Props) {
     informe:
       sofascore.informe !== null ||
       Boolean(informe?.slides_url || informe?.vimeo_url || informe?.tags.length),
-    video: detalle.analisis.length > 0,
+    video: detalle.analisis.some((a) => a.equipo === "rival"),
     abp: detalle.abp.some((a) => a.descripcion),
     plan:
       detalle.escenarios.length > 0 ||
@@ -101,7 +104,7 @@ export default async function PartidoPage({ params, searchParams }: Props) {
     convocatoria: (detalle.alineacion?.titulares.filter(Boolean).length ?? 0) === 11,
     vestuario: detalle.videos.some((v) => v.url),
     eventos: detalle.eventos.length > 0,
-    post: partido.goles_favor !== null,
+    post: partido.goles_favor !== null || post.estadisticas !== null,
   };
   const rival = partido.rival?.nombre ?? "rival";
 
@@ -167,6 +170,7 @@ export default async function PartidoPage({ params, searchParams }: Props) {
         jugadasPartido={jugadasPartido}
         sofascore={sofascore}
         marcas={marcas}
+        post={post}
         bibliotecaJugadas={biblioteca}
         colorClub={temporada.color_principal}
         partidoId={partido.id}
