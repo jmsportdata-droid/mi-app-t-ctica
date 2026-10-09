@@ -495,6 +495,32 @@ export type Database = {
           },
         ]
       }
+      estado_mac: {
+        Row: {
+          cuerpo_tecnico_id: string
+          ultima_senal: string
+          version: string | null
+        }
+        Insert: {
+          cuerpo_tecnico_id: string
+          ultima_senal?: string
+          version?: string | null
+        }
+        Update: {
+          cuerpo_tecnico_id?: string
+          ultima_senal?: string
+          version?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "estado_mac_cuerpo_tecnico_id_fkey"
+            columns: ["cuerpo_tecnico_id"]
+            isOneToOne: true
+            referencedRelation: "cuerpos_tecnicos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       eventos_partido: {
         Row: {
           creado_en: string
@@ -616,6 +642,44 @@ export type Database = {
           },
         ]
       }
+      informes_rival_datos: {
+        Row: {
+          avisos: string[]
+          datos: Json
+          generado_en: string
+          insights: Json
+          partido_id: string
+          pdf_ruta: string | null
+          validaciones: Json
+        }
+        Insert: {
+          avisos?: string[]
+          datos?: Json
+          generado_en?: string
+          insights?: Json
+          partido_id: string
+          pdf_ruta?: string | null
+          validaciones?: Json
+        }
+        Update: {
+          avisos?: string[]
+          datos?: Json
+          generado_en?: string
+          insights?: Json
+          partido_id?: string
+          pdf_ruta?: string | null
+          validaciones?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "informes_rival_datos_partido_id_fkey"
+            columns: ["partido_id"]
+            isOneToOne: true
+            referencedRelation: "partidos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       jugadas: {
         Row: {
           actualizado_en: string
@@ -727,6 +791,62 @@ export type Database = {
             columns: ["temporada_id"]
             isOneToOne: false
             referencedRelation: "temporadas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      jugadores_rivales: {
+        Row: {
+          actualizado_en: string
+          altura_cm: number | null
+          corto: string | null
+          dorsal: number | null
+          equipo_id: string
+          estadisticas: Json
+          fecha_nac: string | null
+          id: string
+          nacionalidad: string | null
+          nombre: string
+          pie: string | null
+          posicion: string | null
+          sofascore_id: string
+        }
+        Insert: {
+          actualizado_en?: string
+          altura_cm?: number | null
+          corto?: string | null
+          dorsal?: number | null
+          equipo_id: string
+          estadisticas?: Json
+          fecha_nac?: string | null
+          id?: string
+          nacionalidad?: string | null
+          nombre: string
+          pie?: string | null
+          posicion?: string | null
+          sofascore_id: string
+        }
+        Update: {
+          actualizado_en?: string
+          altura_cm?: number | null
+          corto?: string | null
+          dorsal?: number | null
+          equipo_id?: string
+          estadisticas?: Json
+          fecha_nac?: string | null
+          id?: string
+          nacionalidad?: string | null
+          nombre?: string
+          pie?: string | null
+          posicion?: string | null
+          sofascore_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "jugadores_rivales_equipo_id_fkey"
+            columns: ["equipo_id"]
+            isOneToOne: false
+            referencedRelation: "equipos"
             referencedColumns: ["id"]
           },
         ]
@@ -979,6 +1099,47 @@ export type Database = {
             columns: ["temporada_id"]
             isOneToOne: false
             referencedRelation: "temporadas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pedidos_sofascore: {
+        Row: {
+          actualizado_en: string
+          creado_en: string
+          creado_por: string | null
+          estado: Database["public"]["Enums"]["estado_pedido"]
+          id: string
+          mensaje: string | null
+          partido_id: string
+          tipo: Database["public"]["Enums"]["tipo_pedido_sofascore"]
+        }
+        Insert: {
+          actualizado_en?: string
+          creado_en?: string
+          creado_por?: string | null
+          estado?: Database["public"]["Enums"]["estado_pedido"]
+          id?: string
+          mensaje?: string | null
+          partido_id: string
+          tipo?: Database["public"]["Enums"]["tipo_pedido_sofascore"]
+        }
+        Update: {
+          actualizado_en?: string
+          creado_en?: string
+          creado_por?: string | null
+          estado?: Database["public"]["Enums"]["estado_pedido"]
+          id?: string
+          mensaje?: string | null
+          partido_id?: string
+          tipo?: Database["public"]["Enums"]["tipo_pedido_sofascore"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pedidos_sofascore_partido_id_fkey"
+            columns: ["partido_id"]
+            isOneToOne: false
+            referencedRelation: "partidos"
             referencedColumns: ["id"]
           },
         ]
@@ -1691,6 +1852,7 @@ export type Database = {
       estado_asistencia: "completo" | "parcial" | "diferenciado" | "ausente"
       estado_disponibilidad: "disponible" | "limitado" | "baja" | "sancionado"
       estado_partido: "planificado" | "jugado"
+      estado_pedido: "pendiente" | "procesando" | "listo" | "error"
       etiqueta_informe:
         | "salida_balon"
         | "presion"
@@ -1751,6 +1913,7 @@ export type Database = {
         | "otro"
       tipo_cesped: "natural" | "sintetico" | "hibrido"
       tipo_evento: "gol" | "ocasion" | "duelo" | "nota"
+      tipo_pedido_sofascore: "informe_rival"
       tipo_tarea:
         | "entrada_en_calor"
         | "pre_sesion"
@@ -1925,6 +2088,7 @@ export const Constants = {
       estado_asistencia: ["completo", "parcial", "diferenciado", "ausente"],
       estado_disponibilidad: ["disponible", "limitado", "baja", "sancionado"],
       estado_partido: ["planificado", "jugado"],
+      estado_pedido: ["pendiente", "procesando", "listo", "error"],
       etiqueta_informe: [
         "salida_balon",
         "presion",
@@ -1992,6 +2156,7 @@ export const Constants = {
       ],
       tipo_cesped: ["natural", "sintetico", "hibrido"],
       tipo_evento: ["gol", "ocasion", "duelo", "nota"],
+      tipo_pedido_sofascore: ["informe_rival"],
       tipo_tarea: [
         "entrada_en_calor",
         "pre_sesion",

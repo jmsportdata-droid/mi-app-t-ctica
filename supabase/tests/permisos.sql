@@ -351,6 +351,33 @@ begin
   exception when insufficient_privilege then null;
   end;
 
+  -- Sofascore: pedidos, plantel rival e informes; uno abierto por partido; nada de B
+  insert into public.pedidos_sofascore (partido_id) values ('00000000-0000-4000-f000-00000000000a');
+  begin
+    insert into public.pedidos_sofascore (partido_id) values ('00000000-0000-4000-f000-00000000000a');
+    raise exception 'FALLA: se abrieron dos pedidos de Sofascore para el mismo partido';
+  exception when unique_violation then null;
+  end;
+  begin
+    insert into public.pedidos_sofascore (partido_id) values ('00000000-0000-4000-f000-00000000000b');
+    raise exception 'FALLA: el analista A pidió datos para un partido de B';
+  exception when insufficient_privilege then null;
+  end;
+  insert into public.jugadores_rivales (equipo_id, sofascore_id, nombre, altura_cm)
+    values ('00000000-0000-4000-d000-00000000000a', '1', 'Rival alto', 190);
+  begin
+    insert into public.jugadores_rivales (equipo_id, sofascore_id, nombre)
+      values ('00000000-0000-4000-d000-00000000000b', '2', 'Intruso');
+    raise exception 'FALLA: el analista A cargó jugadores en un rival de B';
+  exception when insufficient_privilege then null;
+  end;
+  insert into public.informes_rival_datos (partido_id, datos) values ('00000000-0000-4000-f000-00000000000a', '{"n": 5}');
+  begin
+    insert into public.estado_mac (cuerpo_tecnico_id) values ('00000000-0000-4000-b000-00000000000a');
+    raise exception 'FALLA: un miembro pudo escribir la señal de la Mac (solo la escribe el programa)';
+  exception when insufficient_privilege then null;
+  end;
+
   -- Disponibilidad: solo de jugadores propios
   insert into public.disponibilidad (jugador_id, fecha, estado, fecha_regreso)
     values ('00000000-0000-4000-e000-00000000000a', '2026-05-01', 'baja', '2026-05-20');

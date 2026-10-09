@@ -11,6 +11,8 @@ import { AbpPanel } from "./AbpPanel";
 import { AnalisisVideoPanel } from "./AnalisisVideoPanel";
 import { ConvocatoriaPanel } from "./ConvocatoriaPanel";
 import { InformeRivalPanel } from "./InformeRivalPanel";
+import { InformeSofascore } from "./InformeSofascore";
+import type { InformeSofascore as DatosSofascore } from "@/lib/data/informe";
 import { PlanPartidoEditor, type TareaSugerida } from "./PlanPartidoEditor";
 import { JugadasPartidoPanel, type JugadaElegida } from "@/components/pizarra/JugadasPartidoPanel";
 import type { Jugada } from "@/types/jugada";
@@ -31,6 +33,7 @@ interface Props {
   tareasSugeridas: TareaSugerida[];
   resumenPrevia: string[];
   jugadasPartido: JugadaElegida[];
+  sofascore: DatosSofascore;
   bibliotecaJugadas: Jugada[];
   colorClub: string;
   partidoId: string;
@@ -52,6 +55,7 @@ export function PartidoTabs({
   tareasSugeridas,
   resumenPrevia,
   jugadasPartido,
+  sofascore,
   bibliotecaJugadas,
   colorClub,
   partidoId,
@@ -157,11 +161,15 @@ export function PartidoTabs({
         />
       </Panel>
       <Panel id="informe" activa={activa} visitadas={visitadas}>
-        <Proximamente>
-          Las estadísticas colectivas e individuales del rival y los insights de la IA llegan desde
-          la skill de Sofascore (etapa P3). Mientras tanto, el informe se carga con links.
-        </Proximamente>
-        <InformeRivalPanel partidoId={partidoId} informe={detalle.informe} />
+        <div className="space-y-8">
+          <InformeSofascore partidoId={partidoId} {...sofascore} />
+          <div>
+            <h2 className="mb-3 text-lg font-semibold text-slate-900">
+              Presentación y video del analista
+            </h2>
+            <InformeRivalPanel partidoId={partidoId} informe={detalle.informe} />
+          </div>
+        </div>
       </Panel>
       <Panel id="video" activa={activa} visitadas={visitadas}>
         <AnalisisVideoPanel partidoId={partidoId} analisis={detalle.analisis} />

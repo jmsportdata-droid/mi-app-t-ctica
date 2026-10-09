@@ -6,6 +6,7 @@ import { getJugadores } from "@/lib/data/jugadores";
 import { getModeloJuego } from "@/lib/data/modelo-juego";
 import { getTareas } from "@/lib/data/tareas";
 import { getJugadas, getJugadasPartido } from "@/lib/data/jugadas";
+import { getInformeSofascore } from "@/lib/data/informe";
 import { nombreArchivoSeguro } from "@/lib/export";
 import { clubDeTemporada } from "@/lib/club";
 import { requerirContexto } from "@/lib/contexto";
@@ -56,16 +57,25 @@ export default async function PartidoPage({ params, searchParams }: Props) {
   const { partido, temporada } = datos;
   const titulo = tituloPartido(partido, temporada.club);
 
-  const [detalle, jugadores, disponibilidad, { principios }, tareas, jugadasPartido, biblioteca] =
-    await Promise.all([
-      getDetallePartido(partido.id),
-      getJugadores(partido.temporada_id),
-      getDisponibilidadDelDia(partido.temporada_id, partido.fecha),
-      getModeloJuego(cuerpoTecnico.id),
-      getTareas(cuerpoTecnico.id),
-      getJugadasPartido(partido.id),
-      getJugadas(cuerpoTecnico.id),
-    ]);
+  const [
+    detalle,
+    jugadores,
+    disponibilidad,
+    { principios },
+    tareas,
+    jugadasPartido,
+    biblioteca,
+    sofascore,
+  ] = await Promise.all([
+    getDetallePartido(partido.id),
+    getJugadores(partido.temporada_id),
+    getDisponibilidadDelDia(partido.temporada_id, partido.fecha),
+    getModeloJuego(cuerpoTecnico.id),
+    getTareas(cuerpoTecnico.id),
+    getJugadasPartido(partido.id),
+    getJugadas(cuerpoTecnico.id),
+    getInformeSofascore(partido.id, partido.rival_id, cuerpoTecnico.id),
+  ]);
   const tabInicial = esTabPartido(searchParams.tab) ? searchParams.tab : "previa";
 
   const { previa, informe, plan } = detalle;
@@ -76,7 +86,9 @@ export default async function PartidoPage({ params, searchParams }: Props) {
         Object.entries(previa).some(
           ([k, v]) => k !== "partido_id" && k !== "actualizado_en" && v !== null,
         )),
-    informe: Boolean(informe?.slides_url || informe?.vimeo_url || informe?.tags.length),
+    informe:
+      sofascore.informe !== null ||
+      Boolean(informe?.slides_url || informe?.vimeo_url || informe?.tags.length),
     video: detalle.analisis.length > 0,
     abp: detalle.abp.some((a) => a.descripcion),
     plan:
@@ -150,6 +162,7 @@ export default async function PartidoPage({ params, searchParams }: Props) {
         tareasSugeridas={tareasSugeridas}
         resumenPrevia={resumenPrevia}
         jugadasPartido={jugadasPartido}
+        sofascore={sofascore}
         bibliotecaJugadas={biblioteca}
         colorClub={temporada.color_principal}
         partidoId={partido.id}
