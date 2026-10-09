@@ -12,6 +12,8 @@ La web no puede pedirle datos a Sofascore, así que este programa corre en la Ma
 5. genera el PowerPoint y el PDF;
 6. sube todo a la app: informe, PDF, plantel rival con estadísticas y la previa.
 
+También procesa el plantel propio y el post partido (worker/post.py).
+
 Se corre con el Python de la skill (tiene curl_cffi):
     ~/.claude/skills/informe-rival/.venv/bin/python worker/sofascore.py
 Para dejarlo siempre prendido: worker/instalar.sh
@@ -33,7 +35,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-VERSION = "1.1"
+VERSION = "1.2"
 RAIZ = Path(__file__).resolve().parent.parent
 SKILL = Path.home() / ".claude" / "skills" / "informe-rival"
 SCRIPTS = SKILL / "scripts"
@@ -229,7 +231,8 @@ def plantel_rival(analisis: dict, datos: dict, equipo_id: str) -> list[dict]:
         dorsal = str(j.get("dorsal") or "").strip()
         filas.append({
             "equipo_id": equipo_id,
-            "sofascore_id": str(j["id"]),
+            "id_externo": str(j["id"]),
+            "fuente": "sofascore",
             "nombre": j.get("nombre") or j.get("corto"),
             "corto": j.get("corto"),
             "dorsal": int(dorsal) if dorsal.isdigit() and int(dorsal) <= 99 else None,
@@ -387,7 +390,7 @@ def procesar(pedido: dict):
 
     jugadores = plantel_rival(analisis, datos, rival["id"])
     if jugadores:
-        rest("POST", "jugadores_rivales?on_conflict=equipo_id,sofascore_id", jugadores,
+        rest("POST", "jugadores_rivales?on_conflict=equipo_id,id_externo", jugadores,
              prefer="resolution=merge-duplicates")
     completados = completar_previa(partido, analisis)
 
@@ -487,7 +490,7 @@ def procesar_propio(pedido: dict):
             })
             continue
         cambios = {
-            "estadisticas_sofascore": e,
+            "estadisticas_externas": e,
             "ids_externos": {**(j.get("ids_externos") or {}), "sofascore": str(sj["id"])},
         }
         if not j.get("altura_cm") and sj.get("altura") and 140 <= sj["altura"] <= 220:
@@ -524,6 +527,9 @@ def vuelta():
         try:
             if pedido.get("tipo") == "plantel_propio":
                 procesar_propio(pedido)
+            elif pedido.get("tipo") == "post_partido":
+                import post  # noqa: WPS433  (worker/post.py)
+                post.procesar_post(pedido, sys.modules[__name__])
             else:
                 procesar(pedido)
         except Exception as e:

@@ -360,6 +360,31 @@ begin
   exception when insufficient_privilege then null;
   end;
 
+  -- Post partido: estadísticas y evaluación solo en partidos y con jugadores propios
+  insert into public.estadisticas_partido (partido_id, fuente)
+    values ('00000000-0000-4000-f000-00000000000a', 'sofascore');
+  insert into public.estadisticas_jugador_partido (partido_id, jugador_id, fuente, minutos)
+    values ('00000000-0000-4000-f000-00000000000a', '00000000-0000-4000-e000-00000000000a', 'sofascore', 90);
+  insert into public.post_partido (partido_id, valoracion)
+    values ('00000000-0000-4000-f000-00000000000a', 'Buen partido');
+  begin
+    insert into public.estadisticas_partido (partido_id, fuente)
+      values ('00000000-0000-4000-f000-00000000000b', 'sofascore');
+    raise exception 'FALLA: el analista A cargó estadísticas en un partido de B';
+  exception when insufficient_privilege then null;
+  end;
+  begin
+    insert into public.estadisticas_jugador_partido (partido_id, jugador_id, fuente)
+      values ('00000000-0000-4000-f000-00000000000a', '00000000-0000-4000-e000-00000000000b', 'sofascore');
+    raise exception 'FALLA: el analista A cargó minutos de un jugador de B';
+  exception when insufficient_privilege then null;
+  end;
+  begin
+    insert into public.post_partido (partido_id) values ('00000000-0000-4000-f000-00000000000b');
+    raise exception 'FALLA: el analista A evaluó un partido de B';
+  exception when insufficient_privilege then null;
+  end;
+
   -- Sofascore: pedidos, plantel rival e informes; uno abierto por partido; nada de B
   insert into public.pedidos_sofascore (partido_id) values ('00000000-0000-4000-f000-00000000000a');
   begin
@@ -372,10 +397,10 @@ begin
     raise exception 'FALLA: el analista A pidió datos para un partido de B';
   exception when insufficient_privilege then null;
   end;
-  insert into public.jugadores_rivales (equipo_id, sofascore_id, nombre, altura_cm)
+  insert into public.jugadores_rivales (equipo_id, id_externo, nombre, altura_cm)
     values ('00000000-0000-4000-d000-00000000000a', '1', 'Rival alto', 190);
   begin
-    insert into public.jugadores_rivales (equipo_id, sofascore_id, nombre)
+    insert into public.jugadores_rivales (equipo_id, id_externo, nombre)
       values ('00000000-0000-4000-d000-00000000000b', '2', 'Intruso');
     raise exception 'FALLA: el analista A cargó jugadores en un rival de B';
   exception when insufficient_privilege then null;

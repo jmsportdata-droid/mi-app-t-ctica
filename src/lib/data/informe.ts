@@ -24,6 +24,7 @@ export async function getInformeSofascore(
       .from("pedidos_sofascore")
       .select("*")
       .eq("partido_id", partidoId)
+      .eq("tipo", "informe_rival")
       .order("creado_en", { ascending: false })
       .limit(1)
       .maybeSingle(),

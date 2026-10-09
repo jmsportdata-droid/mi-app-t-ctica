@@ -84,7 +84,7 @@ export async function agregarDesdeSofascore(
       nacionalidad: j.nacionalidad,
       fecha_nac: j.fecha_nac,
       ids_externos: { sofascore: j.sofascore_id } as Json,
-      estadisticas_sofascore: j.estadisticas as Json,
+      estadisticas_externas: j.estadisticas as Json,
     };
   });
   if (filas.length === 0) return { ok: false, error: "Esos jugadores ya no están en la lista." };

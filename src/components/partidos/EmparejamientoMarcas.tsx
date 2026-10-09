@@ -90,7 +90,7 @@ export function EmparejamientoMarcas({
     .filter((j) => j.posicion !== "G")
     .map((j) => ({
       ...aereoDe(j.id, j.corto ?? j.nombre, j.dorsal, j.altura_cm, j.estadisticas as Stats),
-      sofascoreId: j.sofascore_id,
+      sofascoreId: j.id_externo,
       minutos: (j.estadisticas as Stats).minutos ?? 0,
       remates: remates.get(j.corto ?? "") ?? 0,
     }))
@@ -115,7 +115,7 @@ export function EmparejamientoMarcas({
       : { ids: null, texto: "todo el plantel (todavía no hay convocatoria)" };
   const propios = jugadores
     .filter((j) => j.posicion !== "POR" && (fuente.ids ? fuente.ids.has(j.id) : true))
-    .map((j) => aereoDe(j.id, j.nombre, j.numero, j.altura_cm, j.estadisticas_sofascore as Stats));
+    .map((j) => aereoDe(j.id, j.nombre, j.numero, j.altura_cm, j.estadisticas_externas as Stats));
   const sinDatos = propios.filter((p) => p.estimado).length;
 
   const { parejas, libres } = emparejarMarcas(

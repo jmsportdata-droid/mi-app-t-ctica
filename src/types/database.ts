@@ -195,6 +195,7 @@ export type Database = {
         Row: {
           clip_url: string | null
           creado_en: string
+          equipo: string
           fase: Database["public"]["Enums"]["fase_analisis"]
           id: string
           orden: number
@@ -206,6 +207,7 @@ export type Database = {
         Insert: {
           clip_url?: string | null
           creado_en?: string
+          equipo?: string
           fase: Database["public"]["Enums"]["fase_analisis"]
           id?: string
           orden?: number
@@ -217,6 +219,7 @@ export type Database = {
         Update: {
           clip_url?: string | null
           creado_en?: string
+          equipo?: string
           fase?: Database["public"]["Enums"]["fase_analisis"]
           id?: string
           orden?: number
@@ -530,6 +533,116 @@ export type Database = {
           },
         ]
       }
+      estadisticas_jugador_partido: {
+        Row: {
+          amarillas: number
+          asistencias: number
+          fuente: string
+          goles: number
+          jugador_id: string
+          minutos: number
+          nota: number | null
+          partido_id: string
+          rojas: number
+          stats: Json
+          titular: boolean
+        }
+        Insert: {
+          amarillas?: number
+          asistencias?: number
+          fuente: string
+          goles?: number
+          jugador_id: string
+          minutos?: number
+          nota?: number | null
+          partido_id: string
+          rojas?: number
+          stats?: Json
+          titular?: boolean
+        }
+        Update: {
+          amarillas?: number
+          asistencias?: number
+          fuente?: string
+          goles?: number
+          jugador_id?: string
+          minutos?: number
+          nota?: number | null
+          partido_id?: string
+          rojas?: number
+          stats?: Json
+          titular?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "estadisticas_jugador_partido_jugador_id_fkey"
+            columns: ["jugador_id"]
+            isOneToOne: false
+            referencedRelation: "jugadores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "estadisticas_jugador_partido_partido_id_fkey"
+            columns: ["partido_id"]
+            isOneToOne: false
+            referencedRelation: "partidos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      estadisticas_partido: {
+        Row: {
+          avisos: string[]
+          formacion_propia: string | null
+          formacion_rival: string | null
+          fuente: string
+          generado_en: string
+          id_evento: string | null
+          incidencias: Json
+          insights: Json
+          partido_id: string
+          propio: Json
+          rival: Json
+          tiros: Json
+        }
+        Insert: {
+          avisos?: string[]
+          formacion_propia?: string | null
+          formacion_rival?: string | null
+          fuente: string
+          generado_en?: string
+          id_evento?: string | null
+          incidencias?: Json
+          insights?: Json
+          partido_id: string
+          propio?: Json
+          rival?: Json
+          tiros?: Json
+        }
+        Update: {
+          avisos?: string[]
+          formacion_propia?: string | null
+          formacion_rival?: string | null
+          fuente?: string
+          generado_en?: string
+          id_evento?: string | null
+          incidencias?: Json
+          insights?: Json
+          partido_id?: string
+          propio?: Json
+          rival?: Json
+          tiros?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "estadisticas_partido_partido_id_fkey"
+            columns: ["partido_id"]
+            isOneToOne: true
+            referencedRelation: "partidos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       estado_mac: {
         Row: {
           cuerpo_tecnico_id: string
@@ -778,8 +891,10 @@ export type Database = {
         Row: {
           altura_cm: number | null
           creado_en: string
-          estadisticas_sofascore: Json
+          estadisticas_externas: Json
+          fecha_debut: string | null
           fecha_nac: string | null
+          formado_en_club: boolean
           foto_ruta: string | null
           id: string
           ids_externos: Json
@@ -789,13 +904,16 @@ export type Database = {
           pie_habil: Database["public"]["Enums"]["pie_habil"] | null
           posicion: Database["public"]["Enums"]["linea_jugador"]
           posiciones: string[]
+          seleccion: string | null
           temporada_id: string
         }
         Insert: {
           altura_cm?: number | null
           creado_en?: string
-          estadisticas_sofascore?: Json
+          estadisticas_externas?: Json
+          fecha_debut?: string | null
           fecha_nac?: string | null
+          formado_en_club?: boolean
           foto_ruta?: string | null
           id?: string
           ids_externos?: Json
@@ -805,13 +923,16 @@ export type Database = {
           pie_habil?: Database["public"]["Enums"]["pie_habil"] | null
           posicion: Database["public"]["Enums"]["linea_jugador"]
           posiciones?: string[]
+          seleccion?: string | null
           temporada_id: string
         }
         Update: {
           altura_cm?: number | null
           creado_en?: string
-          estadisticas_sofascore?: Json
+          estadisticas_externas?: Json
+          fecha_debut?: string | null
           fecha_nac?: string | null
+          formado_en_club?: boolean
           foto_ruta?: string | null
           id?: string
           ids_externos?: Json
@@ -821,6 +942,7 @@ export type Database = {
           pie_habil?: Database["public"]["Enums"]["pie_habil"] | null
           posicion?: Database["public"]["Enums"]["linea_jugador"]
           posiciones?: string[]
+          seleccion?: string | null
           temporada_id?: string
         }
         Relationships: [
@@ -842,12 +964,13 @@ export type Database = {
           equipo_id: string
           estadisticas: Json
           fecha_nac: string | null
+          fuente: string
           id: string
+          id_externo: string
           nacionalidad: string | null
           nombre: string
           pie: string | null
           posicion: string | null
-          sofascore_id: string
         }
         Insert: {
           actualizado_en?: string
@@ -857,12 +980,13 @@ export type Database = {
           equipo_id: string
           estadisticas?: Json
           fecha_nac?: string | null
+          fuente?: string
           id?: string
+          id_externo: string
           nacionalidad?: string | null
           nombre: string
           pie?: string | null
           posicion?: string | null
-          sofascore_id: string
         }
         Update: {
           actualizado_en?: string
@@ -872,12 +996,13 @@ export type Database = {
           equipo_id?: string
           estadisticas?: Json
           fecha_nac?: string | null
+          fuente?: string
           id?: string
+          id_externo?: string
           nacionalidad?: string | null
           nombre?: string
           pie?: string | null
           posicion?: string | null
-          sofascore_id?: string
         }
         Relationships: [
           {
@@ -1410,6 +1535,44 @@ export type Database = {
             columns: ["cuerpo_tecnico_id"]
             isOneToOne: false
             referencedRelation: "cuerpos_tecnicos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_partido: {
+        Row: {
+          a_mejorar: string | null
+          actualizado_en: string
+          para_la_semana: string | null
+          partido_id: string
+          plan_vs_real: Json
+          positivos: string | null
+          valoracion: string | null
+        }
+        Insert: {
+          a_mejorar?: string | null
+          actualizado_en?: string
+          para_la_semana?: string | null
+          partido_id: string
+          plan_vs_real?: Json
+          positivos?: string | null
+          valoracion?: string | null
+        }
+        Update: {
+          a_mejorar?: string | null
+          actualizado_en?: string
+          para_la_semana?: string | null
+          partido_id?: string
+          plan_vs_real?: Json
+          positivos?: string | null
+          valoracion?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_partido_partido_id_fkey"
+            columns: ["partido_id"]
+            isOneToOne: true
+            referencedRelation: "partidos"
             referencedColumns: ["id"]
           },
         ]
@@ -1990,7 +2153,7 @@ export type Database = {
         | "otro"
       tipo_cesped: "natural" | "sintetico" | "hibrido"
       tipo_evento: "gol" | "ocasion" | "duelo" | "nota"
-      tipo_pedido_sofascore: "informe_rival" | "plantel_propio"
+      tipo_pedido_sofascore: "informe_rival" | "plantel_propio" | "post_partido"
       tipo_tarea:
         | "entrada_en_calor"
         | "pre_sesion"
@@ -2233,7 +2396,11 @@ export const Constants = {
       ],
       tipo_cesped: ["natural", "sintetico", "hibrido"],
       tipo_evento: ["gol", "ocasion", "duelo", "nota"],
-      tipo_pedido_sofascore: ["informe_rival", "plantel_propio"],
+      tipo_pedido_sofascore: [
+        "informe_rival",
+        "plantel_propio",
+        "post_partido",
+      ],
       tipo_tarea: [
         "entrada_en_calor",
         "pre_sesion",

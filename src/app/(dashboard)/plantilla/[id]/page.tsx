@@ -101,7 +101,7 @@ export default async function JugadorPage({ params }: Props) {
 
       <EstadisticasSofascore
         altura={jugador.altura_cm}
-        e={jugador.estadisticas_sofascore as Record<string, number | null | undefined>}
+        e={jugador.estadisticas_externas as Record<string, number | null | undefined>}
       />
 
       <section
