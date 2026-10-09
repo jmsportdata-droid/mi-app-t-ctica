@@ -71,3 +71,13 @@ export function IconCalendario({ className }: IconProps) {
     </svg>
   );
 }
+
+export function IconModeloJuego({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <path d="M12 4v16M3 12h4M17 12h4" />
+      <circle cx="12" cy="12" r="2.5" />
+    </svg>
+  );
+}

@@ -114,6 +114,32 @@ begin
   exception when insufficient_privilege then null;
   end;
 
+  -- Modelo de juego: se carga el base una sola vez, solo para su cuerpo técnico
+  if public.cargar_modelo_base() = 0 then
+    raise exception 'FALLA: cargar_modelo_base no cargó nada';
+  end if;
+  if public.cargar_modelo_base() <> 0 then
+    raise exception 'FALLA: cargar_modelo_base cargó dos veces';
+  end if;
+  if (select count(distinct cuerpo_tecnico_id) from public.principios_juego) <> 1
+     or exists (select 1 from public.principios_juego where cuerpo_tecnico_id <> '00000000-0000-4000-b000-00000000000a') then
+    raise exception 'FALLA: el modelo de juego no quedó solo en el cuerpo técnico A';
+  end if;
+  begin
+    insert into public.principios_juego (momento, padre_id, nombre)
+      select momento, id, 'Tercer nivel' from public.principios_juego
+      where padre_id is not null limit 1;
+    raise exception 'FALLA: se pudo crear un tercer nivel en el modelo de juego';
+  exception when sqlstate 'P0001' then
+    if sqlerrm like 'FALLA:%' then raise; end if;
+  end;
+  begin
+    insert into public.principios_juego (cuerpo_tecnico_id, momento, nombre)
+      values ('00000000-0000-4000-b000-00000000000b', 'balon_parado', 'Intruso');
+    raise exception 'FALLA: el analista A pudo escribir en el modelo de juego de B';
+  exception when insufficient_privilege then null;
+  end;
+
   -- Calendario: el partido creó su actividad sola; nada de B
   if (select count(*) from public.actividades where tipo = 'partido') <> 1 then
     raise exception 'FALLA: el partido no generó su actividad en el calendario (o se ve la de B)';

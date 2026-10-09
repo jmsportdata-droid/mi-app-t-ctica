@@ -156,6 +156,41 @@ export type Database = {
           },
         ]
       }
+      contenidos_tecnicos: {
+        Row: {
+          creado_en: string
+          cuerpo_tecnico_id: string
+          id: string
+          nombre: string
+          oculto: boolean
+          orden: number
+        }
+        Insert: {
+          creado_en?: string
+          cuerpo_tecnico_id?: string
+          id?: string
+          nombre: string
+          oculto?: boolean
+          orden?: number
+        }
+        Update: {
+          creado_en?: string
+          cuerpo_tecnico_id?: string
+          id?: string
+          nombre?: string
+          oculto?: boolean
+          orden?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contenidos_tecnicos_cuerpo_tecnico_id_fkey"
+            columns: ["cuerpo_tecnico_id"]
+            isOneToOne: false
+            referencedRelation: "cuerpos_tecnicos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cuerpos_tecnicos: {
         Row: {
           creado_en: string
@@ -433,6 +468,38 @@ export type Database = {
           },
         ]
       }
+      modelos_juego: {
+        Row: {
+          actualizado_en: string
+          cuerpo_tecnico_id: string
+          filosofia: string | null
+          sistema_con_balon: string | null
+          sistema_sin_balon: string | null
+        }
+        Insert: {
+          actualizado_en?: string
+          cuerpo_tecnico_id?: string
+          filosofia?: string | null
+          sistema_con_balon?: string | null
+          sistema_sin_balon?: string | null
+        }
+        Update: {
+          actualizado_en?: string
+          cuerpo_tecnico_id?: string
+          filosofia?: string | null
+          sistema_con_balon?: string | null
+          sistema_sin_balon?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "modelos_juego_cuerpo_tecnico_id_fkey"
+            columns: ["cuerpo_tecnico_id"]
+            isOneToOne: true
+            referencedRelation: "cuerpos_tecnicos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partidos: {
         Row: {
           competicion: string | null
@@ -561,6 +628,57 @@ export type Database = {
           },
         ]
       }
+      principios_juego: {
+        Row: {
+          creado_en: string
+          cuerpo_tecnico_id: string
+          descripcion: string | null
+          id: string
+          momento: Database["public"]["Enums"]["momento_juego"]
+          nombre: string
+          oculto: boolean
+          orden: number
+          padre_id: string | null
+        }
+        Insert: {
+          creado_en?: string
+          cuerpo_tecnico_id?: string
+          descripcion?: string | null
+          id?: string
+          momento: Database["public"]["Enums"]["momento_juego"]
+          nombre: string
+          oculto?: boolean
+          orden?: number
+          padre_id?: string | null
+        }
+        Update: {
+          creado_en?: string
+          cuerpo_tecnico_id?: string
+          descripcion?: string | null
+          id?: string
+          momento?: Database["public"]["Enums"]["momento_juego"]
+          nombre?: string
+          oculto?: boolean
+          orden?: number
+          padre_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "principios_juego_cuerpo_tecnico_id_fkey"
+            columns: ["cuerpo_tecnico_id"]
+            isOneToOne: false
+            referencedRelation: "cuerpos_tecnicos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "principios_juego_padre_id_fkey"
+            columns: ["padre_id"]
+            isOneToOne: false
+            referencedRelation: "principios_juego"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       temporadas: {
         Row: {
           activa: boolean
@@ -620,6 +738,7 @@ export type Database = {
     }
     Functions: {
       activar_temporada: { Args: { p_temporada: string }; Returns: undefined }
+      cargar_modelo_base: { Args: never; Returns: number }
       crear_cuerpo_tecnico: {
         Args: {
           p_club: string
@@ -673,6 +792,12 @@ export type Database = {
         | "linea_defensiva"
       formacion: "4-3-3" | "4-4-2" | "4-2-3-1" | "5-3-2"
       linea_jugador: "POR" | "DEF" | "CEN" | "DEL"
+      momento_juego:
+        | "organizacion_ofensiva"
+        | "organizacion_defensiva"
+        | "transicion_ataque_defensa"
+        | "transicion_defensa_ataque"
+        | "balon_parado"
       pie_habil: "derecho" | "izquierdo" | "ambos"
       rol_miembro: "entrenador" | "ayudante" | "preparador_fisico" | "analista"
       tipo_abp: "ofensivo" | "defensivo"
@@ -826,6 +951,13 @@ export const Constants = {
       ],
       formacion: ["4-3-3", "4-4-2", "4-2-3-1", "5-3-2"],
       linea_jugador: ["POR", "DEF", "CEN", "DEL"],
+      momento_juego: [
+        "organizacion_ofensiva",
+        "organizacion_defensiva",
+        "transicion_ataque_defensa",
+        "transicion_defensa_ataque",
+        "balon_parado",
+      ],
       pie_habil: ["derecho", "izquierdo", "ambos"],
       rol_miembro: ["entrenador", "ayudante", "preparador_fisico", "analista"],
       tipo_abp: ["ofensivo", "defensivo"],
