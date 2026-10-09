@@ -108,6 +108,15 @@ export function IconReportes({ className }: IconProps) {
   );
 }
 
+export function IconRendimiento({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M3 20h18M4 16l5-5 4 3 7-8" />
+      <path d="M15 6h5v5" />
+    </svg>
+  );
+}
+
 export function IconHoy({ className }: IconProps) {
   return (
     <svg {...base} className={className}>

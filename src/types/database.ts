@@ -1987,6 +1987,45 @@ export type Database = {
           },
         ]
       }
+      valoraciones_jugador: {
+        Row: {
+          actualizado_en: string
+          comentario: string | null
+          jugador_id: string
+          nota: number
+          partido_id: string
+        }
+        Insert: {
+          actualizado_en?: string
+          comentario?: string | null
+          jugador_id: string
+          nota: number
+          partido_id: string
+        }
+        Update: {
+          actualizado_en?: string
+          comentario?: string | null
+          jugador_id?: string
+          nota?: number
+          partido_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "valoraciones_jugador_jugador_id_fkey"
+            columns: ["jugador_id"]
+            isOneToOne: false
+            referencedRelation: "jugadores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "valoraciones_jugador_partido_id_fkey"
+            columns: ["partido_id"]
+            isOneToOne: false
+            referencedRelation: "partidos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       videos_vestuario: {
         Row: {
           actualizado_en: string

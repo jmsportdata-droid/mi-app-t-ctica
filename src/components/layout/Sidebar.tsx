@@ -17,6 +17,7 @@ import {
   IconPartidos,
   IconPelotaQuieta,
   IconPlantilla,
+  IconRendimiento,
   IconReportes,
   IconTareas,
 } from "./icons";
@@ -32,6 +33,7 @@ const NAVEGACION = [
   { href: "/reportes", label: "Reportes", Icono: IconReportes },
   { href: "/equipos", label: "Equipos", Icono: IconEquipos },
   { href: "/partidos", label: "Partidos", Icono: IconPartidos },
+  { href: "/rendimiento", label: "Rendimiento", Icono: IconRendimiento },
   { href: "/cuerpo-tecnico", label: "Cuerpo técnico", Icono: IconCuerpoTecnico },
 ] as const;
 

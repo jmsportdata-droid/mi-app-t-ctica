@@ -151,3 +151,44 @@ export async function usarBorradorClaude(partidoId: string): Promise<Resultado> 
   revalidar(partidoId);
   return { ok: true };
 }
+
+const notaSchema = z
+  .number()
+  .min(1, "La nota va de 1 a 10")
+  .max(10, "La nota va de 1 a 10")
+  .nullable();
+
+/** Nota del cuerpo técnico a un jugador en el partido (null la borra). */
+export async function guardarValoracion(
+  partidoId: string,
+  jugadorId: string,
+  nota: number | null,
+): Promise<Resultado> {
+  const parsed = notaSchema.safeParse(nota);
+  if (!idSchema.safeParse(partidoId).success || !idSchema.safeParse(jugadorId).success) {
+    return { ok: false, error: "Datos no válidos" };
+  }
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]!.message };
+  const accion = await getAccion();
+  if (!accion) return SESION_EXPIRADA;
+  const { supabase } = accion;
+  const { error } =
+    parsed.data === null
+      ? await supabase
+          .from("valoraciones_jugador")
+          .delete()
+          .eq("partido_id", partidoId)
+          .eq("jugador_id", jugadorId)
+      : await supabase.from("valoraciones_jugador").upsert(
+          {
+            partido_id: partidoId,
+            jugador_id: jugadorId,
+            nota: Math.round(parsed.data * 10) / 10,
+          },
+          { onConflict: "partido_id,jugador_id" },
+        );
+  if (error) return errorDeBD(error, "valoración");
+  revalidar(partidoId);
+  revalidatePath("/rendimiento");
+  return { ok: true };
+}

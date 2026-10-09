@@ -26,6 +26,8 @@ export interface PartidoPrevio {
 export interface DatosPostPartido {
   estadisticas: EstadisticasPartido | null;
   jugadores: JugadorPost[];
+  /** Nota del cuerpo técnico por jugador */
+  valoraciones: Record<string, number>;
   post: PostPartido | null;
   previos: PartidoPrevio[];
   pedido: PedidoSofascore | null;
@@ -40,7 +42,7 @@ export async function getPostPartido(
   cuerpoTecnicoId: string,
 ): Promise<DatosPostPartido> {
   const supabase = createClient();
-  const [estadisticas, jugadores, post, previos, pedido, mac] = await Promise.all([
+  const [estadisticas, jugadores, post, previos, pedido, mac, valoraciones] = await Promise.all([
     supabase.from("estadisticas_partido").select("*").eq("partido_id", partidoId).maybeSingle(),
     supabase
       .from("estadisticas_jugador_partido")
@@ -67,6 +69,7 @@ export async function getPostPartido(
       .select("ultima_senal")
       .eq("cuerpo_tecnico_id", cuerpoTecnicoId)
       .maybeSingle(),
+    supabase.from("valoraciones_jugador").select("jugador_id, nota").eq("partido_id", partidoId),
   ]);
   const error =
     estadisticas.error ??
@@ -74,7 +77,8 @@ export async function getPostPartido(
     post.error ??
     previos.error ??
     pedido.error ??
-    mac.error;
+    mac.error ??
+    valoraciones.error;
   if (error) {
     console.error("[getPostPartido]", error.message);
     throw new Error("No se pudo cargar el post partido");
@@ -82,6 +86,9 @@ export async function getPostPartido(
   return {
     estadisticas: estadisticas.data,
     jugadores: (jugadores.data ?? []) as JugadorPost[],
+    valoraciones: Object.fromEntries(
+      (valoraciones.data ?? []).map((v) => [v.jugador_id, Number(v.nota)]),
+    ),
     post: post.data,
     previos: (previos.data ?? [])
       .flatMap((p) =>

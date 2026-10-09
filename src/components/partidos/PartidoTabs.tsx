@@ -269,7 +269,11 @@ export function PartidoTabs({
             macConectada={post.macConectada}
             jugado={partido.fecha <= hoyISO()}
           />
-          <JugadoresPost jugadores={post.jugadores} />
+          <JugadoresPost
+            partidoId={partidoId}
+            jugadores={post.jugadores}
+            valoraciones={post.valoraciones}
+          />
           <div>
             <h2 className="mb-1 text-lg font-semibold text-slate-900">
               Análisis de video de nuestro equipo

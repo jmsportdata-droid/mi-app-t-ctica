@@ -385,6 +385,16 @@ begin
   exception when insufficient_privilege then null;
   end;
 
+  -- Nota del cuerpo técnico: solo jugadores propios en partidos propios
+  insert into public.valoraciones_jugador (partido_id, jugador_id, nota)
+    values ('00000000-0000-4000-f000-00000000000a', '00000000-0000-4000-e000-00000000000a', 7.5);
+  begin
+    insert into public.valoraciones_jugador (partido_id, jugador_id, nota)
+      values ('00000000-0000-4000-f000-00000000000a', '00000000-0000-4000-e000-00000000000b', 7);
+    raise exception 'FALLA: el analista A valoró a un jugador de B';
+  exception when insufficient_privilege then null;
+  end;
+
   -- Asistente del plan: solo en partidos propios
   insert into public.asistente_plan (partido_id) values ('00000000-0000-4000-f000-00000000000a');
   begin

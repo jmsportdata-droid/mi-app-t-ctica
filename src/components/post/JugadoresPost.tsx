@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
 import type { JugadorPost } from "@/lib/data/post-partido";
+import { NotaCuerpoTecnico } from "./NotaCuerpoTecnico";
 
 type Stats = Record<string, number | null | undefined>;
 
@@ -17,7 +18,15 @@ function claseNota(nota: number | null) {
 }
 
 /** Minutos, nota, goles, tarjetas y estadísticas de cada uno de nuestros jugadores en el partido. */
-export function JugadoresPost({ jugadores }: { jugadores: JugadorPost[] }) {
+export function JugadoresPost({
+  partidoId,
+  jugadores,
+  valoraciones,
+}: {
+  partidoId: string;
+  jugadores: JugadorPost[];
+  valoraciones: Record<string, number>;
+}) {
   if (jugadores.length === 0) return null;
   const filas = [...jugadores].sort(
     (a, b) => Number(b.titular) - Number(a.titular) || b.minutos - a.minutos,
@@ -28,7 +37,8 @@ export function JugadoresPost({ jugadores }: { jugadores: JugadorPost[] }) {
     <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <h2 className="mb-1 text-lg font-semibold text-slate-900">Nuestros jugadores</h2>
       <p className="mb-3 text-xs text-slate-500">
-        Se cargan solos con el post partido y alimentan Rendimiento y la Memoria del ciclo.
+        Se cargan solos con el post partido y alimentan Rendimiento y la Memoria del ciclo. «Nota
+        CT» es la del cuerpo técnico (1 a 10): en Rendimiento se compara con la automática.
       </p>
       <div className="-mx-2 overflow-x-auto">
         <table className="w-full min-w-[960px] text-sm">
@@ -38,6 +48,9 @@ export function JugadoresPost({ jugadores }: { jugadores: JugadorPost[] }) {
               <th className="px-2 py-2 text-left font-semibold">Jugador</th>
               <th className="px-2 py-2 text-right font-semibold">Min</th>
               <th className="px-2 py-2 text-center font-semibold">Nota</th>
+              <th className="px-2 py-2 text-center font-semibold" title="Nota del cuerpo técnico">
+                Nota CT
+              </th>
               <th className="px-2 py-2 text-right font-semibold">G</th>
               <th className="px-2 py-2 text-right font-semibold">A</th>
               <th className="px-2 py-2 text-center font-semibold">Tarj.</th>
@@ -84,6 +97,14 @@ export function JugadoresPost({ jugadores }: { jugadores: JugadorPost[] }) {
                     >
                       {nota === null ? "—" : n(nota, 1)}
                     </span>
+                  </td>
+                  <td className="px-2 py-1.5 text-center">
+                    <NotaCuerpoTecnico
+                      partidoId={partidoId}
+                      jugadorId={j.jugador_id}
+                      nombre={j.jugador?.nombre ?? "el jugador"}
+                      inicial={valoraciones[j.jugador_id] ?? null}
+                    />
                   </td>
                   <td className="px-2 py-1.5 text-right tabular-nums">{j.goles || ""}</td>
                   <td className="px-2 py-1.5 text-right tabular-nums">{j.asistencias || ""}</td>
