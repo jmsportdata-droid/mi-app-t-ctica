@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
-import { IMAGEN_ACCEPT, urlImagen, validarImagen, type Bucket } from "@/lib/storage/config";
+import {
+  IMAGEN_ACCEPT,
+  maxBytesDe,
+  urlImagen,
+  validarImagen,
+  type Bucket,
+} from "@/lib/storage/config";
 import type { ImagenValor } from "@/lib/storage/client";
 import { cn } from "@/lib/utils/cn";
 
@@ -12,6 +18,8 @@ interface ImageUploadProps {
   value: ImagenValor;
   onChange: (valor: ImagenValor) => void;
   ajuste?: "cover" | "contain";
+  /** "circulo" para fotos y escudos; "rectangulo" para gráficos */
+  forma?: "circulo" | "rectangulo";
   error?: string;
   disabled?: boolean;
 }
@@ -23,6 +31,7 @@ export function ImageUpload({
   value,
   onChange,
   ajuste = "cover",
+  forma = "circulo",
   error,
   disabled,
 }: ImageUploadProps) {
@@ -49,7 +58,7 @@ export function ImageUpload({
     e.target.value = ""; // permite volver a elegir el mismo archivo
     if (!archivo) return;
 
-    const problema = validarImagen(archivo);
+    const problema = validarImagen(archivo, bucket);
     if (problema) {
       setErrorLocal(problema);
       return;
@@ -69,7 +78,8 @@ export function ImageUpload({
       <div className="flex items-center gap-4">
         <div
           className={cn(
-            "flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-dashed bg-slate-50",
+            "flex shrink-0 items-center justify-center overflow-hidden border-2 border-dashed bg-slate-50",
+            forma === "circulo" ? "h-20 w-20 rounded-full" : "h-24 w-40 rounded-lg",
             mensajeError ? "border-red-300" : "border-slate-300",
           )}
         >
@@ -120,7 +130,9 @@ export function ImageUpload({
               </button>
             )}
           </div>
-          <p className="text-xs text-slate-500">PNG o JPG, máximo 2 MB.</p>
+          <p className="text-xs text-slate-500">
+            PNG o JPG, máximo {maxBytesDe(bucket) / 1024 / 1024} MB.
+          </p>
         </div>
 
         <input

@@ -14,12 +14,14 @@ import {
   IconModeloJuego,
   IconPartidos,
   IconPlantilla,
+  IconTareas,
 } from "./icons";
 
 const NAVEGACION = [
   { href: "/calendario", label: "Calendario", Icono: IconCalendario },
   { href: "/plantilla", label: "Plantel", Icono: IconPlantilla },
   { href: "/modelo-de-juego", label: "Modelo de juego", Icono: IconModeloJuego },
+  { href: "/tareas", label: "Banco de tareas", Icono: IconTareas },
   { href: "/equipos", label: "Equipos", Icono: IconEquipos },
   { href: "/partidos", label: "Partidos", Icono: IconPartidos },
   { href: "/cuerpo-tecnico", label: "Cuerpo técnico", Icono: IconCuerpoTecnico },

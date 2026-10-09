@@ -679,6 +679,164 @@ export type Database = {
           },
         ]
       }
+      tareas: {
+        Row: {
+          actualizado_en: string
+          ancho_m: number | null
+          archivada: boolean
+          competitividad:
+            | Database["public"]["Enums"]["competitividad_tarea"]
+            | null
+          creado_en: string
+          cuerpo_tecnico_id: string
+          descripcion: string | null
+          duracion_seg: number | null
+          espacio: Database["public"]["Enums"]["espacio_tarea"] | null
+          formato: string | null
+          grafico_ruta: string | null
+          id: string
+          jugadores: number | null
+          largo_m: number | null
+          nombre: string
+          orientacion_fisica:
+            | Database["public"]["Enums"]["orientacion_fisica"]
+            | null
+          pausa_seg: number | null
+          prompt_imagen: string | null
+          series: number | null
+          tiempo_total_seg: number | null
+          tipo: Database["public"]["Enums"]["tipo_tarea"]
+          via: Database["public"]["Enums"]["via_metodologica"] | null
+          video_url: string | null
+        }
+        Insert: {
+          actualizado_en?: string
+          ancho_m?: number | null
+          archivada?: boolean
+          competitividad?:
+            | Database["public"]["Enums"]["competitividad_tarea"]
+            | null
+          creado_en?: string
+          cuerpo_tecnico_id?: string
+          descripcion?: string | null
+          duracion_seg?: number | null
+          espacio?: Database["public"]["Enums"]["espacio_tarea"] | null
+          formato?: string | null
+          grafico_ruta?: string | null
+          id?: string
+          jugadores?: number | null
+          largo_m?: number | null
+          nombre: string
+          orientacion_fisica?:
+            | Database["public"]["Enums"]["orientacion_fisica"]
+            | null
+          pausa_seg?: number | null
+          prompt_imagen?: string | null
+          series?: number | null
+          tiempo_total_seg?: number | null
+          tipo: Database["public"]["Enums"]["tipo_tarea"]
+          via?: Database["public"]["Enums"]["via_metodologica"] | null
+          video_url?: string | null
+        }
+        Update: {
+          actualizado_en?: string
+          ancho_m?: number | null
+          archivada?: boolean
+          competitividad?:
+            | Database["public"]["Enums"]["competitividad_tarea"]
+            | null
+          creado_en?: string
+          cuerpo_tecnico_id?: string
+          descripcion?: string | null
+          duracion_seg?: number | null
+          espacio?: Database["public"]["Enums"]["espacio_tarea"] | null
+          formato?: string | null
+          grafico_ruta?: string | null
+          id?: string
+          jugadores?: number | null
+          largo_m?: number | null
+          nombre?: string
+          orientacion_fisica?:
+            | Database["public"]["Enums"]["orientacion_fisica"]
+            | null
+          pausa_seg?: number | null
+          prompt_imagen?: string | null
+          series?: number | null
+          tiempo_total_seg?: number | null
+          tipo?: Database["public"]["Enums"]["tipo_tarea"]
+          via?: Database["public"]["Enums"]["via_metodologica"] | null
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tareas_cuerpo_tecnico_id_fkey"
+            columns: ["cuerpo_tecnico_id"]
+            isOneToOne: false
+            referencedRelation: "cuerpos_tecnicos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tareas_contenidos: {
+        Row: {
+          contenido_id: string
+          tarea_id: string
+        }
+        Insert: {
+          contenido_id: string
+          tarea_id: string
+        }
+        Update: {
+          contenido_id?: string
+          tarea_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tareas_contenidos_contenido_id_fkey"
+            columns: ["contenido_id"]
+            isOneToOne: false
+            referencedRelation: "contenidos_tecnicos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tareas_contenidos_tarea_id_fkey"
+            columns: ["tarea_id"]
+            isOneToOne: false
+            referencedRelation: "tareas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tareas_objetivos: {
+        Row: {
+          principio_id: string
+          tarea_id: string
+        }
+        Insert: {
+          principio_id: string
+          tarea_id: string
+        }
+        Update: {
+          principio_id?: string
+          tarea_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tareas_objetivos_principio_id_fkey"
+            columns: ["principio_id"]
+            isOneToOne: false
+            referencedRelation: "principios_juego"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tareas_objetivos_tarea_id_fkey"
+            columns: ["tarea_id"]
+            isOneToOne: false
+            referencedRelation: "tareas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       temporadas: {
         Row: {
           activa: boolean
@@ -739,6 +897,7 @@ export type Database = {
     Functions: {
       activar_temporada: { Args: { p_temporada: string }; Returns: undefined }
       cargar_modelo_base: { Args: never; Returns: number }
+      cargar_tareas_base: { Args: never; Returns: number }
       crear_cuerpo_tecnico: {
         Args: {
           p_club: string
@@ -763,12 +922,17 @@ export type Database = {
       es_miembro: { Args: { p_cuerpo_tecnico: string }; Returns: boolean }
       es_miembro_jugador: { Args: { p_jugador: string }; Returns: boolean }
       es_miembro_partido: { Args: { p_partido: string }; Returns: boolean }
+      es_miembro_tarea: { Args: { p_tarea: string }; Returns: boolean }
       es_miembro_temporada: { Args: { p_temporada: string }; Returns: boolean }
       jugador_del_partido: {
         Args: { p_jugador: string; p_partido: string }
         Returns: boolean
       }
       mi_cuerpo_tecnico: { Args: never; Returns: string }
+      reemplazar_vinculos_tarea: {
+        Args: { p_contenidos: string[]; p_objetivos: string[]; p_tarea: string }
+        Returns: undefined
+      }
       rival_valido: {
         Args: { p_rival: string; p_temporada: string }
         Returns: boolean
@@ -783,6 +947,18 @@ export type Database = {
     }
     Enums: {
       categoria_abp: "corner" | "falta_lateral"
+      competitividad_tarea:
+        | "sin_oposicion"
+        | "con_oposicion"
+        | "con_oposicion_y_puntuacion"
+      espacio_tarea:
+        | "medidas"
+        | "cancha_entera"
+        | "tres_cuartos"
+        | "media_cancha"
+        | "ultimo_tercio"
+        | "area"
+        | "gimnasio"
       estado_disponibilidad: "disponible" | "limitado" | "baja" | "sancionado"
       estado_partido: "planificado" | "jugado"
       etiqueta_informe:
@@ -798,6 +974,12 @@ export type Database = {
         | "transicion_ataque_defensa"
         | "transicion_defensa_ataque"
         | "balon_parado"
+      orientacion_fisica:
+        | "tension"
+        | "duracion"
+        | "velocidad"
+        | "activacion"
+        | "recuperacion"
       pie_habil: "derecho" | "izquierdo" | "ambos"
       rol_miembro: "entrenador" | "ayudante" | "preparador_fisico" | "analista"
       tipo_abp: "ofensivo" | "defensivo"
@@ -813,6 +995,22 @@ export type Database = {
         | "libre"
         | "otro"
       tipo_evento: "gol" | "ocasion" | "duelo" | "nota"
+      tipo_tarea:
+        | "entrada_en_calor"
+        | "pre_sesion"
+        | "rondo"
+        | "posesion"
+        | "espacio_reducido"
+        | "tactico"
+        | "transiciones"
+        | "partido_condicionado"
+        | "finalizacion"
+        | "pelota_parada"
+        | "velocidad"
+        | "arqueros"
+        | "fuerza"
+        | "recuperacion"
+      via_metodologica: "analitica" | "global" | "sistemica"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -941,6 +1139,20 @@ export const Constants = {
   public: {
     Enums: {
       categoria_abp: ["corner", "falta_lateral"],
+      competitividad_tarea: [
+        "sin_oposicion",
+        "con_oposicion",
+        "con_oposicion_y_puntuacion",
+      ],
+      espacio_tarea: [
+        "medidas",
+        "cancha_entera",
+        "tres_cuartos",
+        "media_cancha",
+        "ultimo_tercio",
+        "area",
+        "gimnasio",
+      ],
       estado_disponibilidad: ["disponible", "limitado", "baja", "sancionado"],
       estado_partido: ["planificado", "jugado"],
       etiqueta_informe: [
@@ -958,6 +1170,13 @@ export const Constants = {
         "transicion_defensa_ataque",
         "balon_parado",
       ],
+      orientacion_fisica: [
+        "tension",
+        "duracion",
+        "velocidad",
+        "activacion",
+        "recuperacion",
+      ],
       pie_habil: ["derecho", "izquierdo", "ambos"],
       rol_miembro: ["entrenador", "ayudante", "preparador_fisico", "analista"],
       tipo_abp: ["ofensivo", "defensivo"],
@@ -974,6 +1193,23 @@ export const Constants = {
         "otro",
       ],
       tipo_evento: ["gol", "ocasion", "duelo", "nota"],
+      tipo_tarea: [
+        "entrada_en_calor",
+        "pre_sesion",
+        "rondo",
+        "posesion",
+        "espacio_reducido",
+        "tactico",
+        "transiciones",
+        "partido_condicionado",
+        "finalizacion",
+        "pelota_parada",
+        "velocidad",
+        "arqueros",
+        "fuerza",
+        "recuperacion",
+      ],
+      via_metodologica: ["analitica", "global", "sistemica"],
     },
   },
 } as const

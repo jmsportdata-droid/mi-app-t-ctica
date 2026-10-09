@@ -44,6 +44,11 @@ insert into public.partidos (id, temporada_id, fecha, rival_id) values
 insert into public.disponibilidad (jugador_id, fecha, estado) values
   ('00000000-0000-4000-e000-00000000000b', '2026-04-01', 'limitado');
 
+insert into public.principios_juego (id, cuerpo_tecnico_id, momento, nombre) values
+  ('00000000-0000-4000-9000-00000000000b', '00000000-0000-4000-b000-00000000000b', 'balon_parado', 'Principio de B');
+insert into public.tareas (id, cuerpo_tecnico_id, nombre, tipo) values
+  ('00000000-0000-4000-8000-00000000000b', '00000000-0000-4000-b000-00000000000b', 'Tarea de B', 'rondo');
+
 -- Analista A2: ve y edita lo de su cuerpo técnico, nada de B ----------
 set local role authenticated;
 set local request.jwt.claims to '{"sub":"00000000-0000-4000-a000-0000000000a2","role":"authenticated"}';
@@ -137,6 +142,42 @@ begin
     insert into public.principios_juego (cuerpo_tecnico_id, momento, nombre)
       values ('00000000-0000-4000-b000-00000000000b', 'balon_parado', 'Intruso');
     raise exception 'FALLA: el analista A pudo escribir en el modelo de juego de B';
+  exception when insufficient_privilege then null;
+  end;
+
+  -- Banco de tareas: se carga una sola vez, con objetivos de su propio modelo
+  if public.cargar_tareas_base() < 50 then
+    raise exception 'FALLA: cargar_tareas_base no cargó el banco';
+  end if;
+  if public.cargar_tareas_base() <> 0 then
+    raise exception 'FALLA: cargar_tareas_base cargó dos veces';
+  end if;
+  if (select count(*) from public.tareas) <> (select count(*) from public.tareas where cuerpo_tecnico_id = '00000000-0000-4000-b000-00000000000a') then
+    raise exception 'FALLA: el analista A ve tareas de B';
+  end if;
+  if exists (select 1 from public.tareas t where t.tipo not in ('pre_sesion', 'fuerza', 'velocidad', 'partido_condicionado')
+             and not exists (select 1 from public.tareas_objetivos o where o.tarea_id = t.id)
+             and not exists (select 1 from public.tareas_contenidos c where c.tarea_id = t.id)) then
+    raise exception 'FALLA: hay tareas base sin objetivos ni contenidos (revisá los nombres del modelo)';
+  end if;
+  if (select tiempo_total_seg from public.tareas where nombre = 'Rondos con rotación') <> 510 then
+    raise exception 'FALLA: el tiempo total de 3 × 2′30″ + 30″ tiene que ser 8′30″';
+  end if;
+  begin
+    insert into public.tareas_objetivos (tarea_id, principio_id)
+      select id, '00000000-0000-4000-9000-00000000000b' from public.tareas limit 1;
+    raise exception 'FALLA: una tarea de A quedó vinculada a un principio de B';
+  exception when insufficient_privilege then null;
+  end;
+  begin
+    insert into public.tareas (cuerpo_tecnico_id, nombre, tipo)
+      values ('00000000-0000-4000-b000-00000000000b', 'Intrusa', 'rondo');
+    raise exception 'FALLA: el analista A pudo crear una tarea en el banco de B';
+  exception when insufficient_privilege then null;
+  end;
+  begin
+    perform public.reemplazar_vinculos_tarea('00000000-0000-4000-8000-00000000000b', '{}', '{}');
+    raise exception 'FALLA: el analista A pudo tocar los objetivos de una tarea de B';
   exception when insufficient_privilege then null;
   end;
 

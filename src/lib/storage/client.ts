@@ -26,7 +26,7 @@ export async function resolverImagen(
 ): Promise<ImagenResuelta> {
   if (!valor.archivo) return { ruta: valor.ruta, rutaSubida: null };
 
-  const errorValidacion = validarImagen(valor.archivo);
+  const errorValidacion = validarImagen(valor.archivo, bucket);
   if (errorValidacion) throw new Error(errorValidacion);
 
   const supabase = createClient();

@@ -67,3 +67,28 @@ export function construirArbol(principios: PrincipioJuego[]): ArbolModelo {
   }
   return arbol;
 }
+
+export interface EtiquetaObjetivo {
+  momento: MomentoJuego;
+  /** "Presión tras pérdida › Reacción en 3 segundos" o solo el principio */
+  texto: string;
+  nombre: string;
+}
+
+/** id → momento y texto completo de cada principio o subprincipio. */
+export function indiceObjetivos(principios: PrincipioJuego[]): Map<string, EtiquetaObjetivo> {
+  const porId = new Map(principios.map((p) => [p.id, p]));
+  return new Map(
+    principios.map((p) => {
+      const padre = p.padre_id ? porId.get(p.padre_id) : undefined;
+      return [
+        p.id,
+        {
+          momento: p.momento,
+          texto: padre ? `${padre.nombre} › ${p.nombre}` : p.nombre,
+          nombre: p.nombre,
+        },
+      ];
+    }),
+  );
+}

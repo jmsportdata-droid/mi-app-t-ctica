@@ -2,6 +2,7 @@
 export const BUCKETS = {
   fotosJugadores: "fotos-jugadores",
   escudos: "escudos",
+  graficosTareas: "graficos-tareas",
 } as const;
 
 export type Bucket = (typeof BUCKETS)[keyof typeof BUCKETS];
@@ -13,6 +14,14 @@ export function esBucket(valor: string): valor is Bucket {
 }
 
 export const IMAGEN_MAX_BYTES = 2 * 1024 * 1024;
+/** Los gráficos de tareas generados con IA pesan más que una foto o un escudo. */
+const MAX_BYTES_BUCKET: Partial<Record<Bucket, number>> = {
+  "graficos-tareas": 5 * 1024 * 1024,
+};
+
+export function maxBytesDe(bucket: Bucket): number {
+  return MAX_BYTES_BUCKET[bucket] ?? IMAGEN_MAX_BYTES;
+}
 export const IMAGEN_TIPOS = ["image/png", "image/jpeg"] as const;
 export const IMAGEN_ACCEPT = IMAGEN_TIPOS.join(",");
 
@@ -26,9 +35,10 @@ function esTipoPermitido(tipo: string): tipo is (typeof IMAGEN_TIPOS)[number] {
 }
 
 /** Devuelve un mensaje de error si el archivo no es válido, o null si lo es. */
-export function validarImagen(archivo: File): string | null {
+export function validarImagen(archivo: File, bucket: Bucket): string | null {
   if (!esTipoPermitido(archivo.type)) return "Solo se admiten imágenes PNG o JPG";
-  if (archivo.size > IMAGEN_MAX_BYTES) return "La imagen no puede superar 2 MB";
+  const max = maxBytesDe(bucket);
+  if (archivo.size > max) return `La imagen no puede superar ${max / 1024 / 1024} MB`;
   return null;
 }
 
