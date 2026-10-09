@@ -7,7 +7,14 @@ export function Logo() {
           <path d="M12 7l3.5 2.5-1.3 4h-4.4l-1.3-4L12 7z" fill="currentColor" />
         </svg>
       </span>
-      <span className="text-lg font-bold tracking-tight text-slate-900">Táctica FC</span>
+      <span className="leading-tight">
+        <span className="block text-base font-bold tracking-tight text-slate-900">
+          Gestión Total
+        </span>
+        <span className="block text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+          Cuerpo técnico
+        </span>
+      </span>
     </div>
   );
 }

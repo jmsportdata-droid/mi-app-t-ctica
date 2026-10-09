@@ -6,10 +6,10 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: {
-    default: "Táctica FC",
-    template: "%s · Táctica FC",
+    default: "Gestión Total CT",
+    template: "%s · Gestión Total CT",
   },
-  description: "Análisis táctico para tu equipo de fútbol",
+  description: "Todo el trabajo del cuerpo técnico en un solo lugar",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
