@@ -34,7 +34,7 @@ export function BarraTemporada({ cuerpoTecnico, temporadas, actual }: Props) {
   }
 
   return (
-    <div className="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur">
+    <div className="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur print:hidden">
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4 sm:px-8">
         {actual ? (
           <>

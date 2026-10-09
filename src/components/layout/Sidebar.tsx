@@ -15,6 +15,7 @@ import {
   IconModeloJuego,
   IconPartidos,
   IconPlantilla,
+  IconReportes,
   IconTareas,
 } from "./icons";
 
@@ -24,6 +25,7 @@ const NAVEGACION = [
   { href: "/plantilla", label: "Plantel", Icono: IconPlantilla },
   { href: "/modelo-de-juego", label: "Modelo de juego", Icono: IconModeloJuego },
   { href: "/tareas", label: "Banco de tareas", Icono: IconTareas },
+  { href: "/reportes", label: "Reportes", Icono: IconReportes },
   { href: "/equipos", label: "Equipos", Icono: IconEquipos },
   { href: "/partidos", label: "Partidos", Icono: IconPartidos },
   { href: "/cuerpo-tecnico", label: "Cuerpo técnico", Icono: IconCuerpoTecnico },
@@ -38,7 +40,7 @@ export function Sidebar({ nombre, rol }: SidebarProps) {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-30 flex w-16 flex-col border-r border-slate-200 bg-white md:w-64">
+    <aside className="fixed inset-y-0 left-0 z-30 flex w-16 flex-col border-r border-slate-200 bg-white md:w-64 print:hidden">
       <div className="flex h-16 items-center justify-center border-b border-slate-100 px-3 md:justify-start md:px-5">
         <div className="hidden md:block">
           <Logo />

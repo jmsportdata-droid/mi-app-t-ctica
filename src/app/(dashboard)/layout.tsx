@@ -9,7 +9,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div className="min-h-screen">
       <Sidebar nombre={contexto.miembro.nombre} rol={contexto.miembro.rol} />
-      <main className="pl-16 md:pl-64">
+      <main className="pl-16 md:pl-64 print:pl-0">
         <BarraTemporada
           cuerpoTecnico={contexto.cuerpoTecnico.nombre}
           temporadas={contexto.temporadas}
