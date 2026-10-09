@@ -156,6 +156,41 @@ export type Database = {
           },
         ]
       }
+      analisis_propio: {
+        Row: {
+          avisos: string[]
+          datos: Json
+          generado_en: string
+          insights: Json
+          no_vinculados: Json
+          temporada_id: string
+        }
+        Insert: {
+          avisos?: string[]
+          datos?: Json
+          generado_en?: string
+          insights?: Json
+          no_vinculados?: Json
+          temporada_id: string
+        }
+        Update: {
+          avisos?: string[]
+          datos?: Json
+          generado_en?: string
+          insights?: Json
+          no_vinculados?: Json
+          temporada_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analisis_propio_temporada_id_fkey"
+            columns: ["temporada_id"]
+            isOneToOne: true
+            referencedRelation: "temporadas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       analisis_rival: {
         Row: {
           clip_url: string | null
@@ -743,6 +778,7 @@ export type Database = {
         Row: {
           altura_cm: number | null
           creado_en: string
+          estadisticas_sofascore: Json
           fecha_nac: string | null
           foto_ruta: string | null
           id: string
@@ -758,6 +794,7 @@ export type Database = {
         Insert: {
           altura_cm?: number | null
           creado_en?: string
+          estadisticas_sofascore?: Json
           fecha_nac?: string | null
           foto_ruta?: string | null
           id?: string
@@ -773,6 +810,7 @@ export type Database = {
         Update: {
           altura_cm?: number | null
           creado_en?: string
+          estadisticas_sofascore?: Json
           fecha_nac?: string | null
           foto_ruta?: string | null
           id?: string
@@ -1111,7 +1149,8 @@ export type Database = {
           estado: Database["public"]["Enums"]["estado_pedido"]
           id: string
           mensaje: string | null
-          partido_id: string
+          partido_id: string | null
+          temporada_id: string | null
           tipo: Database["public"]["Enums"]["tipo_pedido_sofascore"]
         }
         Insert: {
@@ -1121,7 +1160,8 @@ export type Database = {
           estado?: Database["public"]["Enums"]["estado_pedido"]
           id?: string
           mensaje?: string | null
-          partido_id: string
+          partido_id?: string | null
+          temporada_id?: string | null
           tipo?: Database["public"]["Enums"]["tipo_pedido_sofascore"]
         }
         Update: {
@@ -1131,7 +1171,8 @@ export type Database = {
           estado?: Database["public"]["Enums"]["estado_pedido"]
           id?: string
           mensaje?: string | null
-          partido_id?: string
+          partido_id?: string | null
+          temporada_id?: string | null
           tipo?: Database["public"]["Enums"]["tipo_pedido_sofascore"]
         }
         Relationships: [
@@ -1140,6 +1181,13 @@ export type Database = {
             columns: ["partido_id"]
             isOneToOne: false
             referencedRelation: "partidos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pedidos_sofascore_temporada_id_fkey"
+            columns: ["temporada_id"]
+            isOneToOne: false
+            referencedRelation: "temporadas"
             referencedColumns: ["id"]
           },
         ]
@@ -1913,7 +1961,7 @@ export type Database = {
         | "otro"
       tipo_cesped: "natural" | "sintetico" | "hibrido"
       tipo_evento: "gol" | "ocasion" | "duelo" | "nota"
-      tipo_pedido_sofascore: "informe_rival"
+      tipo_pedido_sofascore: "informe_rival" | "plantel_propio"
       tipo_tarea:
         | "entrada_en_calor"
         | "pre_sesion"
@@ -2156,7 +2204,7 @@ export const Constants = {
       ],
       tipo_cesped: ["natural", "sintetico", "hibrido"],
       tipo_evento: ["gol", "ocasion", "duelo", "nota"],
-      tipo_pedido_sofascore: ["informe_rival"],
+      tipo_pedido_sofascore: ["informe_rival", "plantel_propio"],
       tipo_tarea: [
         "entrada_en_calor",
         "pre_sesion",

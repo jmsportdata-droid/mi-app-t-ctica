@@ -33,7 +33,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-VERSION = "1.0"
+VERSION = "1.1"
 RAIZ = Path(__file__).resolve().parent.parent
 SKILL = Path.home() / ".claude" / "skills" / "informe-rival"
 SCRIPTS = SKILL / "scripts"
@@ -131,13 +131,21 @@ def claude_cli() -> str:
     return max(candidatos, key=version)
 
 
-def escribir_insights(carpeta: Path) -> dict:
+def escribir_insights(carpeta: Path, propio: bool = False) -> dict:
     """Claude redacta textos.json a partir de resumen.md, con el formato de la skill."""
     formato = (SKILL / "references" / "textos.md").read_text()
     resumen = (carpeta / "resumen.md").read_text()
+    objetivo = (
+        "Es NUESTRO equipo: hacé una autoevaluación con el mismo JSON. 'fortalezas' = lo que hacemos bien; "
+        "'debilidades' = lo que tenemos que corregir; 'pelota_quieta' = cómo estamos a balón parado; "
+        "'recomendaciones' = qué trabajar en el microciclo; 'jugadores_a_vigilar' = nuestros jugadores "
+        "más determinantes o en mejor momento.\n"
+        if propio
+        else "Con el resumen de datos del próximo rival, escribí el JSON de hipótesis y claves del partido.\n"
+    )
     prompt = (
-        "Sos el analista de un cuerpo técnico de fútbol uruguayo. Con el resumen de datos del próximo "
-        "rival, escribí el JSON de hipótesis y claves del partido con el formato y los criterios de abajo.\n"
+        "Sos el analista de un cuerpo técnico de fútbol uruguayo. " + objetivo +
+        "Usá el formato y los criterios de abajo.\n"
         "Reglas: español rioplatense (voseo), frases cortas, cada afirmación con el dato que la sostiene "
         "entre paréntesis; no inventes nada que no esté en el resumen (nada de video); no menciones "
         "tarjetas. Respondé SOLO con el JSON, sin texto antes ni después.\n\n"
@@ -392,13 +400,132 @@ def procesar(pedido: dict):
     log("Listo:", rival["nombre"])
 
 
+PIE = {"left": "izquierdo", "right": "derecho", "both": "ambos", "izq": "izquierdo", "der": "derecho", "ambos": "ambos"}
+LINEA = {"G": "POR", "D": "DEF", "M": "CEN", "F": "DEL"}
+
+
+def normalizar(texto: str) -> list[str]:
+    import unicodedata
+    t = unicodedata.normalize("NFKD", (texto or "").lower()).encode("ascii", "ignore").decode()
+    return [x for x in re.split(r"[^a-z]+", t) if x]
+
+
+def vincular(app: list[dict], sofa_jugadores: list[dict]) -> dict[str, dict]:
+    """Empareja jugadores de Sofascore con los del plantel (id de Sofascore, o nombre y dorsal)."""
+    resultado: dict[str, dict] = {}
+    usados: set[str] = set()
+    por_id = {str((j.get("ids_externos") or {}).get("sofascore")): j for j in app if (j.get("ids_externos") or {}).get("sofascore")}
+    pendientes = []
+    for sj in sofa_jugadores:
+        j = por_id.get(str(sj["id"]))
+        if j:
+            resultado[str(sj["id"])] = j
+            usados.add(j["id"])
+        else:
+            pendientes.append(sj)
+    candidatos = []
+    for sj in pendientes:
+        st = set(t for t in normalizar(sj.get("nombre")) if len(t) > 2)
+        inicial = (normalizar(sj.get("nombre")) or [""])[0][:1]
+        dorsal = str(sj.get("dorsal") or "").strip()
+        for j in app:
+            at = normalizar(j["nombre"])
+            comunes = len(st & set(t for t in at if len(t) > 2))
+            mismo_dorsal = dorsal.isdigit() and j.get("numero") == int(dorsal)
+            misma_inicial = bool(at) and at[0][:1] == inicial
+            if comunes >= 2 or (comunes >= 1 and (mismo_dorsal or misma_inicial)):
+                candidatos.append((comunes * 2 + mismo_dorsal * 3 + misma_inicial, str(sj["id"]), j))
+    for _, sid, j in sorted(candidatos, key=lambda c: -c[0]):
+        if sid in resultado or j["id"] in usados:
+            continue
+        resultado[sid] = j
+        usados.add(j["id"])
+    return resultado
+
+
+def procesar_propio(pedido: dict):
+    temporada = rest("GET", f"temporadas?id=eq.{pedido['temporada_id']}&select=*")[0]
+    sofa_id = (temporada.get("ids_externos") or {}).get("sofascore")
+    if not sofa_id:
+        raise RuntimeError("La temporada no tiene el id de Sofascore del club.")
+
+    actualizar_pedido(pedido["id"], "procesando", f"Bajando los últimos partidos de {temporada['club']}…")
+    salida = correr(["datos", "--rival-id", str(sofa_id)])
+    m = re.search(r"CARPETA=(.+)", salida)
+    if not m:
+        raise RuntimeError("La skill no devolvió la carpeta del análisis.")
+    carpeta = Path(m.group(1).strip())
+    analisis = json.loads((carpeta / "analisis.json").read_text())
+    datos = json.loads((carpeta / "datos.json").read_text())
+
+    actualizar_pedido(pedido["id"], "procesando", "Claude está escribiendo la autoevaluación…")
+    insights = escribir_insights(carpeta, propio=True)
+
+    actualizar_pedido(pedido["id"], "procesando", "Vinculando jugadores con el plantel…")
+    stats = estadisticas_jugadores(datos)
+    crudos = {p["id"]: p for p in datos.get("plantilla", [])}
+    plantilla = [{**crudos.get(p["id"], {}), **p} for p in analisis.get("plantilla", [])]
+    app = rest("GET", f"jugadores?temporada_id=eq.{temporada['id']}&select=*") or []
+    vinculos = vincular(app, plantilla)
+
+    no_vinculados = []
+    for sj in plantilla:
+        e = {**stats.get(sj["id"], {}), "pj": sj.get("pj"), "titular": sj.get("tit"),
+             "asistencias": sj.get("asist"), "edad": sj.get("edad")}
+        pie = PIE.get(str(sj.get("pie") or "").strip().lower())
+        j = vinculos.get(str(sj["id"]))
+        if not j:
+            dorsal = str(sj.get("dorsal") or "").strip()
+            no_vinculados.append({
+                "sofascore_id": str(sj["id"]), "nombre": sj.get("nombre"), "corto": sj.get("corto"),
+                "dorsal": int(dorsal) if dorsal.isdigit() and int(dorsal) <= 99 else None,
+                "linea": LINEA.get(POS.get(sj.get("pos"), ""), "CEN"),
+                "altura_cm": sj.get("altura") if sj.get("altura") and 140 <= sj["altura"] <= 220 else None,
+                "pie": pie, "nacionalidad": sj.get("pais"),
+                "fecha_nac": datetime.fromtimestamp(sj["nac_ts"], timezone.utc).date().isoformat() if sj.get("nac_ts") else None,
+                "minutos": e.get("minutos"), "estadisticas": e,
+            })
+            continue
+        cambios = {
+            "estadisticas_sofascore": e,
+            "ids_externos": {**(j.get("ids_externos") or {}), "sofascore": str(sj["id"])},
+        }
+        if not j.get("altura_cm") and sj.get("altura") and 140 <= sj["altura"] <= 220:
+            cambios["altura_cm"] = sj["altura"]
+        if not j.get("pie_habil") and pie:
+            cambios["pie_habil"] = pie
+        if not j.get("nacionalidad") and sj.get("pais"):
+            cambios["nacionalidad"] = sj["pais"]
+        rest("PATCH", f"jugadores?id=eq.{j['id']}", cambios)
+
+    rest("POST", "analisis_propio?on_conflict=temporada_id", {
+        "temporada_id": temporada["id"],
+        "generado_en": datetime.now(timezone.utc).isoformat(),
+        "datos": datos_informe(analisis),
+        "insights": insights,
+        "no_vinculados": sorted(no_vinculados, key=lambda x: -(x.get("minutos") or 0)),
+        "avisos": analisis.get("avisos") or [],
+    }, prefer="resolution=merge-duplicates")
+
+    n = analisis.get("n") or len(analisis.get("base_estadisticas") or [])
+    actualizar_pedido(
+        pedido["id"], "listo",
+        f"{temporada['club']}: {n} partidos, {len(vinculos)} jugadores vinculados"
+        + (f" y {len(no_vinculados)} que no están en el plantel" if no_vinculados else "") + ".",
+    )
+    log("Listo:", temporada["club"])
+
+
 def vuelta():
     senal()
     pendientes = rest("GET", "pedidos_sofascore?estado=eq.pendiente&order=creado_en.asc&limit=1") or []
     for pedido in pendientes:
-        log("Pedido", pedido["id"])
+        log("Pedido", pedido["id"], pedido.get("tipo"))
         try:
-            procesar(pedido)
+            if pedido.get("tipo") == "plantel_propio":
+                procesar_propio(pedido)
+            else:
+                procesar(pedido)
         except Exception as e:
             log("Error:", e)
             traceback.print_exc()

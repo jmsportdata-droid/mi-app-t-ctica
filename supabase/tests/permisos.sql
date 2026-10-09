@@ -378,6 +378,22 @@ begin
   exception when insufficient_privilege then null;
   end;
 
+  -- Sofascore propio: pedidos de la temporada y análisis propio; nada de B
+  insert into public.pedidos_sofascore (temporada_id, tipo)
+    values ('00000000-0000-4000-c000-00000000000a', 'plantel_propio');
+  begin
+    insert into public.pedidos_sofascore (temporada_id, tipo)
+      values ('00000000-0000-4000-c000-00000000000b', 'plantel_propio');
+    raise exception 'FALLA: el analista A pidió datos para la temporada de B';
+  exception when insufficient_privilege then null;
+  end;
+  insert into public.analisis_propio (temporada_id) values ('00000000-0000-4000-c000-00000000000a');
+  begin
+    insert into public.analisis_propio (temporada_id) values ('00000000-0000-4000-c000-00000000000b');
+    raise exception 'FALLA: el analista A escribió el análisis propio de B';
+  exception when insufficient_privilege then null;
+  end;
+
   -- Disponibilidad: solo de jugadores propios
   insert into public.disponibilidad (jugador_id, fecha, estado, fecha_regreso)
     values ('00000000-0000-4000-e000-00000000000a', '2026-05-01', 'baja', '2026-05-20');

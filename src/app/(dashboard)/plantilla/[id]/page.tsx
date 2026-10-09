@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getHistorialDisponibilidad } from "@/lib/data/disponibilidad";
 import { getJugador } from "@/lib/data/jugadores";
 import { hoyISO } from "@/lib/utils/fecha";
+import { indiceAereo } from "@/lib/aereo";
 import { BUCKETS, urlImagen } from "@/lib/storage/config";
 import { calcularEdad, formatearFecha } from "@/lib/utils/edad";
 import {
@@ -98,6 +99,11 @@ export default async function JugadorPage({ params }: Props) {
         </div>
       </article>
 
+      <EstadisticasSofascore
+        altura={jugador.altura_cm}
+        e={jugador.estadisticas_sofascore as Record<string, number | null | undefined>}
+      />
+
       <section
         aria-labelledby="titulo-historial"
         className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
@@ -130,5 +136,54 @@ export default async function JugadorPage({ params }: Props) {
         )}
       </section>
     </>
+  );
+}
+
+function EstadisticasSofascore({
+  altura,
+  e,
+}: {
+  altura: number | null;
+  e: Record<string, number | null | undefined>;
+}) {
+  if (!e.minutos) return null;
+  const indice = indiceAereo({
+    altura_cm: altura,
+    minutos: e.minutos,
+    aereos_90: e.aereos_90,
+    aereos_pct: e.aereos_pct,
+    cabezazos_abp: e.cabezazos_abp,
+  });
+  const datos: [string, string][] = [
+    ["Partidos", String(e.partidos ?? e.pj ?? "—")],
+    ["Minutos", String(e.minutos)],
+    ["Nota Sofascore", e.nota ? String(e.nota) : "—"],
+    ["Goles", String(e.goles ?? 0)],
+    ["xG", String(e.xg ?? 0)],
+    ["xA", String(e.xa ?? 0)],
+    [
+      "Aéreos ganados",
+      `${e.aereos_ganados ?? 0}${e.aereos_pct !== null && e.aereos_pct !== undefined ? ` (${e.aereos_pct}%)` : ""}`,
+    ],
+    ["Duelos ganados", String(e.duelos_ganados ?? 0)],
+    ["Despejes", String(e.despejes ?? 0)],
+    ["Remates en ABP", `${e.tiros_abp ?? 0} (${e.cabezazos_abp ?? 0} de cabeza)`],
+    ["Índice aéreo", indice === null ? "—" : `${indice}/100`],
+  ];
+  return (
+    <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <h2 className="font-semibold text-slate-900">Últimos partidos (Sofascore)</h2>
+      <p className="mb-4 text-xs text-slate-500">
+        Totales de los últimos partidos del equipo con estadísticas. Se actualiza desde el Plantel.
+      </p>
+      <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        {datos.map(([label, valor]) => (
+          <div key={label} className="rounded-xl bg-slate-50 p-3">
+            <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</dt>
+            <dd className="mt-0.5 font-semibold tabular-nums text-slate-900">{valor}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
   );
 }

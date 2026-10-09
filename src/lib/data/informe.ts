@@ -50,3 +50,46 @@ export async function getInformeSofascore(
     plantel: plantel.data ?? [],
   };
 }
+
+export type AnalisisPropio = import("@/types/database").Tables<"analisis_propio">;
+
+export interface SofascorePropio {
+  analisis: AnalisisPropio | null;
+  pedido: PedidoSofascore | null;
+  macConectada: boolean;
+}
+
+/** Análisis de nuestro equipo (Sofascore), el último pedido y si la Mac está conectada. */
+export async function getSofascorePropio(
+  temporadaId: string,
+  cuerpoTecnicoId: string,
+): Promise<SofascorePropio> {
+  const supabase = createClient();
+  const [analisis, pedido, mac] = await Promise.all([
+    supabase.from("analisis_propio").select("*").eq("temporada_id", temporadaId).maybeSingle(),
+    supabase
+      .from("pedidos_sofascore")
+      .select("*")
+      .eq("temporada_id", temporadaId)
+      .order("creado_en", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from("estado_mac")
+      .select("ultima_senal")
+      .eq("cuerpo_tecnico_id", cuerpoTecnicoId)
+      .maybeSingle(),
+  ]);
+  const error = analisis.error ?? pedido.error ?? mac.error;
+  if (error) {
+    console.error("[getSofascorePropio]", error.message);
+    throw new Error("No se pudieron cargar los datos de Sofascore");
+  }
+  return {
+    analisis: analisis.data,
+    pedido: pedido.data,
+    macConectada: Boolean(
+      mac.data && Date.now() - new Date(mac.data.ultima_senal).getTime() < CONECTADA_MS,
+    ),
+  };
+}
