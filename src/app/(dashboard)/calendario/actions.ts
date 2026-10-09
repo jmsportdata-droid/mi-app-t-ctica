@@ -248,3 +248,18 @@ export async function copiarCicloAnterior(
   revalidar();
   return { ok: true, copiadas: nuevas.length, salteadas };
 }
+
+/** Crea el link de jugadores de la temporada o lo regenera (el anterior deja de andar). */
+export async function regenerarEnlaceJugadores(): Promise<
+  { ok: true; token: string } | { ok: false; error: string }
+> {
+  const accion = await getAccion();
+  if (!accion) return SESION_EXPIRADA;
+  if (!accion.contexto.temporada) return SIN_TEMPORADA;
+  const { data, error } = await accion.supabase.rpc("regenerar_enlace_jugadores", {
+    p_temporada: accion.contexto.temporada.id,
+  });
+  if (error) return errorDeBD(error, "link jugadores");
+  revalidar();
+  return { ok: true, token: data };
+}

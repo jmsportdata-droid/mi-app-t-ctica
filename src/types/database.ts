@@ -289,6 +289,32 @@ export type Database = {
           },
         ]
       }
+      enlaces_jugadores: {
+        Row: {
+          creado_en: string
+          temporada_id: string
+          token: string
+        }
+        Insert: {
+          creado_en?: string
+          temporada_id: string
+          token?: string
+        }
+        Update: {
+          creado_en?: string
+          temporada_id?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enlaces_jugadores_temporada_id_fkey"
+            columns: ["temporada_id"]
+            isOneToOne: true
+            referencedRelation: "temporadas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       equipos: {
         Row: {
           creado_en: string
@@ -1189,9 +1215,17 @@ export type Database = {
         Args: { p_contenidos: string[]; p_objetivos: string[]; p_tarea: string }
         Returns: undefined
       }
+      regenerar_enlace_jugadores: {
+        Args: { p_temporada: string }
+        Returns: string
+      }
       rival_valido: {
         Args: { p_rival: string; p_temporada: string }
         Returns: boolean
+      }
+      semana_publica: {
+        Args: { p_desde: string; p_token: string }
+        Returns: Json
       }
       tarea_de_la_actividad: {
         Args: { p_actividad: string; p_tarea: string }

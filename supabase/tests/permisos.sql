@@ -259,6 +259,25 @@ begin
   exception when foreign_key_violation then null;
   end;
 
+  -- Semana compartida: link por temporada, solo lo visible para jugadores
+  insert into public.actividades (temporada_id, tipo, titulo, fecha, visible_jugadores)
+    values ('00000000-0000-4000-c000-00000000000a', 'reunion_cuerpo_tecnico', 'Reunión secreta', '2026-04-29', false);
+  perform set_config('prueba.token', public.regenerar_enlace_jugadores('00000000-0000-4000-c000-00000000000a'), true);
+  if exists (
+    select 1 from jsonb_array_elements(
+      public.semana_publica(current_setting('prueba.token'), '2026-04-27') -> 'actividades') x
+    where x ->> 'titulo' = 'Reunión secreta') then
+    raise exception 'FALLA: el link de jugadores muestra actividades solo para el cuerpo técnico';
+  end if;
+  if public.semana_publica('00000000000000000000000000000000', '2026-04-27') is not null then
+    raise exception 'FALLA: un token inventado devuelve una semana';
+  end if;
+  begin
+    perform public.regenerar_enlace_jugadores('00000000-0000-4000-c000-00000000000b');
+    raise exception 'FALLA: el analista A pudo crear el link de jugadores de B';
+  exception when insufficient_privilege then null;
+  end;
+
   -- Disponibilidad: solo de jugadores propios
   insert into public.disponibilidad (jugador_id, fecha, estado, fecha_regreso)
     values ('00000000-0000-4000-e000-00000000000a', '2026-05-01', 'baja', '2026-05-20');
@@ -382,6 +401,12 @@ begin
   if (select count(*) from public.jugadores) + (select count(*) from public.equipos)
      + (select count(*) from public.miembros) <> 0 then
     raise exception 'FALLA: un visitante sin sesión ve datos';
+  end if;
+  if jsonb_array_length(public.semana_publica(current_setting('prueba.token'), '2026-04-27') -> 'actividades') < 1 then
+    raise exception 'FALLA: con el link, un visitante sin sesión no ve la semana';
+  end if;
+  if exists (select 1 from public.enlaces_jugadores) then
+    raise exception 'FALLA: un visitante sin sesión ve los links de jugadores';
   end if;
 end;
 $$;

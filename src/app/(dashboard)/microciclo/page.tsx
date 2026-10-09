@@ -94,6 +94,9 @@ export default async function CalendarioPage({ searchParams }: Props) {
             <Link href={`/calendario?mes=${ciclo.desde.slice(0, 7)}`} className={CLASE_NAV}>
               Mes
             </Link>
+            <Link href={`/calendario/semana?desde=${ciclo.hasta}`} className={CLASE_NAV}>
+              Compartir semana
+            </Link>
           </>
         }
       />

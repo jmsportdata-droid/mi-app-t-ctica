@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Fragment } from "react";
 import Link from "next/link";
 import { rangoFechas } from "@/lib/calendario";
 import { requerirTemporada } from "@/lib/contexto";
@@ -74,6 +75,9 @@ export default async function CalendarioMesPage({
             >
               →
             </Link>
+            <Link href={`/calendario/semana?desde=${primero}`} className={CLASE_NAV}>
+              Semana
+            </Link>
             <Link href="/microciclo" className={CLASE_NAV}>
               Microciclo
             </Link>
@@ -82,14 +86,17 @@ export default async function CalendarioMesPage({
       />
 
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <div className="grid grid-cols-[2.25rem_repeat(7,minmax(0,1fr))] border-b border-slate-200 bg-slate-50 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <div className="py-2" aria-hidden>
+            Sem
+          </div>
           {DIAS.map((d) => (
             <div key={d} className="py-2">
               {d}
             </div>
           ))}
         </div>
-        <div className="grid grid-cols-7">
+        <div className="grid grid-cols-[2.25rem_repeat(7,minmax(0,1fr))]">
           {rangoFechas(desde, hasta).map((fecha) => {
             const delDia = actividades.filter((a) => a.fecha === fecha);
             const destacadas = delDia.filter((a) => DESTACADAS.has(a.tipo));
@@ -102,49 +109,69 @@ export default async function CalendarioMesPage({
             ];
             const fueraDeMes = !fecha.startsWith(mes);
             return (
-              <Link
-                key={fecha}
-                href={`/microciclo?fecha=${fecha}`}
-                className={cn(
-                  "min-h-24 border-b border-r border-slate-100 p-1.5 text-left transition-colors hover:bg-brand-50 sm:min-h-28",
-                  fueraDeMes && "bg-slate-50/60 text-slate-400",
+              <Fragment key={fecha}>
+                {diaSemana(fecha) === 0 && (
+                  <Link
+                    href={`/calendario/semana?desde=${fecha}`}
+                    className="flex items-center justify-center border-b border-r border-slate-100 bg-slate-50 text-slate-400 transition-colors hover:bg-brand-50 hover:text-brand-700"
+                    title="Ver la semana"
+                    aria-label={`Ver la semana del ${Number(fecha.slice(8))}`}
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      aria-hidden
+                    >
+                      <path d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                  </Link>
                 )}
-              >
-                <span
+                <Link
+                  href={`/microciclo?fecha=${fecha}`}
                   className={cn(
-                    "mb-1 inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold",
-                    fecha === hoy && "bg-brand-600 text-white",
+                    "min-h-24 border-b border-r border-slate-100 p-1.5 text-left transition-colors hover:bg-brand-50 sm:min-h-28",
+                    fueraDeMes && "bg-slate-50/60 text-slate-400",
                   )}
                 >
-                  {Number(fecha.slice(8))}
-                </span>
-                <ul className="space-y-0.5">
-                  {destacadas.slice(0, MAX_POR_DIA).map((a) => (
-                    <li
-                      key={a.id}
-                      className={cn(
-                        "truncate rounded px-1 py-0.5 text-[11px] leading-tight ring-1 ring-inset",
-                        INFO_ACTIVIDAD[a.tipo].color,
-                      )}
-                    >
-                      <span className="hidden tabular-nums sm:inline">
-                        {horaCorta(a.hora_inicio) && `${horaCorta(a.hora_inicio)} `}
-                      </span>
-                      {a.titulo}
-                    </li>
-                  ))}
-                  {destacadas.length > MAX_POR_DIA && (
-                    <li className="px-1 text-[11px] text-slate-500">
-                      +{destacadas.length - MAX_POR_DIA} más
-                    </li>
-                  )}
-                  {rutina.length > 0 && (
-                    <li className="truncate px-1 text-[11px] text-slate-500">
-                      {rutina.join(" · ")}
-                    </li>
-                  )}
-                </ul>
-              </Link>
+                  <span
+                    className={cn(
+                      "mb-1 inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold",
+                      fecha === hoy && "bg-brand-600 text-white",
+                    )}
+                  >
+                    {Number(fecha.slice(8))}
+                  </span>
+                  <ul className="space-y-0.5">
+                    {destacadas.slice(0, MAX_POR_DIA).map((a) => (
+                      <li
+                        key={a.id}
+                        className={cn(
+                          "truncate rounded px-1 py-0.5 text-[11px] leading-tight ring-1 ring-inset",
+                          INFO_ACTIVIDAD[a.tipo].color,
+                        )}
+                      >
+                        <span className="hidden tabular-nums sm:inline">
+                          {horaCorta(a.hora_inicio) && `${horaCorta(a.hora_inicio)} `}
+                        </span>
+                        {a.titulo}
+                      </li>
+                    ))}
+                    {destacadas.length > MAX_POR_DIA && (
+                      <li className="px-1 text-[11px] text-slate-500">
+                        +{destacadas.length - MAX_POR_DIA} más
+                      </li>
+                    )}
+                    {rutina.length > 0 && (
+                      <li className="truncate px-1 text-[11px] text-slate-500">
+                        {rutina.join(" · ")}
+                      </li>
+                    )}
+                  </ul>
+                </Link>
+              </Fragment>
             );
           })}
         </div>

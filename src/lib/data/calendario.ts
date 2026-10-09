@@ -56,3 +56,18 @@ export const getReferenciasPartidos = cache(
     return data;
   },
 );
+
+/** Token del link de jugadores de la temporada, o null si todavía no se creó. */
+export async function getEnlaceJugadores(temporadaId: string): Promise<string | null> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("enlaces_jugadores")
+    .select("token")
+    .eq("temporada_id", temporadaId)
+    .maybeSingle();
+  if (error) {
+    console.error("[getEnlaceJugadores]", error.message);
+    return null;
+  }
+  return data?.token ?? null;
+}
