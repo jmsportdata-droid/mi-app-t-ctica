@@ -13,7 +13,8 @@ La web no puede pedirle datos a Sofascore, así que este programa corre en la Ma
 6. sube todo a la app: informe, PDF, plantel rival con estadísticas y la previa.
 
 También procesa el plantel propio, el post partido (worker/post.py) y el
-asistente del plan (worker/asistente.py).
+asistente del plan (worker/asistente.py), las referencias de la liga
+(worker/liga.py) y la importación de la temporada (worker/importar.py).
 
 Se corre con el Python de la skill (tiene curl_cffi):
     ~/.claude/skills/informe-rival/.venv/bin/python worker/sofascore.py
@@ -36,7 +37,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-VERSION = "1.3"
+VERSION = "1.4"
 RAIZ = Path(__file__).resolve().parent.parent
 SKILL = Path.home() / ".claude" / "skills" / "informe-rival"
 SCRIPTS = SKILL / "scripts"
@@ -528,6 +529,12 @@ def vuelta():
         try:
             if pedido.get("tipo") == "plantel_propio":
                 procesar_propio(pedido)
+            elif pedido.get("tipo") == "liga":
+                import liga  # noqa: WPS433  (worker/liga.py)
+                liga.procesar_liga(pedido, sys.modules[__name__])
+            elif pedido.get("tipo") == "importar_temporada":
+                import importar  # noqa: WPS433  (worker/importar.py)
+                importar.procesar_importacion(pedido, sys.modules[__name__])
             elif pedido.get("tipo") == "plan_asistente":
                 import asistente  # noqa: WPS433  (worker/asistente.py)
                 asistente.procesar_asistente(pedido, sys.modules[__name__])

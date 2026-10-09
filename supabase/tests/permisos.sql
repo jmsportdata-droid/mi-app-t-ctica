@@ -395,6 +395,34 @@ begin
   exception when insufficient_privilege then null;
   end;
 
+  -- Referencias de la liga e indicadores del modelo: solo lo propio
+  insert into public.referencias_liga (temporada_id, id_torneo, id_temporada, competicion)
+    values ('00000000-0000-4000-c000-00000000000a', '278', '1', 'Liga');
+  begin
+    insert into public.referencias_liga (temporada_id, id_torneo, id_temporada, competicion)
+      values ('00000000-0000-4000-c000-00000000000b', '278', '1', 'Liga');
+    raise exception 'FALLA: el analista A cargó la liga en una temporada de B';
+  exception when insufficient_privilege then null;
+  end;
+  insert into public.indicadores_modelo (momento, kpi, objetivo)
+    values ('organizacion_defensiva', 'ppda', 8);
+  if (select cuerpo_tecnico_id from public.indicadores_modelo where kpi = 'ppda')
+     <> '00000000-0000-4000-b000-00000000000a' then
+    raise exception 'FALLA: el indicador no quedó en el cuerpo técnico de A';
+  end if;
+  begin
+    insert into public.indicadores_modelo (momento, principio_id, kpi, objetivo)
+      values ('balon_parado', '00000000-0000-4000-9000-00000000000b', 'xg_abp', 0.3);
+    raise exception 'FALLA: el analista A usó un principio de B en un indicador';
+  exception when insufficient_privilege then null;
+  end;
+  begin
+    insert into public.indicadores_modelo (cuerpo_tecnico_id, momento, kpi, objetivo)
+      values ('00000000-0000-4000-b000-00000000000b', 'balon_parado', 'xg_abp', 0.3);
+    raise exception 'FALLA: el analista A creó indicadores para B';
+  exception when insufficient_privilege then null;
+  end;
+
   -- Asistente del plan: solo en partidos propios
   insert into public.asistente_plan (partido_id) values ('00000000-0000-4000-f000-00000000000a');
   begin

@@ -182,7 +182,8 @@ def incidencias(incs: dict, local: bool) -> list[dict]:
                            "color": i.get("incidentClass"), "motivo": i.get("reason")})
         elif tipo == "substitution":
             salida.append({"tipo": "cambio", "minuto": minuto, "extra": extra, "propio": propio,
-                           "entra": nombre("playerIn"), "sale": nombre("playerOut"),
+                           "entra": nombre("playerIn"), "entra_id": (i.get("playerIn") or {}).get("id"),
+                           "sale": nombre("playerOut"), "sale_id": (i.get("playerOut") or {}).get("id"),
                            "lesion": bool(i.get("injury"))})
     return sorted(salida, key=lambda x: ((x["minuto"] or 0), (x["extra"] or 0)))
 
@@ -203,6 +204,26 @@ def tiros(shotmap: dict, local: bool) -> list[dict]:
             "x": coord.get("x"), "y": coord.get("y"),
         })
     return sorted(salida, key=lambda x: ((x["minuto"] or 0), (x["extra"] or 0)))
+
+
+def intervalos(jugadores: list[dict], incs: list[dict]):
+    """Minuto en que cada jugador entró y salió (para el rendimiento con y sin él)."""
+    for j in jugadores:
+        if not j["minutos"]:
+            continue
+        desde = 0 if j["titular"] else None
+        hasta = None
+        for i in incs:
+            if i["tipo"] == "cambio" and i.get("entra_id") == j["id"]:
+                desde = i["minuto"]
+            elif i["tipo"] == "cambio" and i.get("sale_id") == j["id"]:
+                hasta = i["minuto"]
+            elif i["tipo"] == "tarjeta" and i.get("jugador_id") == j["id"] and i.get("color") in ("red", "yellowRed"):
+                hasta = i["minuto"]
+        if desde is None:
+            desde = max(0, 90 - j["minutos"])
+        j["stats"]["desde"] = desde
+        j["stats"]["hasta"] = hasta if hasta is not None else max(90, desde + j["minutos"])
 
 
 def completar_equipo(equipo: dict, jugadores: list[dict], tiros_lado: list[dict]):
@@ -234,6 +255,8 @@ def datos_partido(evento: str, club_sofa: str) -> dict:
     suyos = jugadores_lado(lineups, lado_rival)
     completar_equipo(propio, nuestros, [t for t in lista_tiros if t["propio"]])
     completar_equipo(rival, suyos, [t for t in lista_tiros if not t["propio"]])
+    lista_incidencias = incidencias(sofa.get(f"/event/{evento}/incidents") or {}, local)
+    intervalos(nuestros, lista_incidencias)
     goles = lambda s: (ev.get(s + "Score") or {})  # noqa: E731
     gf, gc = (goles("home"), goles("away")) if local else (goles("away"), goles("home"))
     avisos = []
@@ -251,7 +274,7 @@ def datos_partido(evento: str, club_sofa: str) -> dict:
         "jugadores": nuestros,
         "jugadores_rival": suyos,
         "tiros": lista_tiros,
-        "incidencias": incidencias(sofa.get(f"/event/{evento}/incidents") or {}, local),
+        "incidencias": lista_incidencias,
         "avisos": avisos,
     }
 
@@ -387,10 +410,23 @@ def procesar_post(pedido: dict, h):
         raise RuntimeError("La temporada no tiene el id de Sofascore del club.")
     evento = buscar_evento(h, partido, str(club_sofa))
 
-    h.actualizar_pedido(pedido["id"], "procesando", "Bajando las estadísticas del partido…")
-    d = datos_partido(evento, str(club_sofa))
+    avisar = lambda m: h.actualizar_pedido(pedido["id"], "procesando", m)  # noqa: E731
+    gf, gc, filas, sin_vincular = cargar_post(h, partido, evento, str(club_sofa), avisar, con_claude=True)
+    h.actualizar_pedido(
+        pedido["id"], "listo",
+        f"Post partido {gf}-{gc}: {filas} jugadores con estadísticas"
+        + (f" ({sin_vincular} sin vincular)" if sin_vincular else "") + ".",
+    )
+    h.log("Listo: post partido", partido["id"])
 
-    h.actualizar_pedido(pedido["id"], "procesando", "Vinculando a nuestros jugadores…")
+
+def cargar_post(h, partido: dict, evento: str, club_sofa: str, avisar, con_claude: bool = True):
+    """Baja el partido, vincula a los jugadores y sube todo. Devuelve (gf, gc, filas, sin vincular)."""
+    temporada = partido["temporada"]
+    avisar("Bajando las estadísticas del partido…")
+    d = datos_partido(evento, club_sofa)
+
+    avisar("Vinculando a nuestros jugadores…")
     app = h.rest("GET", f"jugadores?temporada_id=eq.{temporada['id']}&select=*") or []
     vinculos = h.vincular(app, [{"id": j["id"], "nombre": j["nombre"], "dorsal": j["dorsal"]} for j in d["jugadores"]])
     tarjetas: dict[str, dict] = {}
@@ -437,18 +473,23 @@ def procesar_post(pedido: dict, h):
     plan = (h.rest("GET", f"planes_partido?partido_id=eq.{partido['id']}&select=*") or [None])[0]
     video = h.rest("GET", f"analisis_rival?partido_id=eq.{partido['id']}&equipo=eq.propio&select=fase,texto,valoracion&order=orden") or []
 
-    h.actualizar_pedido(pedido["id"], "procesando", "Claude está escribiendo el borrador de conclusiones…")
     insights = {}
+    if con_claude:
+        avisar("Claude está escribiendo el borrador de conclusiones…")
     try:
+        if not con_claude:
+            raise LookupError("sin Claude")
         carpeta = Path.home() / "Library" / "Caches" / "gestion-total"
         carpeta.mkdir(parents=True, exist_ok=True)
         resumen = resumen_para_claude(temporada["club"], partido["rival"]["nombre"], d, plan, video, previos)
         insights = conclusiones_claude(h, carpeta, resumen)
+    except LookupError:
+        pass
     except Exception as e:  # sin borrador, el post partido igual sube
         h.log("Sin conclusiones de Claude:", e)
         avisos.append("Claude no pudo escribir el borrador de conclusiones.")
 
-    h.actualizar_pedido(pedido["id"], "procesando", "Subiendo el post partido a la app…")
+    avisar("Subiendo el post partido a la app…")
     h.rest("POST", "estadisticas_partido?on_conflict=partido_id", {
         "partido_id": partido["id"], "fuente": FUENTE, "id_evento": evento,
         "generado_en": datetime.now(timezone.utc).isoformat(),
@@ -466,12 +507,7 @@ def procesar_post(pedido: dict, h):
             "goles_favor": gf, "goles_contra": gc, "estado": "jugado",
             **({"penales_favor": pf, "penales_contra": pc} if pf is not None and pc is not None else {}),
         })
-    h.actualizar_pedido(
-        pedido["id"], "listo",
-        f"Post partido {gf}-{gc}: {len(filas)} jugadores con estadísticas"
-        + (f" ({len(sin_vincular)} sin vincular)" if sin_vincular else "") + ".",
-    )
-    h.log("Listo: post partido", partido["id"])
+    return gf, gc, len(filas), len(sin_vincular)
 
 
 if __name__ == "__main__" and len(sys.argv) == 4 and sys.argv[1] == "--probar":

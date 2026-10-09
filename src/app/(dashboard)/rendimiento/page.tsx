@@ -3,10 +3,18 @@ import Link from "next/link";
 import { requerirTemporada } from "@/lib/contexto";
 import { getDisponibilidadDelDia } from "@/lib/data/disponibilidad";
 import { getJugadores } from "@/lib/data/jugadores";
-import { getRendimiento } from "@/lib/data/rendimiento";
+import {
+  getIndicadores,
+  getPedidosTemporada,
+  getReferenciasLiga,
+  getRendimiento,
+} from "@/lib/data/rendimiento";
+import { getModeloJuego } from "@/lib/data/modelo-juego";
 import type { Stats } from "@/lib/post-partido";
 import {
   alertas as calcularAlertas,
+  competicionBase,
+  conSin,
   filtrarPartidos,
   resumenJugadores,
   type JugadorInfo,
@@ -19,6 +27,10 @@ import { VistaEvolucion } from "@/components/rendimiento/VistaEvolucion";
 import { VistaIndividual } from "@/components/rendimiento/VistaIndividual";
 import { VistaMinutos } from "@/components/rendimiento/VistaMinutos";
 import { VistaPartido } from "@/components/rendimiento/VistaPartido";
+import { TarjetaConSin, VistaConSin } from "@/components/rendimiento/VistaConSin";
+import { VistaLiga } from "@/components/rendimiento/VistaLiga";
+import { VistaModelo } from "@/components/rendimiento/VistaModelo";
+import { PanelDatos } from "@/components/rendimiento/PanelDatos";
 
 export const metadata: Metadata = { title: "Rendimiento" };
 
@@ -27,6 +39,9 @@ const VISTAS = [
   { id: "partido", label: "Partido" },
   { id: "minutos", label: "Minutos y plantel" },
   { id: "individual", label: "Individual" },
+  { id: "con-sin", label: "Con y sin" },
+  { id: "liga", label: "Liga" },
+  { id: "modelo", label: "Modelo de juego" },
 ] as const;
 type Vista = (typeof VISTAS)[number]["id"];
 
@@ -40,17 +55,23 @@ interface Props {
     hasta?: string;
     partido?: string;
     jugador?: string;
+    liga?: string;
   };
 }
 
 /** Rendimiento del equipo y de los jugadores, con los post partidos de la temporada. */
 export default async function RendimientoPage({ searchParams }: Props) {
-  const { temporada } = await requerirTemporada();
-  const [datos, jugadores, disponibilidad] = await Promise.all([
-    getRendimiento(temporada.id),
-    getJugadores(temporada.id),
-    getDisponibilidadDelDia(temporada.id, hoyISO()),
-  ]);
+  const { temporada, cuerpoTecnico } = await requerirTemporada();
+  const [datos, jugadores, disponibilidad, referencias, indicadores, pedidos, modelo] =
+    await Promise.all([
+      getRendimiento(temporada.id),
+      getJugadores(temporada.id),
+      getDisponibilidadDelDia(temporada.id, hoyISO()),
+      getReferenciasLiga(temporada.id),
+      getIndicadores(cuerpoTecnico.id),
+      getPedidosTemporada(temporada.id, cuerpoTecnico.id),
+      getModeloJuego(cuerpoTecnico.id),
+    ]);
   const vista: Vista = VISTAS.some((v) => v.id === searchParams.vista)
     ? (searchParams.vista as Vista)
     : "evolucion";
@@ -60,7 +81,11 @@ export default async function RendimientoPage({ searchParams }: Props) {
     hasta: fecha(searchParams.hasta),
   };
   const competiciones = [
-    ...new Set(datos.partidos.map((p) => p.competicion).filter((c): c is string => Boolean(c))),
+    ...new Set(
+      datos.partidos
+        .map((p) => competicionBase(p.competicion))
+        .filter((c): c is string => Boolean(c)),
+    ),
   ].sort();
   const partidos = filtrarPartidos(datos.partidos, filtros);
   const ids = new Set(partidos.map((p) => p.id));
@@ -88,6 +113,12 @@ export default async function RendimientoPage({ searchParams }: Props) {
     return `/rendimiento?${p.toString()}`;
   };
   const sinPartidos = partidos.length === 0;
+  const ligaElegida = referencias.find((r) => r.idTorneo === searchParams.liga) ?? referencias[0];
+  const conSofascore = resumen.map((r) => {
+    const j = jugadores.find((x) => x.id === r.jugador.id);
+    const ids = (j?.ids_externos ?? {}) as Record<string, string>;
+    return { ...r, sofascoreId: ids.sofascore ? String(ids.sofascore) : null };
+  });
   const partidoElegido =
     partidos.find((p) => p.id === searchParams.partido) ?? partidos[partidos.length - 1];
   const jugadorElegido =
@@ -100,6 +131,15 @@ export default async function RendimientoPage({ searchParams }: Props) {
         titulo="Rendimiento"
         descripcion={`Equipo y jugadores con los post partidos de la temporada ${temporada.etiqueta} · ${partidos.length} partido${partidos.length === 1 ? "" : "s"} con datos`}
       />
+
+      <div className="mb-5">
+        <PanelDatos
+          liga={pedidos.liga}
+          importacion={pedidos.importacion}
+          macConectada={pedidos.macConectada}
+          ligaActualizada={referencias[0]?.generadoEn ?? null}
+        />
+      </div>
 
       <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
         <FiltrosRendimiento
@@ -167,7 +207,36 @@ export default async function RendimientoPage({ searchParams }: Props) {
         ))}
       </nav>
 
-      {sinPartidos && (vista === "evolucion" || vista === "partido") ? (
+      {vista === "liga" ? (
+        ligaElegida ? (
+          <VistaLiga
+            referencias={referencias}
+            elegida={ligaElegida}
+            resumen={conSofascore}
+            jugadorElegido={searchParams.jugador ?? null}
+          />
+        ) : (
+          <p className="rounded-2xl border-2 border-dashed border-slate-200 bg-white p-8 text-center text-sm text-slate-600">
+            Todavía no hay datos de la liga. Abrí «Datos de Sofascore» y tocá «Actualizar la liga»
+            (la Mac lo procesa en unos segundos).
+          </p>
+        )
+      ) : vista === "modelo" ? (
+        <VistaModelo
+          partidos={partidos}
+          indicadores={indicadores}
+          planes={datos.planes}
+          principios={modelo.principios
+            .filter((p) => !p.padre_id && !p.oculto)
+            .map((p) => ({ id: p.id, nombre: p.nombre, momento: p.momento }))}
+        />
+      ) : vista === "con-sin" ? (
+        sinPartidos ? (
+          <SinDatos filtrado={datos.partidos.length > 0} />
+        ) : (
+          <VistaConSin resumen={resumen} partidos={partidos} jugadorPartidos={jps} />
+        )
+      ) : sinPartidos && (vista === "evolucion" || vista === "partido") ? (
         <SinDatos filtrado={datos.partidos.length > 0} />
       ) : vista === "evolucion" ? (
         <VistaEvolucion partidos={partidos} />
@@ -200,6 +269,11 @@ export default async function RendimientoPage({ searchParams }: Props) {
             valoraciones={datos.valoraciones}
             alertas={alertas}
           />
+          {!sinPartidos && (
+            <div className="mt-5">
+              <TarjetaConSin datos={conSin(jugadorElegido.jugador.id, partidos, jps)} />
+            </div>
+          )}
         </>
       ) : (
         <p className="text-sm text-slate-500">El plantel está vacío.</p>

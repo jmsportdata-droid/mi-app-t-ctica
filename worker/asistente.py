@@ -33,7 +33,7 @@ FASES = {"inicio": "Inicios", "organizacion": "Organización", "finalizacion": "
          "transicion_ofensiva": "Transición ofensiva", "transicion_defensiva": "Transición defensiva"}
 MOMENTO_PRINCIPIO = {"organizacion_ofensiva": "Con pelota", "organizacion_defensiva": "Sin pelota",
                      "transicion_defensa_ataque": "Al recuperar", "transicion_ataque_defensa": "Al perder",
-                     "abp": "Pelota parada"}
+                     "balon_parado": "Pelota parada"}
 KPIS = [("xg", "xG"), ("tiros", "tiros"), ("posesion", "posesión %"), ("toques_area", "toques en el área"),
         ("recuperaciones", "recuperaciones"), ("perdidas", "pérdidas"), ("xg_abp", "xG de ABP")]
 CLAVES_INFORME = ("equipo", "contexto", "formaciones", "once", "bloque", "equipo_stats", "carriles", "ppda",

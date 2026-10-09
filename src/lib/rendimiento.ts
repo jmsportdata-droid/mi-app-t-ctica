@@ -25,6 +25,9 @@ export interface PartidoRend {
   gc: number | null;
   propio: Stats;
   rival_stats: Stats;
+  /** Tiros con minuto y xG (para el rendimiento con y sin cada jugador) */
+  tiros?: { minuto: number | null; propio: boolean; xg: number }[];
+  goles?: { minuto: number | null; propio: boolean }[];
 }
 
 export interface JugadorPartido {
@@ -68,11 +71,24 @@ export interface Filtros {
 /** Minutos mínimos para comparar a un jugador con su línea. */
 export const MINUTOS_MINIMOS = 180;
 
+/** "Liga AUF Uruguaya · Apertura · Fecha 7" → "Liga AUF Uruguaya · Apertura" (para filtrar). */
+export function competicionBase(c: string | null): string | null {
+  if (!c) return null;
+  return (
+    c
+      .replace(
+        /\s*·\s*(Fecha \d+|\d+avos de final|Octavos de final|Cuartos de final|Semifinal|Final)$/i,
+        "",
+      )
+      .trim() || c
+  );
+}
+
 export function filtrarPartidos(partidos: PartidoRend[], f: Filtros): PartidoRend[] {
   return partidos
     .filter(
       (p) =>
-        (!f.competicion || p.competicion === f.competicion) &&
+        (!f.competicion || competicionBase(p.competicion) === f.competicion) &&
         (!f.desde || p.fecha >= f.desde) &&
         (!f.hasta || p.fecha <= f.hasta),
     )
@@ -488,3 +504,75 @@ export function alertas(
   const orden = { alerta: 0, aviso: 1, info: 2 };
   return lista.sort((a, b) => orden[a.nivel] - orden[b.nivel]);
 }
+
+// ---------- Con y sin el jugador ---------------------------------------
+
+/** Duración que se toma para cada partido (el descuento cuenta como minuto 90). */
+const DURACION = 90;
+
+export interface TramoConSin {
+  minutos: number;
+  gf: number;
+  gc: number;
+  xgf: number;
+  xgc: number;
+}
+
+export interface ConSin {
+  con: TramoConSin;
+  sin: TramoConSin;
+}
+
+/** Entre qué minutos estuvo en cancha (si no hay dato, se estima con los minutos jugados). */
+export function intervalo(j: JugadorPartido): [number, number] | null {
+  if (!j.minutos) return null;
+  const desde =
+    typeof j.stats.desde === "number"
+      ? j.stats.desde
+      : j.titular
+        ? 0
+        : Math.max(0, DURACION - j.minutos);
+  const hasta = typeof j.stats.hasta === "number" ? j.stats.hasta : desde + j.minutos;
+  return [Math.min(desde, DURACION), Math.min(hasta, DURACION)];
+}
+
+/**
+ * Cómo le fue al equipo con el jugador en cancha y sin él (goles y xG a favor y
+ * en contra), sumando todos los partidos con datos: en los que no jugó, cuenta
+ * todo como "sin".
+ */
+export function conSin(jugadorId: string, partidos: PartidoRend[], jps: JugadorPartido[]): ConSin {
+  const vacio = (): TramoConSin => ({ minutos: 0, gf: 0, gc: 0, xgf: 0, xgc: 0 });
+  const con = vacio();
+  const sin = vacio();
+  for (const p of partidos) {
+    const jp = jps.find((x) => x.partidoId === p.id && x.jugadorId === jugadorId);
+    const iv = jp ? intervalo(jp) : null;
+    const enCancha = (m: number | null) => {
+      if (!iv) return false;
+      const minuto = Math.min(m ?? 0, DURACION);
+      return iv[0] === 0 ? minuto <= iv[1] : minuto > iv[0] && minuto <= iv[1];
+    };
+    const enJuego = iv ? iv[1] - iv[0] : 0;
+    con.minutos += enJuego;
+    sin.minutos += DURACION - enJuego;
+    for (const t of p.tiros ?? []) {
+      const lado = enCancha(t.minuto) ? con : sin;
+      if (t.propio) lado.xgf += t.xg;
+      else lado.xgc += t.xg;
+    }
+    for (const g of p.goles ?? []) {
+      const lado = enCancha(g.minuto) ? con : sin;
+      if (g.propio) lado.gf += 1;
+      else lado.gc += 1;
+    }
+  }
+  return { con, sin };
+}
+
+/** Por 90 minutos (null con menos de 90′). */
+export const por90 = (valor: number, minutos: number) =>
+  minutos >= 90 ? (90 * valor) / minutos : null;
+
+/** Mínimos para que el con y sin diga algo: minutos con él y sin él. */
+export const MINIMOS_CON_SIN = { con: 270, sin: 90 };

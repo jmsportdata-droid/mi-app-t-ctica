@@ -799,6 +799,54 @@ export type Database = {
           },
         ]
       }
+      indicadores_modelo: {
+        Row: {
+          creado_en: string
+          cuerpo_tecnico_id: string
+          id: string
+          kpi: string
+          momento: Database["public"]["Enums"]["momento_juego"]
+          objetivo: number
+          orden: number
+          principio_id: string | null
+        }
+        Insert: {
+          creado_en?: string
+          cuerpo_tecnico_id?: string
+          id?: string
+          kpi: string
+          momento: Database["public"]["Enums"]["momento_juego"]
+          objetivo: number
+          orden?: number
+          principio_id?: string | null
+        }
+        Update: {
+          creado_en?: string
+          cuerpo_tecnico_id?: string
+          id?: string
+          kpi?: string
+          momento?: Database["public"]["Enums"]["momento_juego"]
+          objetivo?: number
+          orden?: number
+          principio_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "indicadores_modelo_cuerpo_tecnico_id_fkey"
+            columns: ["cuerpo_tecnico_id"]
+            isOneToOne: false
+            referencedRelation: "cuerpos_tecnicos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicadores_modelo_principio_id_fkey"
+            columns: ["principio_id"]
+            isOneToOne: false
+            referencedRelation: "principios_juego"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       informe_rival: {
         Row: {
           actualizado_en: string
@@ -1669,6 +1717,47 @@ export type Database = {
           },
         ]
       }
+      referencias_liga: {
+        Row: {
+          competicion: string
+          equipos: Json
+          fuente: string
+          generado_en: string
+          id_temporada: string
+          id_torneo: string
+          jugadores: Json
+          temporada_id: string
+        }
+        Insert: {
+          competicion: string
+          equipos?: Json
+          fuente?: string
+          generado_en?: string
+          id_temporada: string
+          id_torneo: string
+          jugadores?: Json
+          temporada_id: string
+        }
+        Update: {
+          competicion?: string
+          equipos?: Json
+          fuente?: string
+          generado_en?: string
+          id_temporada?: string
+          id_torneo?: string
+          jugadores?: Json
+          temporada_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referencias_liga_temporada_id_fkey"
+            columns: ["temporada_id"]
+            isOneToOne: false
+            referencedRelation: "temporadas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sesion_tareas: {
         Row: {
           actividad_id: string
@@ -2238,6 +2327,8 @@ export type Database = {
         | "plantel_propio"
         | "post_partido"
         | "plan_asistente"
+        | "liga"
+        | "importar_temporada"
       tipo_tarea:
         | "entrada_en_calor"
         | "pre_sesion"
@@ -2485,6 +2576,8 @@ export const Constants = {
         "plantel_propio",
         "post_partido",
         "plan_asistente",
+        "liga",
+        "importar_temporada",
       ],
       tipo_tarea: [
         "entrada_en_calor",
