@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { llevaEjercicios } from "@/types/calendario";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { requerirTemporada } from "@/lib/contexto";
@@ -7,7 +8,7 @@ import { getDisponibilidadDelDia } from "@/lib/data/disponibilidad";
 import { getJugadores } from "@/lib/data/jugadores";
 import { getModeloJuego } from "@/lib/data/modelo-juego";
 import { getPlantillas, getSesionCompleta, getUbicacionSesion } from "@/lib/data/sesiones";
-import { getTareas } from "@/lib/data/tareas";
+import { getFeedbackTareas, getTareas } from "@/lib/data/tareas";
 import { repartirPorMomento } from "@/lib/sesiones";
 import { formatearSegundos } from "@/lib/tareas";
 import { cn } from "@/lib/utils/cn";
@@ -17,6 +18,8 @@ import { INFO_ORIENTACION } from "@/types/tarea";
 import { BackLink } from "@/components/ui/BackLink";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { CierreSesion } from "@/components/microciclo/CierreSesion";
+import { EnfoqueSesion } from "@/components/microciclo/EnfoqueSesion";
+import { INFO_ACTIVIDAD } from "@/types/calendario";
 import { EditorSesion } from "@/components/microciclo/EditorSesion";
 import { PlantillasSesion } from "@/components/microciclo/PlantillasSesion";
 import { TextosSesion } from "@/components/microciclo/TextosSesion";
@@ -30,26 +33,42 @@ export default async function SesionPage({ params }: { params: { id: string } })
   const { temporada, cuerpoTecnico } = await requerirTemporada();
   const actividad = await getActividad(params.id);
   if (!actividad) notFound();
-  if (actividad.tipo !== "entrenamiento") redirect(`/calendario/${actividad.id}/editar`);
+  if (!llevaEjercicios(actividad.tipo)) redirect(`/calendario/${actividad.id}/editar`);
 
-  const [ubicacion, completa, banco, { principios }, plantillas, jugadores, disponibilidad] =
-    await Promise.all([
-      getUbicacionSesion(temporada.id, actividad),
-      getSesionCompleta(actividad.id),
-      getTareas(cuerpoTecnico.id),
-      getModeloJuego(cuerpoTecnico.id),
-      getPlantillas(cuerpoTecnico.id),
-      getJugadores(temporada.id),
-      getDisponibilidadDelDia(temporada.id, actividad.fecha),
-    ]);
+  const [
+    ubicacion,
+    completa,
+    banco,
+    { principios },
+    plantillas,
+    jugadores,
+    disponibilidad,
+    feedback,
+  ] = await Promise.all([
+    getUbicacionSesion(temporada.id, actividad),
+    getSesionCompleta(actividad.id),
+    getTareas(cuerpoTecnico.id),
+    getModeloJuego(cuerpoTecnico.id),
+    getPlantillas(cuerpoTecnico.id),
+    getJugadores(temporada.id),
+    getDisponibilidadDelDia(temporada.id, actividad.fecha),
+    getFeedbackTareas(cuerpoTecnico.id),
+  ]);
   const { sesion, tareas, asistencia } = completa;
   const { md, diaTipo, numeroMicrociclo, numeroSesion } = ubicacion;
+  // El tipo de entrenamiento elegido en la sesión; si no, el del día según el manual
+  const orientacion = sesion?.orientacion ?? diaTipo?.orientacion;
+  const bloque = INFO_ACTIVIDAD[actividad.tipo].label;
 
   const reparto = repartirPorMomento(tareas, indiceObjetivos(principios));
   const inicio = horaCorta(actividad.hora_inicio);
   const fin = horaCorta(actividad.hora_fin);
   const titulo = [
-    numeroSesion ? `Sesión ${numeroSesion}` : "Sesión",
+    actividad.tipo === "entrenamiento"
+      ? numeroSesion
+        ? `Sesión ${numeroSesion}`
+        : "Sesión"
+      : actividad.titulo || bloque,
     numeroMicrociclo ? `Microciclo ${numeroMicrociclo}` : null,
   ]
     .filter(Boolean)
@@ -77,24 +96,40 @@ export default async function SesionPage({ params }: { params: { id: string } })
             <Link href={`/imprimir/sesion/${actividad.id}`} target="_blank" className={CLASE_BOTON}>
               Planilla PDF ↗
             </Link>
+            <Link href={`/imprimir/dia/${actividad.fecha}`} target="_blank" className={CLASE_BOTON}>
+              Día completo PDF ↗
+            </Link>
           </>
         }
       />
 
-      {diaTipo && md && (
+      {orientacion && (
         <div className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-brand-200 bg-brand-50/60 px-5 py-3 text-sm">
-          <span className="rounded-md bg-slate-900 px-2 py-0.5 text-xs font-bold text-white">
-            {md}
+          {md && (
+            <span className="rounded-md bg-slate-900 px-2 py-0.5 text-xs font-bold text-white">
+              {md}
+            </span>
+          )}
+          <span className="rounded-md bg-white px-2 py-0.5 text-xs font-semibold text-slate-700 ring-1 ring-inset ring-slate-200">
+            {bloque}
           </span>
           <span className="font-semibold text-slate-900">
-            {INFO_ORIENTACION[diaTipo.orientacion].label}
+            {INFO_ORIENTACION[orientacion].label}
           </span>
-          <span className="text-slate-600">{diaTipo.foco}</span>
+          {diaTipo && <span className="text-slate-600">{diaTipo.foco}</span>}
         </div>
       )}
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="space-y-6">
+          <EnfoqueSesion
+            actividadId={actividad.id}
+            orientacionGuardada={sesion?.orientacion ?? null}
+            orientacionDelDia={diaTipo?.orientacion}
+            md={md ?? undefined}
+            principios={principios}
+            elegidos={sesion?.principios ?? []}
+          />
           <TextosSesion
             actividadId={actividad.id}
             objetivo={sesion?.objetivo ?? null}
@@ -105,8 +140,11 @@ export default async function SesionPage({ params }: { params: { id: string } })
             tareas={tareas}
             banco={banco.filter((t) => !t.archivada)}
             principios={principios}
-            orientacionDelDia={diaTipo?.orientacion}
+            orientacionDelDia={orientacion}
             md={md ?? undefined}
+            tipoBloque={actividad.tipo}
+            principiosElegidos={sesion?.principios ?? []}
+            feedback={feedback}
           />
           <CierreSesion
             actividadId={actividad.id}
@@ -114,6 +152,7 @@ export default async function SesionPage({ params }: { params: { id: string } })
             jugadores={jugadores}
             disponibilidad={disponibilidad}
             asistencia={asistencia}
+            tareas={tareas}
             minutosPlanificados={Math.round(reparto.total / 60)}
           />
         </div>

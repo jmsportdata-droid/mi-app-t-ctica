@@ -17,7 +17,7 @@ import { INFO_TIPO_TAREA } from "@/types/tarea";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { BotonImprimir } from "@/components/microciclo/BotonImprimir";
 
-export const metadata: Metadata = { title: "Reportes" };
+export const metadata: Metadata = { title: "Reportes de entrenamiento" };
 
 const CLASE_NAV =
   "inline-flex items-center rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50";
@@ -99,7 +99,7 @@ export default async function ReportesPage({ searchParams }: Props) {
   return (
     <>
       <PageHeader
-        titulo={`Reporte · ${titulo}`}
+        titulo={`Reporte de entrenamiento · ${titulo}`}
         descripcion={`Del ${formatearDia(desde)} al ${formatearDia(hasta)}. Lo planificado sale de las sesiones; lo real, de las sesiones cerradas.`}
         acciones={
           <div className="flex flex-wrap items-center gap-2 print:hidden">

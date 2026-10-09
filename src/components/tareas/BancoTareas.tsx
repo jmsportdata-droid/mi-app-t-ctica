@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import type { FeedbackTarea } from "@/lib/data/tareas";
 import Link from "next/link";
 import { BUCKETS, urlImagen } from "@/lib/storage/config";
 import { textoEspacio, textoTiempo } from "@/lib/tareas";
@@ -32,9 +33,12 @@ function normalizar(texto: string) {
 export function BancoTareas({
   tareas,
   principios,
+  feedback,
 }: {
   tareas: TareaConVinculos[];
   principios: PrincipioJuego[];
+  /** Usos y valoraciones de cada tarea en los cierres de sesión */
+  feedback: Record<string, FeedbackTarea>;
 }) {
   const [busqueda, setBusqueda] = useState("");
   const [tipo, setTipo] = useState<TipoTarea | "">("");
@@ -177,7 +181,7 @@ export function BancoTareas({
         <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {filtradas.map((t) => (
             <li key={t.id}>
-              <TarjetaTarea tarea={t} indice={indice} />
+              <TarjetaTarea tarea={t} indice={indice} feedback={feedback[t.id]} />
             </li>
           ))}
         </ul>
@@ -189,9 +193,11 @@ export function BancoTareas({
 function TarjetaTarea({
   tarea,
   indice,
+  feedback,
 }: {
   tarea: TareaConVinculos;
   indice: Map<string, EtiquetaObjetivo>;
+  feedback?: FeedbackTarea;
 }) {
   const info = INFO_TIPO_TAREA[tarea.tipo];
   const grafico = urlImagen(BUCKETS.graficosTareas, tarea.grafico_ruta);
@@ -225,6 +231,13 @@ function TarjetaTarea({
         </span>
         <h3 className="font-semibold leading-snug text-slate-900">{tarea.nombre}</h3>
         {datos.length > 0 && <p className="text-xs text-slate-500">{datos.join(" · ")}</p>}
+        {feedback && (
+          <p className="text-[11px] text-slate-500">
+            Usada {feedback.usos} {feedback.usos === 1 ? "vez" : "veces"}
+            {feedback.funciono + feedback.regular + feedback.noFunciono > 0 &&
+              ` · ${feedback.funciono} funcionó · ${feedback.noFunciono} no`}
+          </p>
+        )}
         {objetivos.length > 0 && (
           <ul className="mt-auto flex flex-wrap gap-1.5 pt-1">
             {objetivos.slice(0, 3).map((o) => (

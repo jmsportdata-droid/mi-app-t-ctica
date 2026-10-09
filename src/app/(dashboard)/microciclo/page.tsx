@@ -1,9 +1,16 @@
 import type { Metadata } from "next";
+import { llevaEjercicios } from "@/types/calendario";
 import Link from "next/link";
 import { cicloDe, DESPUES_DEL_ULTIMO, numeroMicrociclo, numerarSesiones } from "@/lib/calendario";
 import { requerirTemporada } from "@/lib/contexto";
 import { getActividades, getReferenciasPartidos } from "@/lib/data/calendario";
 import { getResumenSesiones } from "@/lib/data/sesiones";
+import { getDisponibilidadDelDia } from "@/lib/data/disponibilidad";
+import { getModeloJuego } from "@/lib/data/modelo-juego";
+import { getPrincipiosDelPlan, getSesionesReporte } from "@/lib/data/reportes";
+import { calcularReporte } from "@/lib/reportes";
+import { rangoFechas } from "@/lib/calendario";
+import { ResumenMicrociclo } from "@/components/microciclo/ResumenMicrociclo";
 import { formatearDia, hoyISO, sumarDias } from "@/lib/utils/fecha";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { CopiarCicloButton } from "@/components/calendario/CopiarCicloButton";
@@ -20,7 +27,7 @@ const CLASE_NAV =
   "inline-flex items-center rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50";
 
 export default async function CalendarioPage({ searchParams }: Props) {
-  const { temporada } = await requerirTemporada();
+  const { temporada, cuerpoTecnico } = await requerirTemporada();
   const hoy = hoyISO();
   const fecha =
     searchParams.fecha && /^\d{4}-\d{2}-\d{2}$/.test(searchParams.fecha) ? searchParams.fecha : hoy;
@@ -29,9 +36,48 @@ export default async function CalendarioPage({ searchParams }: Props) {
   const ciclo = cicloDe(partidos, fecha, searchParams.partido ?? null);
   const actividades = await getActividades(temporada.id, ciclo.desde, ciclo.hasta);
   const resumenes = await getResumenSesiones(
-    actividades.filter((a) => a.tipo === "entrenamiento").map((a) => a.id),
+    actividades.filter((a) => llevaEjercicios(a.tipo)).map((a) => a.id),
   );
   const numeroSesion = numerarSesiones(actividades);
+  const desdePrevio = sumarDias(ciclo.desde, -28);
+  const [sesionesReporte, { principios }, delPlan, disponibilidades] = await Promise.all([
+    getSesionesReporte(temporada.id, desdePrevio, ciclo.hasta),
+    getModeloJuego(cuerpoTecnico.id),
+    getPrincipiosDelPlan(ciclo.partido?.id ?? null),
+    Promise.all(
+      rangoFechas(ciclo.desde, ciclo.hasta).map(
+        async (f) => [f, await getDisponibilidadDelDia(temporada.id, f)] as const,
+      ),
+    ),
+  ]);
+  const reporteSemana = calcularReporte({
+    sesiones: sesionesReporte,
+    desde: ciclo.desde,
+    hasta: ciclo.hasta,
+    principios,
+    partidos,
+    agrupar: "dia",
+  });
+  const reportePrevio = calcularReporte({
+    sesiones: sesionesReporte.filter((s) => s.fecha < ciclo.desde),
+    desde: desdePrevio,
+    hasta: sumarDias(ciclo.desde, -1),
+    principios,
+    partidos,
+    agrupar: "semana",
+  });
+  const bajasPorDia = Object.fromEntries(
+    disponibilidades.map(([f, d]) => {
+      const estados = Object.values(d).map((x) => x.estado);
+      return [
+        f,
+        {
+          bajas: estados.filter((e) => e === "baja" || e === "sancionado").length,
+          limitados: estados.filter((e) => e === "limitado").length,
+        },
+      ];
+    }),
+  );
   const numero = numeroMicrociclo(partidos, ciclo);
 
   const actividadPartido = ciclo.partido
@@ -108,14 +154,23 @@ export default async function CalendarioPage({ searchParams }: Props) {
         />
       </div>
 
+      <ResumenMicrociclo
+        semana={reporteSemana}
+        previas={reportePrevio}
+        principios={principios}
+        delPlan={delPlan}
+      />
+
       <VistaCiclo
         desde={ciclo.desde}
         hasta={ciclo.hasta}
         hoy={hoy}
         actividades={actividades}
         partidos={partidos}
-        resumenes={resumenes}
-        numeroSesion={numeroSesion}
+        resumenes={Object.fromEntries(resumenes)}
+        numeroSesion={Object.fromEntries(numeroSesion)}
+        editable
+        disponibilidad={bajasPorDia}
       />
     </>
   );

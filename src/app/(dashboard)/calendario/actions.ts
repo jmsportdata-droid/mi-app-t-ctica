@@ -13,7 +13,12 @@ import {
 } from "@/lib/validations/calendario";
 import { fechaSchema } from "@/lib/validations/comun";
 import { hoyISO, sumarDias } from "@/lib/utils/fecha";
-import type { Actividad, ActividadInput, ActividadPartidoInput } from "@/types/calendario";
+import {
+  llevaEjercicios,
+  type Actividad,
+  type ActividadInput,
+  type ActividadPartidoInput,
+} from "@/types/calendario";
 
 export type ActividadActionResult =
   | { ok: true; id: string; fecha: string }
@@ -27,7 +32,8 @@ function errorDeBD(error: PostgrestError, contexto: string): { ok: false; error:
   if (error.hint === "tiene_sesion") {
     return {
       ok: false,
-      error: "Este entrenamiento tiene una sesión armada: no puede cambiar de tipo.",
+      error:
+        "Este bloque tiene ejercicios: solo puede pasar a otro bloque que lleve ejercicios (cancha, pre sesión, gimnasio, pelota quieta o recuperación).",
     };
   }
   console.error(`[calendario ${contexto}]`, error.code, error.message);
@@ -156,7 +162,7 @@ export async function duplicarActividad(id: string, fecha: string): Promise<Acti
     .select("id, fecha")
     .single();
   if (error) return errorDeBD(error, "duplicar");
-  if (origen.tipo === "entrenamiento") {
+  if (llevaEjercicios(origen.tipo)) {
     const { error: errorSesion } = await accion.supabase.rpc("copiar_sesion", {
       p_origen: origen.id,
       p_destino: data.id,
@@ -236,7 +242,7 @@ export async function copiarCicloAnterior(
       .select("id")
       .single();
     if (errorInsert) return errorDeBD(errorInsert, "copiar insertar");
-    if (fila.tipo === "entrenamiento") {
+    if (llevaEjercicios(fila.tipo)) {
       const { error: errorSesion } = await supabase.rpc("copiar_sesion", {
         p_origen: idOrigen,
         p_destino: nueva.id,

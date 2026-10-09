@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { requerirContexto } from "@/lib/contexto";
 import { getModeloJuego } from "@/lib/data/modelo-juego";
-import { getTarea } from "@/lib/data/tareas";
+import { getFeedbackTareas, getTarea, type FeedbackTarea } from "@/lib/data/tareas";
 import { BUCKETS, urlImagen } from "@/lib/storage/config";
 import {
   formatearSegundos,
@@ -27,9 +27,10 @@ export const metadata: Metadata = { title: "Tarea" };
 
 export default async function TareaPage({ params }: { params: { id: string } }) {
   const { cuerpoTecnico } = await requerirContexto();
-  const [tarea, { principios, contenidos }] = await Promise.all([
+  const [tarea, { principios, contenidos }, feedbacks] = await Promise.all([
     getTarea(params.id),
     getModeloJuego(cuerpoTecnico.id),
+    getFeedbackTareas(cuerpoTecnico.id),
   ]);
   if (!tarea) notFound();
 
@@ -130,6 +131,7 @@ export default async function TareaPage({ params }: { params: { id: string } }) 
         </div>
 
         <aside className="space-y-6">
+          <FeedbackDeTarea feedback={feedbacks[tarea.id]} />
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="mb-3 font-semibold text-slate-900">Ficha</h2>
             <dl className="space-y-2 text-sm">
@@ -204,5 +206,53 @@ export default async function TareaPage({ params }: { params: { id: string } }) 
         </aside>
       </div>
     </>
+  );
+}
+
+const ETIQUETA_VALORACION: Record<string, string> = {
+  funciono: "Funcionó",
+  regular: "Regular",
+  no_funciono: "No funcionó",
+};
+
+/** Cuántas veces se usó la tarea y cómo funcionó según los cierres de sesión. */
+function FeedbackDeTarea({ feedback }: { feedback?: FeedbackTarea }) {
+  const valoradas = feedback ? feedback.funciono + feedback.regular + feedback.noFunciono : 0;
+  return (
+    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <h2 className="mb-2 font-semibold text-slate-900">Cómo funcionó</h2>
+      {!feedback ? (
+        <p className="text-sm text-slate-500">
+          Todavía no se usó en ninguna sesión. Al cerrar una sesión se valora cada ejercicio.
+        </p>
+      ) : (
+        <div className="space-y-3 text-sm">
+          <p className="text-slate-700">
+            Usada <b>{feedback.usos}</b> {feedback.usos === 1 ? "vez" : "veces"}
+            {valoradas > 0 && (
+              <>
+                {" "}
+                · funcionó <b className="text-emerald-700">{feedback.funciono}</b>, regular{" "}
+                <b className="text-amber-700">{feedback.regular}</b>, no funcionó{" "}
+                <b className="text-red-700">{feedback.noFunciono}</b>
+              </>
+            )}
+          </p>
+          {feedback.comentarios.length > 0 && (
+            <ul className="space-y-1.5">
+              {feedback.comentarios.map((c, i) => (
+                <li key={i} className="rounded-lg bg-slate-50 px-3 py-2">
+                  <span className="text-xs text-slate-500">
+                    {c.fecha.split("-").reverse().join("/")}
+                    {c.valoracion && ` · ${ETIQUETA_VALORACION[c.valoracion]}`}
+                  </span>
+                  <p className="text-slate-800">{c.texto}</p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+    </section>
   );
 }

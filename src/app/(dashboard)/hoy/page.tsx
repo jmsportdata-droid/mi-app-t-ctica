@@ -12,7 +12,7 @@ import { calcularReporte } from "@/lib/reportes";
 import { formatearSegundos } from "@/lib/tareas";
 import { cn } from "@/lib/utils/cn";
 import { formatearDia, horaCorta, hoyISO, sumarDias } from "@/lib/utils/fecha";
-import { INFO_ACTIVIDAD } from "@/types/calendario";
+import { INFO_ACTIVIDAD, llevaEjercicios } from "@/types/calendario";
 import { INFO_ESTADO } from "@/types/disponibilidad";
 import { INFO_MOMENTO } from "@/types/modelo-juego";
 import { INFO_ORIENTACION } from "@/types/tarea";
@@ -70,7 +70,7 @@ export default async function HoyPage() {
 
   const deHoy = actividadesCiclo.filter((a) => a.fecha === hoy);
   const deManana = actividadesCiclo.filter((a) => a.fecha === manana);
-  const entrenamientosHoy = deHoy.filter((a) => a.tipo === "entrenamiento");
+  const entrenamientosHoy = deHoy.filter((a) => llevaEjercicios(a.tipo));
   const resumenes = await getResumenSesiones(entrenamientosHoy.map((a) => a.id));
   const numeroSesion = numerarSesiones(
     actividadesCiclo.filter((a) => a.fecha >= ciclo.desde && a.fecha <= ciclo.hasta),

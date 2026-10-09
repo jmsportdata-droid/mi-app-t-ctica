@@ -2,7 +2,7 @@ import Link from "next/link";
 import { formatearSegundos } from "@/lib/tareas";
 import { cn } from "@/lib/utils/cn";
 import { horaCorta } from "@/lib/utils/fecha";
-import { INFO_ACTIVIDAD, type Actividad } from "@/types/calendario";
+import { INFO_ACTIVIDAD, llevaEjercicios, type Actividad } from "@/types/calendario";
 import type { ResumenSesion } from "@/types/sesion";
 
 /**
@@ -22,7 +22,7 @@ export function TarjetaActividad({
   const inicio = horaCorta(actividad.hora_inicio);
   const fin = horaCorta(actividad.hora_fin);
   const citacion = horaCorta(actividad.hora_citacion);
-  const esEntrenamiento = actividad.tipo === "entrenamiento";
+  const esEntrenamiento = llevaEjercicios(actividad.tipo);
 
   return (
     <Link

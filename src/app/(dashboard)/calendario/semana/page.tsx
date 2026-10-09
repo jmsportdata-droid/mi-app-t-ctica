@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { llevaEjercicios } from "@/types/calendario";
 import Link from "next/link";
 import { requerirTemporada } from "@/lib/contexto";
 import { getActividades, getEnlaceJugadores, getReferenciasPartidos } from "@/lib/data/calendario";
@@ -29,7 +30,7 @@ export default async function SemanaPage({ searchParams }: { searchParams: { des
     getEnlaceJugadores(temporada.id),
   ]);
   const resumenes = await getResumenSesiones(
-    actividades.filter((a) => a.tipo === "entrenamiento").map((a) => a.id),
+    actividades.filter((a) => llevaEjercicios(a.tipo)).map((a) => a.id),
   );
   const esActual = desde <= hoy && hoy <= hasta;
 
@@ -78,9 +79,9 @@ export default async function SemanaPage({ searchParams }: { searchParams: { des
         hoy={hoy}
         actividades={actividades}
         partidos={partidos}
-        resumenes={resumenes}
+        resumenes={Object.fromEntries(resumenes)}
         // La numeración de sesiones es por microciclo, no por semana
-        numeroSesion={new Map()}
+        numeroSesion={{}}
       />
     </>
   );

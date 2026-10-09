@@ -30,7 +30,7 @@ const NAVEGACION = [
   { href: "/modelo-de-juego", label: "Modelo de juego", Icono: IconModeloJuego },
   { href: "/tareas", label: "Banco de tareas", Icono: IconTareas },
   { href: "/pelota-quieta", label: "Pelota quieta", Icono: IconPelotaQuieta },
-  { href: "/reportes", label: "Reportes", Icono: IconReportes },
+  { href: "/reportes", label: "Reportes de entrenamiento", Icono: IconReportes },
   { href: "/equipos", label: "Equipos", Icono: IconEquipos },
   { href: "/partidos", label: "Partidos", Icono: IconPartidos },
   { href: "/rendimiento", label: "Rendimiento", Icono: IconRendimiento },

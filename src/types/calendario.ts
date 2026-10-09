@@ -27,9 +27,23 @@ export const TIPOS_ACTIVIDAD = [
   },
   {
     valor: "gimnasio",
-    label: "Gym",
+    label: "Gimnasio",
     color: "bg-sky-50 text-sky-900 ring-sky-200",
     punto: "bg-sky-500",
+    visible: true,
+  },
+  {
+    valor: "pelota_quieta",
+    label: "Pelota quieta",
+    color: "bg-rose-50 text-rose-900 ring-rose-200",
+    punto: "bg-rose-500",
+    visible: true,
+  },
+  {
+    valor: "recuperacion",
+    label: "Recuperación",
+    color: "bg-lime-50 text-lime-900 ring-lime-200",
+    punto: "bg-lime-500",
     visible: true,
   },
   {
@@ -63,8 +77,8 @@ export const TIPOS_ACTIVIDAD = [
   {
     valor: "concentracion",
     label: "Concentración",
-    color: "bg-rose-50 text-rose-900 ring-rose-200",
-    punto: "bg-rose-500",
+    color: "bg-fuchsia-50 text-fuchsia-900 ring-fuchsia-200",
+    punto: "bg-fuchsia-500",
     visible: true,
   },
   {
@@ -94,6 +108,18 @@ export const TIPOS_ACTIVIDAD = [
 export const INFO_ACTIVIDAD = Object.fromEntries(
   TIPOS_ACTIVIDAD.map((t) => [t.valor, t]),
 ) as Record<TipoActividad, (typeof TIPOS_ACTIVIDAD)[number]>;
+
+/** Bloques que llevan ejercicios del banco (los mismos que admite la base). */
+export const TIPOS_CON_EJERCICIOS = [
+  "entrenamiento",
+  "pre_sesion",
+  "gimnasio",
+  "pelota_quieta",
+  "recuperacion",
+] as const satisfies readonly TipoActividad[];
+
+export const llevaEjercicios = (tipo: TipoActividad) =>
+  (TIPOS_CON_EJERCICIOS as readonly string[]).includes(tipo);
 
 /** Tipos que se cargan a mano (los partidos se crean desde Partidos). */
 export const TIPOS_CARGABLES = TIPOS_ACTIVIDAD.filter((t) => t.valor !== "partido");

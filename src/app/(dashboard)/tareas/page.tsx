@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requerirContexto } from "@/lib/contexto";
 import { getModeloJuego } from "@/lib/data/modelo-juego";
-import { getTareas } from "@/lib/data/tareas";
+import { getFeedbackTareas, getTareas } from "@/lib/data/tareas";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { BancoTareas } from "@/components/tareas/BancoTareas";
 import { CargarTareasBase } from "@/components/tareas/CargarTareasBase";
@@ -11,9 +11,10 @@ export const metadata: Metadata = { title: "Banco de tareas" };
 
 export default async function TareasPage() {
   const { cuerpoTecnico } = await requerirContexto();
-  const [tareas, { principios }] = await Promise.all([
+  const [tareas, { principios }, feedback] = await Promise.all([
     getTareas(cuerpoTecnico.id),
     getModeloJuego(cuerpoTecnico.id),
+    getFeedbackTareas(cuerpoTecnico.id),
   ]);
 
   return (
@@ -33,7 +34,7 @@ export default async function TareasPage() {
       {tareas.length === 0 ? (
         <CargarTareasBase />
       ) : (
-        <BancoTareas tareas={tareas} principios={principios} />
+        <BancoTareas tareas={tareas} principios={principios} feedback={feedback} />
       )}
     </>
   );

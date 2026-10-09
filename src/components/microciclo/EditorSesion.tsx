@@ -9,7 +9,8 @@ import {
   moverTareaSesion,
   quitarTareaSesion,
 } from "@/app/(dashboard)/microciclo/actions";
-import { noEncajaConElDia } from "@/lib/sesiones";
+import { ampliarPrincipios, encajeTarea, noEncajaConElDia } from "@/lib/sesiones";
+import type { FeedbackTarea } from "@/lib/data/tareas";
 import {
   duracionParaEditar,
   formatearSegundos,
@@ -64,9 +65,15 @@ interface Props {
   tareas: TareaDeSesion[];
   banco: TareaConVinculos[];
   principios: PrincipioJuego[];
-  /** Orientación física del día según la semana tipo (si la hay) */
+  /** Tipo de entrenamiento de la sesión (el elegido o el del día según el manual) */
   orientacionDelDia?: OrientacionFisica;
   md?: string;
+  /** Tipo de bloque (cancha, pre sesión, gimnasio…) */
+  tipoBloque: string;
+  /** Principios que se quieren trabajar en la sesión */
+  principiosElegidos: string[];
+  /** Usos y valoraciones anteriores de cada tarea del banco */
+  feedback: Record<string, FeedbackTarea>;
 }
 
 export function EditorSesion({
@@ -76,6 +83,9 @@ export function EditorSesion({
   principios,
   orientacionDelDia,
   md,
+  tipoBloque,
+  principiosElegidos,
+  feedback,
 }: Props) {
   const [agregando, setAgregando] = useState(false);
   const indice = useMemo(() => indiceObjetivos(principios), [principios]);
@@ -126,6 +136,10 @@ export function EditorSesion({
         enSesion={new Set(tareas.map((t) => t.tarea_id))}
         orientacionDelDia={orientacionDelDia}
         md={md}
+        tipoBloque={tipoBloque}
+        principiosElegidos={ampliarPrincipios(principiosElegidos, principios)}
+        hayPrincipios={principiosElegidos.length > 0}
+        feedback={feedback}
       />
     </section>
   );
@@ -353,6 +367,10 @@ function SelectorTarea({
   enSesion,
   orientacionDelDia,
   md,
+  tipoBloque,
+  principiosElegidos,
+  hayPrincipios,
+  feedback,
 }: {
   abierto: boolean;
   onCerrar: () => void;
@@ -361,24 +379,31 @@ function SelectorTarea({
   enSesion: Set<string>;
   orientacionDelDia?: OrientacionFisica;
   md?: string;
+  tipoBloque: string;
+  principiosElegidos: ReadonlySet<string>;
+  hayPrincipios: boolean;
+  feedback: Record<string, FeedbackTarea>;
 }) {
   const { pendiente, error, ejecutar } = useAccion();
   const [busqueda, setBusqueda] = useState("");
   const [tipo, setTipo] = useState<TipoTarea | "">("");
-  const [soloSugeridas, setSoloSugeridas] = useState(Boolean(orientacionDelDia));
+  const [soloSugeridas, setSoloSugeridas] = useState(true);
   const [agregandoId, setAgregandoId] = useState<string | null>(null);
 
   const q = normalizar(busqueda.trim());
-  const lista = banco
-    .filter((t) => !tipo || t.tipo === tipo)
-    .filter((t) => !q || normalizar(`${t.nombre} ${t.formato ?? ""}`).includes(q))
-    .filter(
-      (t) =>
-        !soloSugeridas ||
-        !orientacionDelDia ||
-        t.orientacion_fisica === orientacionDelDia ||
-        t.orientacion_fisica === null,
-    );
+  const enfoque = {
+    tipoBloque,
+    orientacion: orientacionDelDia ?? null,
+    principios: principiosElegidos,
+  };
+  const conEncaje = banco
+    .map((t) => ({ t, e: encajeTarea(t, enfoque) }))
+    .sort((a, b) => b.e.puntaje - a.e.puntaje || a.t.nombre.localeCompare(b.t.nombre, "es"));
+  const hayEncajes = conEncaje.some((x) => x.e.puntaje > 0);
+  const lista = conEncaje
+    .filter(({ t }) => !tipo || t.tipo === tipo)
+    .filter(({ t }) => !q || normalizar(`${t.nombre} ${t.formato ?? ""}`).includes(q))
+    .filter(({ e }) => !soloSugeridas || !hayEncajes || e.puntaje > 0);
 
   return (
     <Modal abierto={abierto} onCerrar={onCerrar} titulo="Agregar tarea" className="max-w-2xl">
@@ -417,7 +442,7 @@ function SelectorTarea({
             ))}
           </select>
         </div>
-        {orientacionDelDia && (
+        {hayEncajes && (
           <label className="flex items-center gap-2 text-sm text-slate-700">
             <input
               type="checkbox"
@@ -425,9 +450,17 @@ function SelectorTarea({
               onChange={(e) => setSoloSugeridas(e.target.checked)}
               className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
             />
-            Solo las que encajan con {md} ({INFO_ORIENTACION[orientacionDelDia].label.toLowerCase()}
-            )
+            Solo las que encajan
+            {orientacionDelDia &&
+              ` con ${INFO_ORIENTACION[orientacionDelDia].label.toLowerCase()}${md ? ` (${md})` : ""}`}
+            {hayPrincipios && " y los principios elegidos"}
           </label>
+        )}
+        {!hayPrincipios && (
+          <p className="text-xs text-slate-500">
+            Tip: elegí en «Qué trabajamos» los principios de la sesión y acá aparecen primero los
+            ejercicios que los trabajan.
+          </p>
         )}
         {error && <p className="text-sm text-red-600">{error}</p>}
         <ul className="max-h-[50vh] divide-y divide-slate-100 overflow-y-auto rounded-xl border border-slate-200">
@@ -436,9 +469,10 @@ function SelectorTarea({
               No hay tareas con esos filtros.
             </li>
           )}
-          {lista.map((t) => {
+          {lista.map(({ t, e }) => {
             const info = INFO_TIPO_TAREA[t.tipo];
             const ya = enSesion.has(t.id);
+            const fb = feedback[t.id];
             return (
               <li key={t.id} className="flex items-center gap-3 p-3">
                 <div className="min-w-0 flex-1">
@@ -449,6 +483,25 @@ function SelectorTarea({
                     </span>
                     {[textoTiempo(t), t.formato].filter(Boolean).join(" · ")}
                   </p>
+                  {(e.motivos.length > 0 || fb) && (
+                    <p className="mt-1 flex flex-wrap gap-1 text-[11px]">
+                      {e.motivos.map((m) => (
+                        <span
+                          key={m}
+                          className="rounded bg-brand-50 px-1.5 py-0.5 font-medium text-brand-800"
+                        >
+                          ✓ {m}
+                        </span>
+                      ))}
+                      {fb && (
+                        <span className="rounded bg-slate-100 px-1.5 py-0.5 text-slate-600">
+                          Usada {fb.usos} {fb.usos === 1 ? "vez" : "veces"}
+                          {fb.funciono + fb.regular + fb.noFunciono > 0 &&
+                            ` · funcionó ${fb.funciono}, regular ${fb.regular}, no ${fb.noFunciono}`}
+                        </span>
+                      )}
+                    </p>
+                  )}
                 </div>
                 <Button
                   variante={ya ? "ghost" : "secondary"}

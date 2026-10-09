@@ -12,6 +12,7 @@ import {
   type Asistencia,
   type EstadoAsistencia,
   type Sesion,
+  type TareaDeSesion,
 } from "@/types/sesion";
 import { Button } from "@/components/ui/Button";
 import { claseControl } from "@/components/ui/Field";
@@ -24,7 +25,15 @@ function sugerido(estado: EstadoDelDia | undefined): EstadoAsistencia {
   return "completo";
 }
 
-/** Cierre de la sesión: minutos reales, observaciones y asistencia. */
+type Valoracion = "funciono" | "regular" | "no_funciono";
+
+const VALORACIONES: { valor: Valoracion; label: string; boton: string }[] = [
+  { valor: "funciono", label: "Funcionó", boton: "bg-emerald-600 text-white ring-emerald-600" },
+  { valor: "regular", label: "Regular", boton: "bg-amber-500 text-white ring-amber-500" },
+  { valor: "no_funciono", label: "No funcionó", boton: "bg-red-600 text-white ring-red-600" },
+];
+
+/** Cierre de la sesión: minutos reales, observaciones, cómo funcionó cada ejercicio y asistencia. */
 export function CierreSesion({
   actividadId,
   sesion,
@@ -32,6 +41,7 @@ export function CierreSesion({
   disponibilidad,
   asistencia,
   minutosPlanificados,
+  tareas,
 }: {
   actividadId: string;
   sesion: Sesion | null;
@@ -39,6 +49,7 @@ export function CierreSesion({
   disponibilidad: Record<string, EstadoDelDia>;
   asistencia: Asistencia[];
   minutosPlanificados: number;
+  tareas: TareaDeSesion[];
 }) {
   const router = useRouter();
   const [pendiente, startTransition] = useTransition();
@@ -50,6 +61,14 @@ export function CierreSesion({
     String(sesion?.minutos_reales ?? (minutosPlanificados || "")),
   );
   const [observaciones, setObservaciones] = useState(sesion?.observaciones_cierre ?? "");
+  const [valoraciones, setValoraciones] = useState<
+    Record<string, { valoracion: Valoracion | null; comentario: string }>
+  >(() =>
+    Object.fromEntries(
+      tareas.map((t) => [t.id, { valoracion: t.valoracion, comentario: t.comentario ?? "" }]),
+    ),
+  );
+  const valoradas = tareas.filter((t) => t.valoracion);
   const [estados, setEstados] = useState<Record<string, EstadoAsistencia>>(() =>
     Object.fromEntries(
       jugadores.map((j) => [j.id, cargada.get(j.id) ?? sugerido(disponibilidad[j.id])]),
@@ -113,6 +132,27 @@ export function CierreSesion({
             {sesion.observaciones_cierre}
           </p>
         )}
+        {valoradas.length > 0 && (
+          <ul className="space-y-1 text-sm">
+            {valoradas.map((t) => {
+              const v = VALORACIONES.find((x) => x.valor === t.valoracion)!;
+              return (
+                <li key={t.id} className="flex flex-wrap items-baseline gap-2">
+                  <span
+                    className={cn(
+                      "rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1 ring-inset",
+                      v.boton,
+                    )}
+                  >
+                    {v.label}
+                  </span>
+                  <span className="font-medium text-slate-800">{t.tarea.nombre}</span>
+                  {t.comentario && <span className="text-slate-500">· {t.comentario}</span>}
+                </li>
+              );
+            })}
+          </ul>
+        )}
         {error && <p className="text-xs text-red-600">{error}</p>}
       </section>
     );
@@ -124,7 +164,8 @@ export function CierreSesion({
         <div>
           <h2 className="font-semibold text-slate-900">Cierre de la sesión</h2>
           <p className="text-sm text-slate-500">
-            Después de entrenar: minutos reales y quién hizo la sesión.
+            Después de entrenar: minutos reales, cómo funcionó cada ejercicio y quién hizo la
+            sesión.
           </p>
         </div>
         <Button variante="secondary" onClick={() => setAbierto(true)}>
@@ -162,6 +203,73 @@ export function CierreSesion({
           />
         </label>
       </div>
+
+      {tareas.length > 0 && (
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium text-slate-700">
+            ¿Cómo funcionó cada ejercicio?{" "}
+            <span className="font-normal text-slate-500">(queda en el banco de tareas)</span>
+          </h3>
+          <ul className="divide-y divide-slate-100 rounded-xl border border-slate-200">
+            {tareas.map((t, i) => {
+              const v = valoraciones[t.id] ?? { valoracion: null, comentario: "" };
+              return (
+                <li key={t.id} className="space-y-2 px-3 py-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="min-w-0 flex-1 truncate text-sm font-medium text-slate-800">
+                      {i + 1}. {t.tarea.nombre}
+                    </span>
+                    <div
+                      className="flex flex-wrap gap-1"
+                      role="radiogroup"
+                      aria-label={t.tarea.nombre}
+                    >
+                      {VALORACIONES.map((x) => {
+                        const activo = v.valoracion === x.valor;
+                        return (
+                          <button
+                            key={x.valor}
+                            type="button"
+                            role="radio"
+                            aria-checked={activo}
+                            onClick={() =>
+                              setValoraciones((all) => ({
+                                ...all,
+                                [t.id]: { ...v, valoracion: activo ? null : x.valor },
+                              }))
+                            }
+                            className={cn(
+                              "rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset transition-colors",
+                              activo
+                                ? x.boton
+                                : "bg-white text-slate-600 ring-slate-300 hover:bg-slate-50",
+                            )}
+                          >
+                            {x.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <input
+                    value={v.comentario}
+                    onChange={(e) =>
+                      setValoraciones((all) => ({
+                        ...all,
+                        [t.id]: { ...v, comentario: e.target.value },
+                      }))
+                    }
+                    maxLength={500}
+                    placeholder="Por qué (opcional): intensidad, espacio, se entendió…"
+                    aria-label={`Comentario sobre ${t.tarea.nombre}`}
+                    className={`${claseControl()} py-1 text-sm`}
+                  />
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
 
       <div className="space-y-2">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -231,6 +339,11 @@ export function CierreSesion({
               cerrarSesion(actividadId, {
                 minutos_reales: minutos.trim() === "" ? null : Number(minutos),
                 observaciones_cierre: observaciones,
+                valoraciones: Object.entries(valoraciones).map(([id, v]) => ({
+                  id,
+                  valoracion: v.valoracion,
+                  comentario: v.comentario,
+                })),
                 asistencia: Object.entries(estados).map(([jugador_id, estado]) => ({
                   jugador_id,
                   estado,

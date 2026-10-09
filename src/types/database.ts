@@ -1762,6 +1762,7 @@ export type Database = {
         Row: {
           actividad_id: string
           ancho_m: number | null
+          comentario: string | null
           creado_en: string
           duracion_seg: number | null
           espacio: Database["public"]["Enums"]["espacio_tarea"] | null
@@ -1774,10 +1775,12 @@ export type Database = {
           series: number | null
           tarea_id: string
           tiempo_total_seg: number | null
+          valoracion: Database["public"]["Enums"]["valoracion_tarea"] | null
         }
         Insert: {
           actividad_id: string
           ancho_m?: number | null
+          comentario?: string | null
           creado_en?: string
           duracion_seg?: number | null
           espacio?: Database["public"]["Enums"]["espacio_tarea"] | null
@@ -1790,10 +1793,12 @@ export type Database = {
           series?: number | null
           tarea_id: string
           tiempo_total_seg?: number | null
+          valoracion?: Database["public"]["Enums"]["valoracion_tarea"] | null
         }
         Update: {
           actividad_id?: string
           ancho_m?: number | null
+          comentario?: string | null
           creado_en?: string
           duracion_seg?: number | null
           espacio?: Database["public"]["Enums"]["espacio_tarea"] | null
@@ -1806,6 +1811,7 @@ export type Database = {
           series?: number | null
           tarea_id?: string
           tiempo_total_seg?: number | null
+          valoracion?: Database["public"]["Enums"]["valoracion_tarea"] | null
         }
         Relationships: [
           {
@@ -1834,6 +1840,8 @@ export type Database = {
           notas: string | null
           objetivo: string | null
           observaciones_cierre: string | null
+          orientacion: Database["public"]["Enums"]["orientacion_fisica"] | null
+          principios: string[]
         }
         Insert: {
           actividad_id: string
@@ -1844,6 +1852,8 @@ export type Database = {
           notas?: string | null
           objetivo?: string | null
           observaciones_cierre?: string | null
+          orientacion?: Database["public"]["Enums"]["orientacion_fisica"] | null
+          principios?: string[]
         }
         Update: {
           actividad_id?: string
@@ -1854,6 +1864,8 @@ export type Database = {
           notas?: string | null
           objetivo?: string | null
           observaciones_cierre?: string | null
+          orientacion?: Database["public"]["Enums"]["orientacion_fisica"] | null
+          principios?: string[]
         }
         Relationships: [
           {
@@ -2159,6 +2171,10 @@ export type Database = {
     }
     Functions: {
       activar_temporada: { Args: { p_temporada: string }; Returns: undefined }
+      admite_sesion: {
+        Args: { p_tipo: Database["public"]["Enums"]["tipo_actividad"] }
+        Returns: boolean
+      }
       agregar_tarea_sesion: {
         Args: { p_actividad: string; p_tarea: string }
         Returns: string
@@ -2313,6 +2329,8 @@ export type Database = {
         | "pre_sesion"
         | "partido"
         | "gimnasio"
+        | "pelota_quieta"
+        | "recuperacion"
         | "charla_tecnica"
         | "reunion_cuerpo_tecnico"
         | "comida"
@@ -2350,6 +2368,7 @@ export type Database = {
         | "pre_partido"
         | "post_partido"
       valoracion_analisis: "fortaleza" | "debilidad" | "patron"
+      valoracion_tarea: "funciono" | "regular" | "no_funciono"
       via_metodologica: "analitica" | "global" | "sistemica"
     }
     CompositeTypes: {
@@ -2561,6 +2580,8 @@ export const Constants = {
         "pre_sesion",
         "partido",
         "gimnasio",
+        "pelota_quieta",
+        "recuperacion",
         "charla_tecnica",
         "reunion_cuerpo_tecnico",
         "comida",
@@ -2602,6 +2623,7 @@ export const Constants = {
         "post_partido",
       ],
       valoracion_analisis: ["fortaleza", "debilidad", "patron"],
+      valoracion_tarea: ["funciono", "regular", "no_funciono"],
       via_metodologica: ["analitica", "global", "sistemica"],
     },
   },

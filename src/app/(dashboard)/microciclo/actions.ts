@@ -5,7 +5,7 @@ import { z } from "zod";
 import type { PostgrestError } from "@supabase/supabase-js";
 import { getAccion, SESION_EXPIRADA } from "@/lib/supabase/auth";
 import { textoOpcionalSchema } from "@/lib/validations/comun";
-import { ESPACIOS, type EspacioTarea } from "@/types/tarea";
+import { ESPACIOS, ORIENTACIONES, type EspacioTarea, type OrientacionFisica } from "@/types/tarea";
 import { ESTADOS_ASISTENCIA, type EstadoAsistencia } from "@/types/sesion";
 import type { ResultadoAutoguardado } from "@/components/ui/AutoSaveField";
 
@@ -15,7 +15,7 @@ const idSchema = z.string().uuid();
 
 function errorDeBD(error: PostgrestError, contexto: string): { ok: false; error: string } {
   if (error.hint === "solo_entrenamiento") {
-    return { ok: false, error: "Solo los entrenamientos en cancha tienen sesión." };
+    return { ok: false, error: "Este bloque no lleva ejercicios." };
   }
   if (error.hint === "sesion_vacia") {
     return { ok: false, error: "Agregá tareas a la sesión antes de guardarla como plantilla." };
@@ -231,6 +231,16 @@ const cierreSchema = z.object({
     .max(400, "Máximo 400 minutos")
     .nullable(),
   observaciones_cierre: textoOpcionalSchema(2000, "Las observaciones"),
+  valoraciones: z
+    .array(
+      z.object({
+        id: z.string().uuid(),
+        valoracion: z.enum(["funciono", "regular", "no_funciono"]).nullable(),
+        comentario: textoOpcionalSchema(500, "El comentario"),
+      }),
+    )
+    .max(40)
+    .default([]),
   asistencia: z
     .array(
       z.object({
@@ -258,7 +268,7 @@ export async function cerrarSesion(
   const accion = await getAccion();
   if (!accion) return SESION_EXPIRADA;
   const { supabase } = accion;
-  const { asistencia, ...cierre } = parsed.data;
+  const { asistencia, valoraciones, ...cierre } = parsed.data;
 
   const { error } = await supabase
     .from("sesiones")
@@ -276,7 +286,17 @@ export async function cerrarSesion(
       .insert(asistencia.map((a) => ({ ...a, actividad_id: actividadId })));
     if (errorAsistencia) return errorDeBD(errorAsistencia, "asistencia");
   }
+  // Valoración de cada ejercicio (para aprender qué funciona)
+  for (const v of valoraciones) {
+    const { error: errorValoracion } = await supabase
+      .from("sesion_tareas")
+      .update({ valoracion: v.valoracion, comentario: v.comentario })
+      .eq("id", v.id)
+      .eq("actividad_id", actividadId);
+    if (errorValoracion) return errorDeBD(errorValoracion, "valoración");
+  }
   revalidar();
+  revalidatePath("/tareas", "layout");
   return { ok: true };
 }
 
@@ -289,6 +309,34 @@ export async function reabrirSesion(actividadId: string): Promise<Resultado> {
     .update({ cerrada: false })
     .eq("actividad_id", actividadId);
   if (error) return errorDeBD(error, "reabrir");
+  revalidar();
+  return { ok: true };
+}
+
+const enfoqueSchema = z.object({
+  orientacion: z
+    .enum(ORIENTACIONES.map((o) => o.valor) as [OrientacionFisica, ...OrientacionFisica[]])
+    .nullable(),
+  principios: z.array(z.string().uuid()).max(12, "Elegí hasta 12 principios"),
+});
+
+export type EnfoqueSesionInput = z.input<typeof enfoqueSchema>;
+
+/** Tipo de entrenamiento y principios que se quieren trabajar en la sesión. */
+export async function guardarEnfoqueSesion(
+  actividadId: string,
+  input: EnfoqueSesionInput,
+): Promise<Resultado> {
+  const parsed = enfoqueSchema.safeParse(input);
+  if (!idSchema.safeParse(actividadId).success) return { ok: false, error: "Datos no válidos" };
+  if (!parsed.success)
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Revisá los datos" };
+  const accion = await getAccion();
+  if (!accion) return SESION_EXPIRADA;
+  const { error } = await accion.supabase
+    .from("sesiones")
+    .upsert({ actividad_id: actividadId, ...parsed.data });
+  if (error) return errorDeBD(error, "enfoque");
   revalidar();
   return { ok: true };
 }

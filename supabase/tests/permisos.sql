@@ -243,9 +243,19 @@ begin
        (select id from public.actividades where titulo = 'Entrenamiento 2')) <> 1 then
     raise exception 'FALLA: las plantillas o la copia de sesión no copiaron las tareas';
   end if;
+  -- El gimnasio también lleva ejercicios; un bloque con ejercicios no pasa a uno que no los lleva
+  insert into public.actividades (temporada_id, tipo, titulo, fecha)
+    values ('00000000-0000-4000-c000-00000000000a', 'gimnasio', 'Gimnasio 1', '2026-04-30');
+  perform public.agregar_tarea_sesion(
+    (select id from public.actividades where titulo = 'Gimnasio 1'),
+    (select id from public.tareas where nombre = 'Rondo 4v1'));
+  update public.sesiones set orientacion = 'tension', principios = '{}'
+    where actividad_id = (select id from public.actividades where titulo = 'Gimnasio 1');
+  update public.sesion_tareas set valoracion = 'funciono', comentario = 'Muy buena intensidad'
+    where actividad_id = (select id from public.actividades where titulo = 'Gimnasio 1');
   begin
-    update public.actividades set tipo = 'gimnasio' where titulo = 'Entrenamiento';
-    raise exception 'FALLA: un entrenamiento con sesión cambió de tipo';
+    update public.actividades set tipo = 'charla_tecnica' where titulo = 'Entrenamiento';
+    raise exception 'FALLA: un entrenamiento con sesión pasó a un bloque sin ejercicios';
   exception when sqlstate 'P0001' then
     if sqlerrm like 'FALLA:%' then raise; end if;
   end;
