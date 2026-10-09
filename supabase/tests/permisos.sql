@@ -48,6 +48,8 @@ insert into public.principios_juego (id, cuerpo_tecnico_id, momento, nombre) val
   ('00000000-0000-4000-9000-00000000000b', '00000000-0000-4000-b000-00000000000b', 'balon_parado', 'Principio de B');
 insert into public.tareas (id, cuerpo_tecnico_id, nombre, tipo) values
   ('00000000-0000-4000-8000-00000000000b', '00000000-0000-4000-b000-00000000000b', 'Tarea de B', 'rondo');
+insert into public.actividades (id, temporada_id, tipo, titulo, fecha) values
+  ('00000000-0000-4000-7000-00000000000b', '00000000-0000-4000-c000-00000000000b', 'entrenamiento', 'Entrenamiento de B', '2026-04-29');
 
 -- Analista A2: ve y edita lo de su cuerpo técnico, nada de B ----------
 set local role authenticated;
@@ -197,6 +199,65 @@ begin
   if (select fecha from public.actividades where partido_id = '00000000-0000-4000-f000-00000000000a') <> '2026-05-03' then
     raise exception 'FALLA: al cambiar la fecha del partido no se movió en el calendario';
   end if;
+
+  -- Microciclo: sesiones con tareas del banco propio; nada de B
+  insert into public.actividades (temporada_id, tipo, titulo, fecha)
+    values ('00000000-0000-4000-c000-00000000000a', 'entrenamiento', 'Entrenamiento 2', '2026-04-30');
+  perform public.agregar_tarea_sesion(
+    (select id from public.actividades where titulo = 'Entrenamiento'),
+    (select id from public.tareas where nombre = 'Rondo 4v1'));
+  if (select tiempo_total_seg from public.sesion_tareas) <> 420 then
+    raise exception 'FALLA: la tarea no se copió a la sesión con su tiempo (3 × 2′ + 30″ = 7′)';
+  end if;
+  begin
+    perform public.agregar_tarea_sesion(
+      (select id from public.actividades where tipo = 'partido'),
+      (select id from public.tareas where nombre = 'Rondo 4v1'));
+    raise exception 'FALLA: se pudo armar una sesión en un partido';
+  exception when sqlstate 'P0001' then
+    if sqlerrm like 'FALLA:%' then raise; end if;
+  end;
+  begin
+    perform public.agregar_tarea_sesion(
+      (select id from public.actividades where titulo = 'Entrenamiento'),
+      '00000000-0000-4000-8000-00000000000b');
+    raise exception 'FALLA: se pudo agregar una tarea de B a una sesión de A';
+  exception when insufficient_privilege then null;
+  end;
+  begin
+    perform public.agregar_tarea_sesion(
+      '00000000-0000-4000-7000-00000000000b',
+      (select id from public.tareas where nombre = 'Rondo 4v1'));
+    raise exception 'FALLA: el analista A pudo armar una sesión de B';
+  exception when insufficient_privilege then null;
+  end;
+  perform public.guardar_plantilla_sesion(
+    (select id from public.actividades where titulo = 'Entrenamiento'), 'Plantilla MD-3', 'MD-3');
+  if public.aplicar_plantilla_sesion(
+       (select id from public.plantillas_sesion where nombre = 'Plantilla MD-3'),
+       (select id from public.actividades where titulo = 'Entrenamiento 2')) <> 1
+     or public.copiar_sesion(
+       (select id from public.actividades where titulo = 'Entrenamiento'),
+       (select id from public.actividades where titulo = 'Entrenamiento 2')) <> 1 then
+    raise exception 'FALLA: las plantillas o la copia de sesión no copiaron las tareas';
+  end if;
+  begin
+    update public.actividades set tipo = 'gimnasio' where titulo = 'Entrenamiento';
+    raise exception 'FALLA: un entrenamiento con sesión cambió de tipo';
+  exception when sqlstate 'P0001' then
+    if sqlerrm like 'FALLA:%' then raise; end if;
+  end;
+  begin
+    insert into public.asistencia_sesion (actividad_id, jugador_id)
+      values ((select id from public.actividades where titulo = 'Entrenamiento'), '00000000-0000-4000-e000-00000000000b');
+    raise exception 'FALLA: se cargó asistencia de un jugador de B';
+  exception when insufficient_privilege then null;
+  end;
+  begin
+    delete from public.tareas where nombre = 'Rondo 4v1';
+    raise exception 'FALLA: se borró una tarea usada en una sesión';
+  exception when foreign_key_violation then null;
+  end;
 
   -- Disponibilidad: solo de jugadores propios
   insert into public.disponibilidad (jugador_id, fecha, estado, fecha_regreso)

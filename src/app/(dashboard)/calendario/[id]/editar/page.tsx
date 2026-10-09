@@ -18,7 +18,7 @@ export default async function EditarActividadPage({ params }: { params: { id: st
 
   return (
     <>
-      <BackLink href={`/calendario?fecha=${actividad.fecha}`}>Calendario</BackLink>
+      <BackLink href={`/microciclo?fecha=${actividad.fecha}`}>Microciclo</BackLink>
       <PageHeader titulo={actividad.titulo} descripcion={formatearDia(actividad.fecha)} />
       {actividad.partido_id ? (
         <ActividadPartidoForm actividad={actividad} />

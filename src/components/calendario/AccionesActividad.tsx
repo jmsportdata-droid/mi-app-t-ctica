@@ -32,7 +32,7 @@ export function AccionesActividad({
           setError(r.error);
           return;
         }
-        router.push(`/calendario?fecha=${r.fecha}`);
+        router.push(`/microciclo?fecha=${r.fecha}`);
         router.refresh();
       } catch {
         setError("Error de conexión. Probá de nuevo.");
@@ -49,7 +49,7 @@ export function AccionesActividad({
           setError(r.error);
           return;
         }
-        router.push(`/calendario?fecha=${fecha}`);
+        router.push(`/microciclo?fecha=${fecha}`);
         router.refresh();
       } catch {
         setError("Error de conexión. Probá de nuevo.");

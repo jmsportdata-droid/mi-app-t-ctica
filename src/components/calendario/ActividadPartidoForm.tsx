@@ -45,7 +45,7 @@ export function ActividadPartidoForm({ actividad }: { actividad: Actividad }) {
           setErrores(r.errores ?? {});
           return;
         }
-        router.push(`/calendario?fecha=${r.fecha}`);
+        router.push(`/microciclo?fecha=${r.fecha}`);
         router.refresh();
       } catch {
         setErrorGeneral("Error de conexión. Probá de nuevo.");

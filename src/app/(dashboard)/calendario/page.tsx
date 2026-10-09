@@ -1,110 +1,154 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { cicloDe, DESPUES_DEL_ULTIMO } from "@/lib/calendario";
+import { rangoFechas } from "@/lib/calendario";
 import { requerirTemporada } from "@/lib/contexto";
-import { getActividades, getReferenciasPartidos } from "@/lib/data/calendario";
-import { formatearDia, hoyISO, sumarDias } from "@/lib/utils/fecha";
+import { getActividades } from "@/lib/data/calendario";
+import { cn } from "@/lib/utils/cn";
+import { horaCorta, hoyISO, sumarDias } from "@/lib/utils/fecha";
+import { INFO_ACTIVIDAD } from "@/types/calendario";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { CopiarCicloButton } from "@/components/calendario/CopiarCicloButton";
-import { VistaCiclo } from "@/components/calendario/VistaCiclo";
 
 export const metadata: Metadata = { title: "Calendario" };
 
-interface Props {
-  /** partido: id del partido que cierra el ciclo; fecha: muestra el ciclo que la contiene */
-  searchParams: { partido?: string; fecha?: string };
-}
+/** Lo que se destaca en la foto del mes; el resto (cancha, gym, video…) se resume. */
+const DESTACADAS = new Set(["partido", "viaje", "concentracion", "libre", "otro"]);
+
+const NOMBRE_MES = new Intl.DateTimeFormat("es-UY", {
+  month: "long",
+  year: "numeric",
+  timeZone: "UTC",
+});
+const DIAS = ["lun", "mar", "mié", "jue", "vie", "sáb", "dom"];
+const MAX_POR_DIA = 3;
 
 const CLASE_NAV =
   "inline-flex items-center rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50";
 
-export default async function CalendarioPage({ searchParams }: Props) {
+/** Lunes = 0 … domingo = 6 */
+const diaSemana = (fecha: string) => (new Date(`${fecha}T00:00:00Z`).getUTCDay() + 6) % 7;
+
+function mesSiguiente(mes: string, delta: number): string {
+  const [anio, m] = mes.split("-").map(Number);
+  const d = new Date(Date.UTC(anio ?? 1970, (m ?? 1) - 1 + delta, 1));
+  return d.toISOString().slice(0, 7);
+}
+
+export default async function CalendarioMesPage({
+  searchParams,
+}: {
+  searchParams: { mes?: string };
+}) {
   const { temporada } = await requerirTemporada();
   const hoy = hoyISO();
-  const fecha =
-    searchParams.fecha && /^\d{4}-\d{2}-\d{2}$/.test(searchParams.fecha) ? searchParams.fecha : hoy;
+  const mes =
+    searchParams.mes && /^\d{4}-\d{2}$/.test(searchParams.mes) ? searchParams.mes : hoy.slice(0, 7);
 
-  const partidos = await getReferenciasPartidos(temporada.id);
-  const ciclo = cicloDe(partidos, fecha, searchParams.partido ?? null);
-  const actividades = await getActividades(temporada.id, ciclo.desde, ciclo.hasta);
-
-  const actividadPartido = ciclo.partido
-    ? actividades.find((a) => a.partido_id === ciclo.partido?.id)
-    : undefined;
-  const titulo = actividadPartido
-    ? `Ciclo ${actividadPartido.titulo}`
-    : partidos.length === 0
-      ? "Calendario"
-      : "Después del último partido";
-  const rango = `Del ${formatearDia(ciclo.desde)} al ${formatearDia(ciclo.hasta)}`;
-  const esActual = ciclo.desde <= hoy && hoy <= ciclo.hasta;
-  // Sin partidos cargados se navega de a semanas
-  const porSemanas = partidos.length === 0;
-  const hrefAnterior = porSemanas
-    ? `?fecha=${sumarDias(ciclo.desde, -7)}`
-    : ciclo.anterior && `?partido=${ciclo.anterior}`;
-  const hrefSiguiente = porSemanas
-    ? `?fecha=${sumarDias(ciclo.desde, 7)}`
-    : ciclo.siguiente && `?partido=${ciclo.siguiente}`;
+  // La grilla arranca el lunes anterior al día 1 y termina el domingo posterior al último día
+  const primero = `${mes}-01`;
+  const ultimo = sumarDias(`${mesSiguiente(mes, 1)}-01`, -1);
+  const desde = sumarDias(primero, -diaSemana(primero));
+  const hasta = sumarDias(ultimo, 6 - diaSemana(ultimo));
+  const actividades = await getActividades(temporada.id, desde, hasta);
 
   return (
     <>
       <PageHeader
-        titulo={titulo}
-        descripcion={
-          partidos.length === 0
-            ? `${rango}. Cargá los partidos para ver el calendario de partido a partido.`
-            : rango
-        }
+        titulo={NOMBRE_MES.format(new Date(`${primero}T00:00:00Z`))}
+        descripcion="La foto general del mes: partidos, viajes, concentraciones y días libres. Tocá un día para abrir su microciclo."
         acciones={
           <>
-            <nav aria-label="Cambiar de ciclo" className="flex items-center gap-2">
-              {hrefAnterior ? (
-                <Link href={hrefAnterior} className={CLASE_NAV} aria-label="Anterior">
-                  ←
-                </Link>
-              ) : (
-                <span className={`${CLASE_NAV} pointer-events-none opacity-40`} aria-hidden>
-                  ←
-                </span>
-              )}
-              <Link
-                href="/calendario"
-                className={`${CLASE_NAV} ${esActual ? "pointer-events-none opacity-50" : ""}`}
-              >
-                Hoy
-              </Link>
-              {hrefSiguiente ? (
-                <Link href={hrefSiguiente} className={CLASE_NAV} aria-label="Siguiente">
-                  →
-                </Link>
-              ) : (
-                <span className={`${CLASE_NAV} pointer-events-none opacity-40`} aria-hidden>
-                  →
-                </span>
-              )}
-            </nav>
-            <Link href={`/calendario/mes?mes=${ciclo.desde.slice(0, 7)}`} className={CLASE_NAV}>
-              Mes
+            <Link
+              href={`?mes=${mesSiguiente(mes, -1)}`}
+              className={CLASE_NAV}
+              aria-label="Mes anterior"
+            >
+              ←
+            </Link>
+            <Link href="?" className={CLASE_NAV}>
+              Este mes
+            </Link>
+            <Link
+              href={`?mes=${mesSiguiente(mes, 1)}`}
+              className={CLASE_NAV}
+              aria-label="Mes siguiente"
+            >
+              →
+            </Link>
+            <Link href="/microciclo" className={CLASE_NAV}>
+              Microciclo
             </Link>
           </>
         }
       />
 
-      <div className="mb-4 flex justify-end">
-        <CopiarCicloButton
-          partidoId={ciclo.partido?.id ?? (ciclo.anterior ? DESPUES_DEL_ULTIMO : null)}
-          fecha={ciclo.desde}
-        />
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">
+          {DIAS.map((d) => (
+            <div key={d} className="py-2">
+              {d}
+            </div>
+          ))}
+        </div>
+        <div className="grid grid-cols-7">
+          {rangoFechas(desde, hasta).map((fecha) => {
+            const delDia = actividades.filter((a) => a.fecha === fecha);
+            const destacadas = delDia.filter((a) => DESTACADAS.has(a.tipo));
+            const rutina = [
+              ...new Set(
+                delDia
+                  .filter((a) => !DESTACADAS.has(a.tipo))
+                  .map((a) => INFO_ACTIVIDAD[a.tipo].label),
+              ),
+            ];
+            const fueraDeMes = !fecha.startsWith(mes);
+            return (
+              <Link
+                key={fecha}
+                href={`/microciclo?fecha=${fecha}`}
+                className={cn(
+                  "min-h-24 border-b border-r border-slate-100 p-1.5 text-left transition-colors hover:bg-brand-50 sm:min-h-28",
+                  fueraDeMes && "bg-slate-50/60 text-slate-400",
+                )}
+              >
+                <span
+                  className={cn(
+                    "mb-1 inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold",
+                    fecha === hoy && "bg-brand-600 text-white",
+                  )}
+                >
+                  {Number(fecha.slice(8))}
+                </span>
+                <ul className="space-y-0.5">
+                  {destacadas.slice(0, MAX_POR_DIA).map((a) => (
+                    <li
+                      key={a.id}
+                      className={cn(
+                        "truncate rounded px-1 py-0.5 text-[11px] leading-tight ring-1 ring-inset",
+                        INFO_ACTIVIDAD[a.tipo].color,
+                      )}
+                    >
+                      <span className="hidden tabular-nums sm:inline">
+                        {horaCorta(a.hora_inicio) && `${horaCorta(a.hora_inicio)} `}
+                      </span>
+                      {a.titulo}
+                    </li>
+                  ))}
+                  {destacadas.length > MAX_POR_DIA && (
+                    <li className="px-1 text-[11px] text-slate-500">
+                      +{destacadas.length - MAX_POR_DIA} más
+                    </li>
+                  )}
+                  {rutina.length > 0 && (
+                    <li className="truncate px-1 text-[11px] text-slate-500">
+                      {rutina.join(" · ")}
+                    </li>
+                  )}
+                </ul>
+              </Link>
+            );
+          })}
+        </div>
       </div>
-
-      <VistaCiclo
-        desde={ciclo.desde}
-        hasta={ciclo.hasta}
-        hoy={hoy}
-        actividades={actividades}
-        partidos={partidos}
-      />
     </>
   );
 }

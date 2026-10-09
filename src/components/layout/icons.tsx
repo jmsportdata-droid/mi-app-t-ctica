@@ -90,3 +90,12 @@ export function IconTareas({ className }: IconProps) {
     </svg>
   );
 }
+
+export function IconMicrociclo({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <rect x="3" y="5" width="18" height="15" rx="2" />
+      <path d="M3 10h18M8 5v15M13 5v15M18 5v15" />
+    </svg>
+  );
+}

@@ -11,6 +11,7 @@ import {
   IconCuenta,
   IconCuerpoTecnico,
   IconEquipos,
+  IconMicrociclo,
   IconModeloJuego,
   IconPartidos,
   IconPlantilla,
@@ -19,6 +20,7 @@ import {
 
 const NAVEGACION = [
   { href: "/calendario", label: "Calendario", Icono: IconCalendario },
+  { href: "/microciclo", label: "Microciclo", Icono: IconMicrociclo },
   { href: "/plantilla", label: "Plantel", Icono: IconPlantilla },
   { href: "/modelo-de-juego", label: "Modelo de juego", Icono: IconModeloJuego },
   { href: "/tareas", label: "Banco de tareas", Icono: IconTareas },

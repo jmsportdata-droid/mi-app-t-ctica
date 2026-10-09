@@ -24,6 +24,12 @@ type Resultado = { ok: true } | { ok: false; error: string };
 const idSchema = z.string().uuid();
 
 function errorDeBD(error: PostgrestError, contexto: string): { ok: false; error: string } {
+  if (error.hint === "tiene_sesion") {
+    return {
+      ok: false,
+      error: "Este entrenamiento tiene una sesión armada: no puede cambiar de tipo.",
+    };
+  }
   console.error(`[calendario ${contexto}]`, error.code, error.message);
   return { ok: false, error: "No se pudo guardar. Probá de nuevo." };
 }
@@ -46,6 +52,7 @@ function copiaDe(a: Actividad) {
 
 function revalidar() {
   revalidatePath("/calendario", "layout");
+  revalidatePath("/microciclo", "layout");
 }
 
 /** Crea (id = null) o actualiza una actividad cargada a mano. */
@@ -149,6 +156,13 @@ export async function duplicarActividad(id: string, fecha: string): Promise<Acti
     .select("id, fecha")
     .single();
   if (error) return errorDeBD(error, "duplicar");
+  if (origen.tipo === "entrenamiento") {
+    const { error: errorSesion } = await accion.supabase.rpc("copiar_sesion", {
+      p_origen: origen.id,
+      p_destino: data.id,
+    });
+    if (errorSesion) return errorDeBD(errorSesion, "duplicar sesión");
+  }
 
   revalidar();
   return { ok: true, id: data.id, fecha: data.fecha };
@@ -211,12 +225,24 @@ export async function copiarCicloAnterior(
         return [];
       }
       existentes.add(clave);
-      return [{ ...copiaDe(a), fecha }];
+      return [{ origen: a.id, fila: { ...copiaDe(a), fecha } }];
     });
 
-  if (nuevas.length > 0) {
-    const { error: errorInsert } = await supabase.from("actividades").insert(nuevas);
+  // De a una para saber qué entrenamiento nuevo corresponde a cuál y copiar su sesión
+  for (const { origen: idOrigen, fila } of nuevas) {
+    const { data: nueva, error: errorInsert } = await supabase
+      .from("actividades")
+      .insert(fila)
+      .select("id")
+      .single();
     if (errorInsert) return errorDeBD(errorInsert, "copiar insertar");
+    if (fila.tipo === "entrenamiento") {
+      const { error: errorSesion } = await supabase.rpc("copiar_sesion", {
+        p_origen: idOrigen,
+        p_destino: nueva.id,
+      });
+      if (errorSesion) return errorDeBD(errorSesion, "copiar sesión");
+    }
   }
 
   revalidar();

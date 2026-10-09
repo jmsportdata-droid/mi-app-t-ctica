@@ -1,4 +1,5 @@
 import { sumarDias } from "@/lib/utils/fecha";
+import type { OrientacionFisica } from "@/types/tarea";
 
 /** Partido como referencia del calendario. */
 export interface PartidoReferencia {
@@ -126,4 +127,51 @@ export function fechaEquivalente(
   }
   const posicion = diasEntre(origen.desde, fecha);
   return dias[posicion] ?? null;
+}
+
+/** Un día de la semana tipo del manual: orientación física y foco táctico. */
+export interface DiaSemanaTipo {
+  orientacion: OrientacionFisica;
+  foco: string;
+}
+
+/** Semana tipo del manual del cuerpo técnico, por etiqueta de día de partido. */
+export const SEMANA_TIPO: Partial<Record<string, DiaSemanaTipo>> = {
+  "MD+1": { orientacion: "recuperacion", foco: "Recuperación (o libre)" },
+  "MD-4": { orientacion: "tension", foco: "Sistema defensivo · fuerza y contacto" },
+  "MD-3": { orientacion: "duracion", foco: "Sistema ofensivo: salida, progresión y finalización" },
+  "MD-2": { orientacion: "velocidad", foco: "Transiciones · pico de velocidad" },
+  "MD-1": { orientacion: "activacion", foco: "Pelota parada · bajo volumen" },
+};
+
+/**
+ * Número del microciclo en la temporada: el del partido que lo cierra (1 = el
+ * que termina en el primer partido). Después del último, uno más. Sin partidos, null.
+ */
+export function numeroMicrociclo(partidos: PartidoReferencia[], ciclo: Ciclo): number | null {
+  if (partidos.length === 0) return null;
+  const ordenados = [...partidos].sort((a, b) => a.fecha.localeCompare(b.fecha));
+  if (!ciclo.partido) return ordenados.length + 1;
+  return ordenados.findIndex((p) => p.id === ciclo.partido?.id) + 1;
+}
+
+type ActividadOrdenable = {
+  id: string;
+  tipo: string;
+  fecha: string;
+  hora_inicio: string | null;
+  creado_en: string;
+};
+
+/** Número de sesión de cada entrenamiento en cancha del ciclo: vuelve a 1 en cada microciclo. */
+export function numerarSesiones(actividades: ActividadOrdenable[]): Map<string, number> {
+  const entrenamientos = actividades
+    .filter((a) => a.tipo === "entrenamiento")
+    .sort(
+      (a, b) =>
+        a.fecha.localeCompare(b.fecha) ||
+        (a.hora_inicio ?? "").localeCompare(b.hora_inicio ?? "") ||
+        a.creado_en.localeCompare(b.creado_en),
+    );
+  return new Map(entrenamientos.map((a, i) => [a.id, i + 1]));
 }

@@ -31,7 +31,7 @@ export function CopiarCicloButton({
           texto:
             r.copiadas === 0
               ? "No había nada nuevo para copiar."
-              : `Se copiaron ${r.copiadas} actividad${r.copiadas === 1 ? "" : "es"}.` +
+              : `Se copiaron ${r.copiadas} actividad${r.copiadas === 1 ? "" : "es"} (los entrenamientos, con su sesión).` +
                 (r.salteadas > 0 ? ` ${r.salteadas} ya estaban o no tienen día equivalente.` : ""),
         });
         router.refresh();
@@ -44,7 +44,7 @@ export function CopiarCicloButton({
   return (
     <div className="flex flex-col items-end gap-1">
       <Button variante="secondary" onClick={handleCopiar} cargando={pendiente}>
-        Copiar del ciclo anterior
+        Copiar del microciclo anterior
       </Button>
       {mensaje && (
         <p className={mensaje.tipo === "ok" ? "text-xs text-brand-700" : "text-xs text-red-600"}>

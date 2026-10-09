@@ -156,6 +156,42 @@ export type Database = {
           },
         ]
       }
+      asistencia_sesion: {
+        Row: {
+          actividad_id: string
+          estado: Database["public"]["Enums"]["estado_asistencia"]
+          jugador_id: string
+          nota: string | null
+        }
+        Insert: {
+          actividad_id: string
+          estado?: Database["public"]["Enums"]["estado_asistencia"]
+          jugador_id: string
+          nota?: string | null
+        }
+        Update: {
+          actividad_id?: string
+          estado?: Database["public"]["Enums"]["estado_asistencia"]
+          jugador_id?: string
+          nota?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asistencia_sesion_actividad_id_fkey"
+            columns: ["actividad_id"]
+            isOneToOne: false
+            referencedRelation: "sesiones"
+            referencedColumns: ["actividad_id"]
+          },
+          {
+            foreignKeyName: "asistencia_sesion_jugador_id_fkey"
+            columns: ["jugador_id"]
+            isOneToOne: false
+            referencedRelation: "jugadores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contenidos_tecnicos: {
         Row: {
           creado_en: string
@@ -628,6 +664,101 @@ export type Database = {
           },
         ]
       }
+      plantilla_tareas: {
+        Row: {
+          ancho_m: number | null
+          duracion_seg: number | null
+          espacio: Database["public"]["Enums"]["espacio_tarea"] | null
+          id: string
+          jugadores: number | null
+          largo_m: number | null
+          notas: string | null
+          orden: number
+          pausa_seg: number | null
+          plantilla_id: string
+          series: number | null
+          tarea_id: string
+        }
+        Insert: {
+          ancho_m?: number | null
+          duracion_seg?: number | null
+          espacio?: Database["public"]["Enums"]["espacio_tarea"] | null
+          id?: string
+          jugadores?: number | null
+          largo_m?: number | null
+          notas?: string | null
+          orden?: number
+          pausa_seg?: number | null
+          plantilla_id: string
+          series?: number | null
+          tarea_id: string
+        }
+        Update: {
+          ancho_m?: number | null
+          duracion_seg?: number | null
+          espacio?: Database["public"]["Enums"]["espacio_tarea"] | null
+          id?: string
+          jugadores?: number | null
+          largo_m?: number | null
+          notas?: string | null
+          orden?: number
+          pausa_seg?: number | null
+          plantilla_id?: string
+          series?: number | null
+          tarea_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plantilla_tareas_plantilla_id_fkey"
+            columns: ["plantilla_id"]
+            isOneToOne: false
+            referencedRelation: "plantillas_sesion"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plantilla_tareas_tarea_id_fkey"
+            columns: ["tarea_id"]
+            isOneToOne: false
+            referencedRelation: "tareas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plantillas_sesion: {
+        Row: {
+          creado_en: string
+          cuerpo_tecnico_id: string
+          id: string
+          md: string | null
+          nombre: string
+          objetivo: string | null
+        }
+        Insert: {
+          creado_en?: string
+          cuerpo_tecnico_id?: string
+          id?: string
+          md?: string | null
+          nombre: string
+          objetivo?: string | null
+        }
+        Update: {
+          creado_en?: string
+          cuerpo_tecnico_id?: string
+          id?: string
+          md?: string | null
+          nombre?: string
+          objetivo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plantillas_sesion_cuerpo_tecnico_id_fkey"
+            columns: ["cuerpo_tecnico_id"]
+            isOneToOne: false
+            referencedRelation: "cuerpos_tecnicos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       principios_juego: {
         Row: {
           creado_en: string
@@ -675,6 +806,113 @@ export type Database = {
             columns: ["padre_id"]
             isOneToOne: false
             referencedRelation: "principios_juego"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sesion_tareas: {
+        Row: {
+          actividad_id: string
+          ancho_m: number | null
+          creado_en: string
+          duracion_seg: number | null
+          espacio: Database["public"]["Enums"]["espacio_tarea"] | null
+          id: string
+          jugadores: number | null
+          largo_m: number | null
+          notas: string | null
+          orden: number
+          pausa_seg: number | null
+          series: number | null
+          tarea_id: string
+          tiempo_total_seg: number | null
+        }
+        Insert: {
+          actividad_id: string
+          ancho_m?: number | null
+          creado_en?: string
+          duracion_seg?: number | null
+          espacio?: Database["public"]["Enums"]["espacio_tarea"] | null
+          id?: string
+          jugadores?: number | null
+          largo_m?: number | null
+          notas?: string | null
+          orden?: number
+          pausa_seg?: number | null
+          series?: number | null
+          tarea_id: string
+          tiempo_total_seg?: number | null
+        }
+        Update: {
+          actividad_id?: string
+          ancho_m?: number | null
+          creado_en?: string
+          duracion_seg?: number | null
+          espacio?: Database["public"]["Enums"]["espacio_tarea"] | null
+          id?: string
+          jugadores?: number | null
+          largo_m?: number | null
+          notas?: string | null
+          orden?: number
+          pausa_seg?: number | null
+          series?: number | null
+          tarea_id?: string
+          tiempo_total_seg?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sesion_tareas_actividad_id_fkey"
+            columns: ["actividad_id"]
+            isOneToOne: false
+            referencedRelation: "sesiones"
+            referencedColumns: ["actividad_id"]
+          },
+          {
+            foreignKeyName: "sesion_tareas_tarea_id_fkey"
+            columns: ["tarea_id"]
+            isOneToOne: false
+            referencedRelation: "tareas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sesiones: {
+        Row: {
+          actividad_id: string
+          actualizado_en: string
+          cerrada: boolean
+          creado_en: string
+          minutos_reales: number | null
+          notas: string | null
+          objetivo: string | null
+          observaciones_cierre: string | null
+        }
+        Insert: {
+          actividad_id: string
+          actualizado_en?: string
+          cerrada?: boolean
+          creado_en?: string
+          minutos_reales?: number | null
+          notas?: string | null
+          objetivo?: string | null
+          observaciones_cierre?: string | null
+        }
+        Update: {
+          actividad_id?: string
+          actualizado_en?: string
+          cerrada?: boolean
+          creado_en?: string
+          minutos_reales?: number | null
+          notas?: string | null
+          objetivo?: string | null
+          observaciones_cierre?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sesiones_actividad_id_fkey"
+            columns: ["actividad_id"]
+            isOneToOne: true
+            referencedRelation: "actividades"
             referencedColumns: ["id"]
           },
         ]
@@ -896,8 +1134,20 @@ export type Database = {
     }
     Functions: {
       activar_temporada: { Args: { p_temporada: string }; Returns: undefined }
+      agregar_tarea_sesion: {
+        Args: { p_actividad: string; p_tarea: string }
+        Returns: string
+      }
+      aplicar_plantilla_sesion: {
+        Args: { p_actividad: string; p_plantilla: string }
+        Returns: number
+      }
       cargar_modelo_base: { Args: never; Returns: number }
       cargar_tareas_base: { Args: never; Returns: number }
+      copiar_sesion: {
+        Args: { p_destino: string; p_origen: string }
+        Returns: number
+      }
       crear_cuerpo_tecnico: {
         Args: {
           p_club: string
@@ -920,10 +1170,16 @@ export type Database = {
       }
       es_entrenador: { Args: { p_cuerpo_tecnico: string }; Returns: boolean }
       es_miembro: { Args: { p_cuerpo_tecnico: string }; Returns: boolean }
+      es_miembro_actividad: { Args: { p_actividad: string }; Returns: boolean }
       es_miembro_jugador: { Args: { p_jugador: string }; Returns: boolean }
       es_miembro_partido: { Args: { p_partido: string }; Returns: boolean }
+      es_miembro_plantilla: { Args: { p_plantilla: string }; Returns: boolean }
       es_miembro_tarea: { Args: { p_tarea: string }; Returns: boolean }
       es_miembro_temporada: { Args: { p_temporada: string }; Returns: boolean }
+      guardar_plantilla_sesion: {
+        Args: { p_actividad: string; p_md: string; p_nombre: string }
+        Returns: string
+      }
       jugador_del_partido: {
         Args: { p_jugador: string; p_partido: string }
         Returns: boolean
@@ -935,6 +1191,10 @@ export type Database = {
       }
       rival_valido: {
         Args: { p_rival: string; p_temporada: string }
+        Returns: boolean
+      }
+      tarea_de_la_actividad: {
+        Args: { p_actividad: string; p_tarea: string }
         Returns: boolean
       }
       tiene_rol: {
@@ -959,6 +1219,7 @@ export type Database = {
         | "ultimo_tercio"
         | "area"
         | "gimnasio"
+      estado_asistencia: "completo" | "parcial" | "diferenciado" | "ausente"
       estado_disponibilidad: "disponible" | "limitado" | "baja" | "sancionado"
       estado_partido: "planificado" | "jugado"
       etiqueta_informe:
@@ -985,6 +1246,7 @@ export type Database = {
       tipo_abp: "ofensivo" | "defensivo"
       tipo_actividad:
         | "entrenamiento"
+        | "pre_sesion"
         | "partido"
         | "gimnasio"
         | "charla_tecnica"
@@ -1153,6 +1415,7 @@ export const Constants = {
         "area",
         "gimnasio",
       ],
+      estado_asistencia: ["completo", "parcial", "diferenciado", "ausente"],
       estado_disponibilidad: ["disponible", "limitado", "baja", "sancionado"],
       estado_partido: ["planificado", "jugado"],
       etiqueta_informe: [
@@ -1182,6 +1445,7 @@ export const Constants = {
       tipo_abp: ["ofensivo", "defensivo"],
       tipo_actividad: [
         "entrenamiento",
+        "pre_sesion",
         "partido",
         "gimnasio",
         "charla_tecnica",

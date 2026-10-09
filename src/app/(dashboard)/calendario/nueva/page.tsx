@@ -20,7 +20,7 @@ export default async function NuevaActividadPage({
 
   return (
     <>
-      <BackLink href={fecha ? `/calendario?fecha=${fecha}` : "/calendario"}>Calendario</BackLink>
+      <BackLink href={fecha ? `/microciclo?fecha=${fecha}` : "/microciclo"}>Microciclo</BackLink>
       <PageHeader
         titulo="Nueva actividad"
         descripcion={fecha ? formatearDia(fecha) : "Los partidos se cargan desde Partidos."}

@@ -1,7 +1,9 @@
 import Link from "next/link";
-import { etiquetaMD, rangoFechas, type PartidoReferencia } from "@/lib/calendario";
+import { etiquetaMD, rangoFechas, SEMANA_TIPO, type PartidoReferencia } from "@/lib/calendario";
 import { cn } from "@/lib/utils/cn";
 import type { Actividad } from "@/types/calendario";
+import type { ResumenSesion } from "@/types/sesion";
+import { INFO_ORIENTACION } from "@/types/tarea";
 import { TarjetaActividad } from "./TarjetaActividad";
 
 interface Props {
@@ -10,6 +12,10 @@ interface Props {
   hoy: string;
   actividades: Actividad[];
   partidos: PartidoReferencia[];
+  /** Resumen de la sesión de cada entrenamiento (por id de actividad) */
+  resumenes: Map<string, ResumenSesion>;
+  /** Número de sesión de cada entrenamiento en el microciclo */
+  numeroSesion: Map<string, number>;
 }
 
 const DIA_SEMANA = new Intl.DateTimeFormat("es-UY", { weekday: "short", timeZone: "UTC" });
@@ -24,7 +30,15 @@ const aFecha = (f: string) => new Date(`${f}T00:00:00Z`);
  * Los días del ciclo en columnas (tablet y computadora) o uno abajo del otro
  * (celular), con la etiqueta de día de partido (MD-3, MD, MD+1…).
  */
-export function VistaCiclo({ desde, hasta, hoy, actividades, partidos }: Props) {
+export function VistaCiclo({
+  desde,
+  hasta,
+  hoy,
+  actividades,
+  partidos,
+  resumenes,
+  numeroSesion,
+}: Props) {
   const dias = rangoFechas(desde, hasta);
 
   return (
@@ -38,6 +52,7 @@ export function VistaCiclo({ desde, hasta, hoy, actividades, partidos }: Props) 
           const delDia = actividades.filter((a) => a.fecha === fecha);
           const esHoy = fecha === hoy;
           const esPartido = etiqueta?.offset === 0;
+          const tipo = etiqueta ? SEMANA_TIPO[etiqueta.texto] : undefined;
           return (
             <section
               key={fecha}
@@ -69,10 +84,23 @@ export function VistaCiclo({ desde, hasta, hoy, actividades, partidos }: Props) 
                   </span>
                 )}
               </header>
+              {tipo && (
+                <p className="mb-2 px-1 text-[11px] leading-snug text-slate-500" title={tipo.foco}>
+                  <span className="font-semibold text-slate-700">
+                    {INFO_ORIENTACION[tipo.orientacion].label}
+                  </span>{" "}
+                  · {tipo.foco}
+                </p>
+              )}
 
               <div className="flex flex-1 flex-col gap-1.5">
                 {delDia.map((a) => (
-                  <TarjetaActividad key={a.id} actividad={a} />
+                  <TarjetaActividad
+                    key={a.id}
+                    actividad={a}
+                    resumen={resumenes.get(a.id)}
+                    numeroSesion={numeroSesion.get(a.id)}
+                  />
                 ))}
               </div>
 

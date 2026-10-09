@@ -6,9 +6,16 @@ export type TipoActividad = Enums<"tipo_actividad">;
 export const TIPOS_ACTIVIDAD = [
   {
     valor: "entrenamiento",
-    label: "Entrenamiento",
+    label: "Cancha",
     color: "bg-emerald-50 text-emerald-900 ring-emerald-200",
     punto: "bg-emerald-500",
+    visible: true,
+  },
+  {
+    valor: "pre_sesion",
+    label: "Pre sesión",
+    color: "bg-teal-50 text-teal-900 ring-teal-200",
+    punto: "bg-teal-500",
     visible: true,
   },
   {
@@ -20,14 +27,14 @@ export const TIPOS_ACTIVIDAD = [
   },
   {
     valor: "gimnasio",
-    label: "Gimnasio",
+    label: "Gym",
     color: "bg-sky-50 text-sky-900 ring-sky-200",
     punto: "bg-sky-500",
     visible: true,
   },
   {
     valor: "charla_tecnica",
-    label: "Charla técnica",
+    label: "Video",
     color: "bg-indigo-50 text-indigo-900 ring-indigo-200",
     punto: "bg-indigo-500",
     visible: true,
