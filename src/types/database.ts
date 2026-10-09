@@ -236,6 +236,57 @@ export type Database = {
           },
         ]
       }
+      concentraciones: {
+        Row: {
+          actividad_id: string | null
+          actualizado_en: string
+          entrada_fecha: string | null
+          entrada_hora: string | null
+          lugar: string | null
+          notas: string | null
+          partido_id: string
+          salida_fecha: string | null
+          salida_hora: string | null
+        }
+        Insert: {
+          actividad_id?: string | null
+          actualizado_en?: string
+          entrada_fecha?: string | null
+          entrada_hora?: string | null
+          lugar?: string | null
+          notas?: string | null
+          partido_id: string
+          salida_fecha?: string | null
+          salida_hora?: string | null
+        }
+        Update: {
+          actividad_id?: string | null
+          actualizado_en?: string
+          entrada_fecha?: string | null
+          entrada_hora?: string | null
+          lugar?: string | null
+          notas?: string | null
+          partido_id?: string
+          salida_fecha?: string | null
+          salida_hora?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "concentraciones_actividad_id_fkey"
+            columns: ["actividad_id"]
+            isOneToOne: false
+            referencedRelation: "actividades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "concentraciones_partido_id_fkey"
+            columns: ["partido_id"]
+            isOneToOne: true
+            referencedRelation: "partidos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contenidos_tecnicos: {
         Row: {
           creado_en: string
@@ -492,6 +543,44 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "partidos"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      habitaciones: {
+        Row: {
+          capacidad: number
+          creado_en: string
+          id: string
+          jugadores: string[]
+          nombre: string
+          orden: number
+          partido_id: string
+        }
+        Insert: {
+          capacidad?: number
+          creado_en?: string
+          id?: string
+          jugadores?: string[]
+          nombre: string
+          orden?: number
+          partido_id: string
+        }
+        Update: {
+          capacidad?: number
+          creado_en?: string
+          id?: string
+          jugadores?: string[]
+          nombre?: string
+          orden?: number
+          partido_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "habitaciones_partido_id_fkey"
+            columns: ["partido_id"]
+            isOneToOne: false
+            referencedRelation: "concentraciones"
+            referencedColumns: ["partido_id"]
           },
         ]
       }
@@ -860,6 +949,104 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "plan_partido_partido_id_fkey"
+            columns: ["partido_id"]
+            isOneToOne: true
+            referencedRelation: "partidos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      planes_partido: {
+        Row: {
+          abp_ct: string | null
+          abp_plantel: string | null
+          actualizado_en: string
+          choque: string | null
+          claves: string[]
+          contexto: string | null
+          defensiva_ct: string | null
+          defensiva_jugadores: string[]
+          defensiva_plantel: string | null
+          defensiva_principios: string[]
+          gestion: string | null
+          jugadores_clave: Json
+          microciclo_principios: string[]
+          objetivo: string | null
+          ofensiva_ct: string | null
+          ofensiva_jugadores: string[]
+          ofensiva_plantel: string | null
+          ofensiva_principios: string[]
+          partido_id: string
+          tad_ct: string | null
+          tad_jugadores: string[]
+          tad_plantel: string | null
+          tad_principios: string[]
+          tda_ct: string | null
+          tda_jugadores: string[]
+          tda_plantel: string | null
+          tda_principios: string[]
+        }
+        Insert: {
+          abp_ct?: string | null
+          abp_plantel?: string | null
+          actualizado_en?: string
+          choque?: string | null
+          claves?: string[]
+          contexto?: string | null
+          defensiva_ct?: string | null
+          defensiva_jugadores?: string[]
+          defensiva_plantel?: string | null
+          defensiva_principios?: string[]
+          gestion?: string | null
+          jugadores_clave?: Json
+          microciclo_principios?: string[]
+          objetivo?: string | null
+          ofensiva_ct?: string | null
+          ofensiva_jugadores?: string[]
+          ofensiva_plantel?: string | null
+          ofensiva_principios?: string[]
+          partido_id: string
+          tad_ct?: string | null
+          tad_jugadores?: string[]
+          tad_plantel?: string | null
+          tad_principios?: string[]
+          tda_ct?: string | null
+          tda_jugadores?: string[]
+          tda_plantel?: string | null
+          tda_principios?: string[]
+        }
+        Update: {
+          abp_ct?: string | null
+          abp_plantel?: string | null
+          actualizado_en?: string
+          choque?: string | null
+          claves?: string[]
+          contexto?: string | null
+          defensiva_ct?: string | null
+          defensiva_jugadores?: string[]
+          defensiva_plantel?: string | null
+          defensiva_principios?: string[]
+          gestion?: string | null
+          jugadores_clave?: Json
+          microciclo_principios?: string[]
+          objetivo?: string | null
+          ofensiva_ct?: string | null
+          ofensiva_jugadores?: string[]
+          ofensiva_plantel?: string | null
+          ofensiva_principios?: string[]
+          partido_id?: string
+          tad_ct?: string | null
+          tad_jugadores?: string[]
+          tad_plantel?: string | null
+          tad_principios?: string[]
+          tda_ct?: string | null
+          tda_jugadores?: string[]
+          tda_plantel?: string | null
+          tda_principios?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "planes_partido_partido_id_fkey"
             columns: ["partido_id"]
             isOneToOne: true
             referencedRelation: "partidos"

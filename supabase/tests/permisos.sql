@@ -83,8 +83,8 @@ begin
        <> '00000000-0000-4000-b000-00000000000a' then
     raise exception 'FALLA: el equipo nuevo tiene que quedar en el cuerpo técnico del usuario';
   end if;
-  insert into public.plan_partido (partido_id, ataque_notas)
-    values ('00000000-0000-4000-f000-00000000000a', 'Notas');
+  insert into public.planes_partido (partido_id, objetivo)
+    values ('00000000-0000-4000-f000-00000000000a', 'Ganar');
 
   -- Nada de B: ni leer, ni escribir, ni modificar
   begin
@@ -101,7 +101,7 @@ begin
   end if;
 
   begin
-    insert into public.plan_partido (partido_id, ataque_notas)
+    insert into public.planes_partido (partido_id, objetivo)
       values ('00000000-0000-4000-f000-00000000000b', 'Intruso');
     raise exception 'FALLA: el analista A pudo escribir el plan de un partido de B';
   exception when insufficient_privilege then null;
@@ -307,6 +307,23 @@ begin
     insert into public.videos_vestuario (partido_id, tipo, url)
       values ('00000000-0000-4000-f000-00000000000b', 'rival', 'https://vimeo.com/3');
     raise exception 'FALLA: el analista A pudo cargar videos de un partido de B';
+  exception when insufficient_privilege then null;
+  end;
+
+  -- Concentración y habitaciones: con capacidad; nada de B
+  insert into public.concentraciones (partido_id, lugar) values ('00000000-0000-4000-f000-00000000000a', 'Hotel');
+  insert into public.habitaciones (partido_id, nombre, capacidad, jugadores)
+    values ('00000000-0000-4000-f000-00000000000a', '101', 2, array['00000000-0000-4000-e000-00000000000a']::uuid[]);
+  begin
+    insert into public.habitaciones (partido_id, nombre, capacidad, jugadores)
+      values ('00000000-0000-4000-f000-00000000000a', '102', 1,
+              array['00000000-0000-4000-e000-00000000000a', '00000000-0000-4000-e000-00000000000a']::uuid[]);
+    raise exception 'FALLA: una habitación quedó con más jugadores que camas';
+  exception when check_violation then null;
+  end;
+  begin
+    insert into public.concentraciones (partido_id, lugar) values ('00000000-0000-4000-f000-00000000000b', 'Intruso');
+    raise exception 'FALLA: el analista A pudo cargar la concentración de un partido de B';
   exception when insufficient_privilege then null;
   end;
 

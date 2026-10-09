@@ -5,13 +5,13 @@ import { cn } from "@/lib/utils/cn";
 import type { DetallePartido } from "@/lib/data/partidos";
 import type { EstadoDelDia } from "@/types/disponibilidad";
 import type { Jugador } from "@/types/jugador";
+import type { PrincipioJuego } from "@/types/modelo-juego";
 import { TABS_PARTIDO, type PartidoConRival, type TabPartido } from "@/types/partido";
 import { AbpPanel } from "./AbpPanel";
 import { AnalisisVideoPanel } from "./AnalisisVideoPanel";
 import { ConvocatoriaPanel } from "./ConvocatoriaPanel";
-import { EscenariosPanel } from "./EscenariosPanel";
 import { InformeRivalPanel } from "./InformeRivalPanel";
-import { PlanPartidoPanel } from "./PlanPartidoPanel";
+import { PlanPartidoEditor, type TareaSugerida } from "./PlanPartidoEditor";
 import { PostPartidoPanel } from "./PostPartidoPanel";
 import { PreviaPanel } from "./PreviaPanel";
 import { VestuarioPanel } from "./VestuarioPanel";
@@ -25,6 +25,9 @@ interface Props {
   /** Qué pasos ya tienen contenido */
   completos: Record<TabPartido, boolean>;
   encabezadoConvocatoria: string;
+  principios: PrincipioJuego[];
+  tareasSugeridas: TareaSugerida[];
+  resumenPrevia: string[];
   partidoId: string;
   detalle: DetallePartido;
   jugadores: Jugador[];
@@ -40,6 +43,9 @@ export function PartidoTabs({
   disponibilidad,
   completos,
   encabezadoConvocatoria,
+  principios,
+  tareasSugeridas,
+  resumenPrevia,
   partidoId,
   detalle,
   jugadores,
@@ -52,6 +58,19 @@ export function PartidoTabs({
   // (no se pierde lo escrito, y las gráficas se miden con el panel ya visible).
   const [visitadas, setVisitadas] = useState<Set<TabPartido>>(() => new Set([tabInicial]));
   const botones = useRef<Array<HTMLButtonElement | null>>([]);
+  // En el plan, primero los convocados (si ya hay convocatoria)
+  const convocados = new Set(
+    [...(detalle.alineacion?.titulares ?? []), ...(detalle.alineacion?.suplentes ?? [])].filter(
+      Boolean,
+    ) as string[],
+  );
+  const jugadoresDelPlan =
+    convocados.size > 0
+      ? [
+          ...jugadores.filter((j) => convocados.has(j.id)),
+          ...jugadores.filter((j) => !convocados.has(j.id)),
+        ]
+      : jugadores;
 
   function seleccionar(tab: TabPartido) {
     setActiva(tab);
@@ -148,14 +167,17 @@ export function PartidoTabs({
         <AbpPanel partidoId={partidoId} abp={detalle.abp} />
       </Panel>
       <Panel id="plan" activa={activa} visitadas={visitadas}>
-        <div className="space-y-6">
-          <PlanPartidoPanel partidoId={partidoId} plan={detalle.plan} />
-          <EscenariosPanel
-            partidoId={partidoId}
-            escenarios={detalle.escenarios}
-            jugadores={jugadores}
-          />
-        </div>
+        <PlanPartidoEditor
+          partidoId={partidoId}
+          plan={detalle.plan}
+          principios={principios}
+          jugadores={jugadoresDelPlan}
+          escenarios={detalle.escenarios}
+          formacionPropia={detalle.alineacion?.formacion ?? null}
+          formacionRival={partido.formacion_rival}
+          resumenPrevia={resumenPrevia}
+          tareasSugeridas={tareasSugeridas}
+        />
       </Panel>
       <Panel id="convocatoria" activa={activa} visitadas={visitadas}>
         <ConvocatoriaPanel
@@ -164,6 +186,9 @@ export function PartidoTabs({
           jugadores={jugadores}
           disponibilidad={disponibilidad}
           encabezado={encabezadoConvocatoria}
+          fechaPartido={partido.fecha}
+          concentracion={detalle.concentracion}
+          habitaciones={detalle.habitaciones}
         />
       </Panel>
       <Panel id="vestuario" activa={activa} visitadas={visitadas}>

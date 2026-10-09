@@ -2,13 +2,10 @@ import { z } from "zod";
 import { esUrlHttps, slidesEmbedUrl, vimeoEmbedUrl } from "@/lib/embeds";
 import {
   CAMPOS_INFORME,
-  CAMPOS_PLAN,
   ESTADOS_PARTIDO,
   TAGS_INFORME,
   type CampoInforme,
-  type CampoPlan,
   type PartidoInput,
-  type SufijoPlan,
 } from "@/types/partido";
 import { textoOpcionalSchema } from "./comun";
 import { horaSchema } from "./calendario";
@@ -52,28 +49,6 @@ const urlSlides = nulable(
     .max(URL_MAX)
     .refine((v) => slidesEmbedUrl(v) !== null, "Pegá un enlace válido de Google Slides"),
 );
-const urlHttps = nulable(
-  z.string().max(URL_MAX).refine(esUrlHttps, "Ingresá una URL válida que empiece con https://"),
-);
-const notas = nulable(z.string().max(10_000, "Las notas no pueden superar 10.000 caracteres"));
-
-const SCHEMA_POR_SUFIJO: Record<SufijoPlan, z.ZodType<string | null, z.ZodTypeDef, string>> = {
-  notas,
-  vimeo: urlVimeo,
-  imagen1: urlHttps,
-  imagen2: urlHttps,
-  pdf: urlHttps,
-};
-
-export function esCampoPlan(campo: string): campo is CampoPlan {
-  return (CAMPOS_PLAN as readonly string[]).includes(campo);
-}
-
-export function schemaCampoPlan(campo: CampoPlan) {
-  const sufijo = campo.slice(campo.indexOf("_") + 1) as SufijoPlan;
-  return SCHEMA_POR_SUFIJO[sufijo];
-}
-
 export const SCHEMA_CAMPO_INFORME: Record<
   CampoInforme,
   z.ZodType<string | null, z.ZodTypeDef, string>

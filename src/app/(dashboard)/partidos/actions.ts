@@ -13,9 +13,7 @@ import { erroresDeZod } from "@/lib/validations/comun";
 import {
   SCHEMA_CAMPO_INFORME,
   esCampoInforme,
-  esCampoPlan,
   partidoSchema,
-  schemaCampoPlan,
   tagsSchema,
   type PartidoErrores,
 } from "@/lib/validations/partido";
@@ -110,7 +108,7 @@ export async function eliminarPartido(id: string): Promise<PartidoActionResult> 
   const supabase = await clienteAutenticado();
   if (!supabase) return SESION_EXPIRADA;
 
-  // plan_partido e informe_rival se borran en cascada
+  // El plan, el informe y el resto del partido se borran en cascada
   const { error } = await supabase.from("partidos").delete().eq("id", id);
   if (error) return errorDeBD(error, "eliminar");
 
@@ -118,34 +116,6 @@ export async function eliminarPartido(id: string): Promise<PartidoActionResult> 
   revalidatePath("/calendario", "layout");
   revalidatePath("/microciclo", "layout");
   return { ok: true, id };
-}
-
-// ---------- Guardado automático: plan de partido ------------------
-
-export async function guardarCampoPlan(
-  partidoId: string,
-  campo: string,
-  valor: string,
-): Promise<GuardadoResult> {
-  if (!idSchema.safeParse(partidoId).success || !esCampoPlan(campo)) {
-    return { ok: false, error: "Campo no válido" };
-  }
-  const parsed = schemaCampoPlan(campo).safeParse(valor);
-  if (!parsed.success) {
-    return { ok: false, error: parsed.error.issues[0]?.message ?? "Valor no válido" };
-  }
-
-  const supabase = await clienteAutenticado();
-  if (!supabase) return SESION_EXPIRADA;
-
-  // Upsert: la fila del plan se crea en el primer guardado
-  const { error } = await supabase
-    .from("plan_partido")
-    .upsert({ partido_id: partidoId, [campo]: parsed.data }, { onConflict: "partido_id" });
-  if (error) return errorDeBD(error, `plan.${campo}`);
-
-  revalidatePath(`/partidos/${partidoId}`);
-  return { ok: true, valor: parsed.data };
 }
 
 // ---------- Guardado automático: informe del rival ----------------

@@ -1,12 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
 import { etiquetaFormacion, type AlineacionPartido } from "@/types/alineacion";
 import { INFO_ESTADO, type EstadoDelDia } from "@/types/disponibilidad";
 import type { Jugador } from "@/types/jugador";
+import type { Concentracion, Habitacion } from "@/types/partido";
 import { Button } from "@/components/ui/Button";
 import { AlineacionEditor } from "./AlineacionEditor";
+import { ConcentracionPanel } from "./ConcentracionPanel";
 
 /**
  * Convocatoria: titulares y suplentes (con la alineación), avisos de disponibilidad
@@ -18,6 +21,9 @@ export function ConvocatoriaPanel({
   jugadores,
   disponibilidad,
   encabezado,
+  fechaPartido,
+  concentracion,
+  habitaciones,
 }: {
   partidoId: string;
   alineacion: AlineacionPartido | null;
@@ -25,6 +31,9 @@ export function ConvocatoriaPanel({
   disponibilidad: Record<string, EstadoDelDia>;
   /** "Convocados vs Peñarol · domingo 18/10" */
   encabezado: string;
+  fechaPartido: string;
+  concentracion: Concentracion | null;
+  habitaciones: Habitacion[];
 }) {
   const [copiado, setCopiado] = useState(false);
   const porId = new Map(jugadores.map((j) => [j.id, j]));
@@ -94,12 +103,31 @@ export function ConvocatoriaPanel({
             </p>
           )}
         </div>
-        <Button variante="secondary" onClick={copiar} disabled={convocados.length === 0}>
-          {copiado ? "¡Copiada!" : "Copiar lista para el grupo"}
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variante="secondary" onClick={copiar} disabled={convocados.length === 0}>
+            {copiado ? "¡Copiada!" : "Copiar lista para el grupo"}
+          </Button>
+          {convocados.length > 0 && (
+            <Link
+              href={`/imprimir/convocatoria/${partidoId}?que=lista`}
+              target="_blank"
+              className="inline-flex items-center rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+            >
+              Exportar lista para el club ↗
+            </Link>
+          )}
+        </div>
       </section>
 
       <AlineacionEditor partidoId={partidoId} alineacion={alineacion} jugadores={jugadores} />
+
+      <ConcentracionPanel
+        partidoId={partidoId}
+        fechaPartido={fechaPartido}
+        concentracion={concentracion}
+        habitaciones={habitaciones}
+        convocados={ordenar(convocados)}
+      />
     </div>
   );
 }

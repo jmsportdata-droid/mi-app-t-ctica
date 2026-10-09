@@ -3,12 +3,21 @@ import { notFound } from "next/navigation";
 import { getDetallePartido, getPartido } from "@/lib/data/partidos";
 import { getDisponibilidadDelDia } from "@/lib/data/disponibilidad";
 import { getJugadores } from "@/lib/data/jugadores";
+import { getModeloJuego } from "@/lib/data/modelo-juego";
+import { getTareas } from "@/lib/data/tareas";
 import { nombreArchivoSeguro } from "@/lib/export";
 import { clubDeTemporada } from "@/lib/club";
 import { requerirContexto } from "@/lib/contexto";
 import { getTemporada } from "@/lib/data/cuerpo-tecnico";
 import { formatearDia, formatearFechaPartido, horaCorta } from "@/lib/utils/fecha";
-import { CAMPOS_PLAN, esTabPartido, type PartidoConRival, type TabPartido } from "@/types/partido";
+import { etiquetaFormacion } from "@/types/alineacion";
+import {
+  CAMPOS_TEXTO_PLAN,
+  CESPEDES,
+  esTabPartido,
+  type PartidoConRival,
+  type TabPartido,
+} from "@/types/partido";
 import type { Temporada } from "@/types/cuerpo-tecnico";
 import { BackLink } from "@/components/ui/BackLink";
 import { Enfrentamiento } from "@/components/partidos/Enfrentamiento";
@@ -40,16 +49,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function PartidoPage({ params, searchParams }: Props) {
-  await requerirContexto();
+  const { cuerpoTecnico } = await requerirContexto();
   const datos = await getPartidoYTemporada(params.id);
   if (!datos) notFound();
   const { partido, temporada } = datos;
   const titulo = tituloPartido(partido, temporada.club);
 
-  const [detalle, jugadores, disponibilidad] = await Promise.all([
+  const [detalle, jugadores, disponibilidad, { principios }, tareas] = await Promise.all([
     getDetallePartido(partido.id),
     getJugadores(partido.temporada_id),
     getDisponibilidadDelDia(partido.temporada_id, partido.fecha),
+    getModeloJuego(cuerpoTecnico.id),
+    getTareas(cuerpoTecnico.id),
   ]);
   const tabInicial = esTabPartido(searchParams.tab) ? searchParams.tab : "previa";
 
@@ -64,13 +75,39 @@ export default async function PartidoPage({ params, searchParams }: Props) {
     informe: Boolean(informe?.slides_url || informe?.vimeo_url || informe?.tags.length),
     video: detalle.analisis.length > 0,
     abp: detalle.abp.some((a) => a.descripcion),
-    plan: detalle.escenarios.length > 0 || CAMPOS_PLAN.some((c) => plan?.[c]),
+    plan:
+      detalle.escenarios.length > 0 ||
+      Boolean(plan?.claves.length) ||
+      (Object.keys(CAMPOS_TEXTO_PLAN) as (keyof typeof CAMPOS_TEXTO_PLAN)[]).some((c) => plan?.[c]),
     convocatoria: (detalle.alineacion?.titulares.filter(Boolean).length ?? 0) === 11,
     vestuario: detalle.videos.some((v) => v.url),
     eventos: detalle.eventos.length > 0,
     post: partido.goles_favor !== null,
   };
   const rival = partido.rival?.nombre ?? "rival";
+
+  // Tareas del banco que trabajan los principios elegidos para el microciclo
+  const elegidos = new Set(plan?.microciclo_principios ?? []);
+  for (const p of principios) if (p.padre_id && elegidos.has(p.padre_id)) elegidos.add(p.id);
+  const tareasSugeridas = tareas
+    .filter((t) => !t.archivada)
+    .map((t) => ({ t, n: t.objetivos.filter((o) => elegidos.has(o)).length }))
+    .filter((x) => x.n > 0)
+    .sort((a, b) => b.n - a.n || a.t.nombre.localeCompare(b.t.nombre, "es"))
+    .slice(0, 8)
+    .map(({ t }) => ({ id: t.id, nombre: t.nombre, tipo: t.tipo }));
+
+  const resumenPrevia = [
+    partido.formacion_rival &&
+      `Formación esperada del rival: ${etiquetaFormacion(partido.formacion_rival)}`,
+    previa?.rival_racha && `Cómo viene: ${previa.rival_racha}`,
+    previa?.rival_bajas && `Bajas: ${previa.rival_bajas}`,
+    previa?.rival_dt && `Entrenador: ${previa.rival_dt}`,
+    previa?.arbitro && `Árbitro: ${previa.arbitro}`,
+    previa?.cesped &&
+      `Césped ${CESPEDES.find((c) => c.valor === previa.cesped)?.label.toLowerCase()}`,
+    previa?.clima && `Clima: ${previa.clima}`,
+  ].filter((x): x is string => Boolean(x));
 
   return (
     <>
@@ -105,6 +142,9 @@ export default async function PartidoPage({ params, searchParams }: Props) {
         disponibilidad={disponibilidad}
         completos={completos}
         encabezadoConvocatoria={`Convocados vs ${rival} · ${formatearDia(partido.fecha)}`}
+        principios={principios}
+        tareasSugeridas={tareasSugeridas}
+        resumenPrevia={resumenPrevia}
         partidoId={partido.id}
         detalle={detalle}
         jugadores={jugadores}

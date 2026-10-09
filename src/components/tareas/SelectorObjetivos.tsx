@@ -17,13 +17,20 @@ interface Props {
   principios: PrincipioJuego[];
   value: string[];
   onChange: (ids: string[]) => void;
+  /** Momento que aparece elegido al abrir */
+  momentoInicial?: MomentoJuego;
 }
 
 /** Desplegables encadenados momento → principio → subprincipio, con la lista de elegidos. */
-export function SelectorObjetivos({ principios, value, onChange }: Props) {
+export function SelectorObjetivos({
+  principios,
+  value,
+  onChange,
+  momentoInicial = "organizacion_ofensiva",
+}: Props) {
   const arbol = useMemo(() => construirArbol(principios.filter((p) => !p.oculto)), [principios]);
   const indice = useMemo(() => indiceObjetivos(principios), [principios]);
-  const [momento, setMomento] = useState<MomentoJuego>("organizacion_ofensiva");
+  const [momento, setMomento] = useState<MomentoJuego>(momentoInicial);
   const [principioId, setPrincipioId] = useState("");
   const [subId, setSubId] = useState("");
 

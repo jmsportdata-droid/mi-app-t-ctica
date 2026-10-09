@@ -6,6 +6,8 @@ import type { AlineacionPartido } from "@/types/alineacion";
 import type { EventoPartido } from "@/types/evento";
 import type {
   AnalisisRival,
+  Concentracion,
+  Habitacion,
   EscenarioPartido,
   InformeRival,
   PartidoConRival,
@@ -59,38 +61,58 @@ export interface DetallePartido {
   analisis: AnalisisRival[];
   escenarios: EscenarioPartido[];
   videos: VideoVestuario[];
+  concentracion: Concentracion | null;
+  habitaciones: Habitacion[];
 }
 
 /** Contenido de las pestañas del partido (las filas 1:1 se crean al primer guardado). */
 export async function getDetallePartido(partidoId: string): Promise<DetallePartido> {
   const supabase = createClient();
-  const [plan, informe, abp, alineacion, eventos, previa, analisis, escenarios, videos] =
-    await Promise.all([
-      supabase.from("plan_partido").select("*").eq("partido_id", partidoId).maybeSingle(),
-      supabase.from("informe_rival").select("*").eq("partido_id", partidoId).maybeSingle(),
-      supabase.from("abp_partido").select("*").eq("partido_id", partidoId),
-      supabase.from("alineacion_partido").select("*").eq("partido_id", partidoId).maybeSingle(),
-      supabase
-        .from("eventos_partido")
-        .select("*")
-        .eq("partido_id", partidoId)
-        .order("minuto", { ascending: true })
-        .order("creado_en", { ascending: true }),
-      supabase.from("partido_previa").select("*").eq("partido_id", partidoId).maybeSingle(),
-      supabase
-        .from("analisis_rival")
-        .select("*")
-        .eq("partido_id", partidoId)
-        .order("orden", { ascending: true })
-        .order("creado_en", { ascending: true }),
-      supabase
-        .from("escenarios_partido")
-        .select("*")
-        .eq("partido_id", partidoId)
-        .order("orden", { ascending: true })
-        .order("creado_en", { ascending: true }),
-      supabase.from("videos_vestuario").select("*").eq("partido_id", partidoId),
-    ]);
+  const [
+    plan,
+    informe,
+    abp,
+    alineacion,
+    eventos,
+    previa,
+    analisis,
+    escenarios,
+    videos,
+    concentracion,
+    habitaciones,
+  ] = await Promise.all([
+    supabase.from("planes_partido").select("*").eq("partido_id", partidoId).maybeSingle(),
+    supabase.from("informe_rival").select("*").eq("partido_id", partidoId).maybeSingle(),
+    supabase.from("abp_partido").select("*").eq("partido_id", partidoId),
+    supabase.from("alineacion_partido").select("*").eq("partido_id", partidoId).maybeSingle(),
+    supabase
+      .from("eventos_partido")
+      .select("*")
+      .eq("partido_id", partidoId)
+      .order("minuto", { ascending: true })
+      .order("creado_en", { ascending: true }),
+    supabase.from("partido_previa").select("*").eq("partido_id", partidoId).maybeSingle(),
+    supabase
+      .from("analisis_rival")
+      .select("*")
+      .eq("partido_id", partidoId)
+      .order("orden", { ascending: true })
+      .order("creado_en", { ascending: true }),
+    supabase
+      .from("escenarios_partido")
+      .select("*")
+      .eq("partido_id", partidoId)
+      .order("orden", { ascending: true })
+      .order("creado_en", { ascending: true }),
+    supabase.from("videos_vestuario").select("*").eq("partido_id", partidoId),
+    supabase.from("concentraciones").select("*").eq("partido_id", partidoId).maybeSingle(),
+    supabase
+      .from("habitaciones")
+      .select("*")
+      .eq("partido_id", partidoId)
+      .order("orden", { ascending: true })
+      .order("creado_en", { ascending: true }),
+  ]);
 
   const error =
     plan.error ??
@@ -101,7 +123,9 @@ export async function getDetallePartido(partidoId: string): Promise<DetalleParti
     previa.error ??
     analisis.error ??
     escenarios.error ??
-    videos.error;
+    videos.error ??
+    concentracion.error ??
+    habitaciones.error;
   if (error) {
     console.error("[getDetallePartido]", error.message);
     throw new Error("No se pudo cargar el detalle del partido");
@@ -116,5 +140,7 @@ export async function getDetallePartido(partidoId: string): Promise<DetalleParti
     analisis: analisis.data ?? [],
     escenarios: escenarios.data ?? [],
     videos: videos.data ?? [],
+    concentracion: concentracion.data,
+    habitaciones: habitaciones.data ?? [],
   };
 }

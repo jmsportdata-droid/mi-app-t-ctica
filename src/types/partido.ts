@@ -25,25 +25,79 @@ export type PartidoConRival = Partido & { rival: RivalResumen | null };
 
 // ---------- Plan de partido --------------------------------------
 
-export const BLOQUES_PLAN = [
-  { clave: "ataque", titulo: "Ataque" },
-  { clave: "defensa", titulo: "Defensa" },
-  { clave: "transicion", titulo: "Transiciones" },
+/** Fila de la tabla "planes_partido". */
+export type PlanPartido = Tables<"planes_partido">;
+
+/** Los momentos del plan, con el prefijo de sus columnas y su momento del modelo. */
+export const MOMENTOS_PLAN = [
+  {
+    prefijo: "ofensiva",
+    label: "Organización ofensiva",
+    momento: "organizacion_ofensiva",
+    corto: "Con pelota",
+  },
+  {
+    prefijo: "defensiva",
+    label: "Organización defensiva",
+    momento: "organizacion_defensiva",
+    corto: "Sin pelota",
+  },
+  {
+    prefijo: "tda",
+    label: "Transición defensa-ataque",
+    momento: "transicion_defensa_ataque",
+    corto: "Al recuperar",
+  },
+  {
+    prefijo: "tad",
+    label: "Transición ataque-defensa",
+    momento: "transicion_ataque_defensa",
+    corto: "Al perder",
+  },
 ] as const;
-export type BloquePlan = (typeof BLOQUES_PLAN)[number]["clave"];
+export type PrefijoPlan = (typeof MOMENTOS_PLAN)[number]["prefijo"];
 
-export const SUFIJOS_PLAN = ["notas", "vimeo", "imagen1", "imagen2", "pdf"] as const;
-export type SufijoPlan = (typeof SUFIJOS_PLAN)[number];
+/** Textos del plan con guardado automático y su largo máximo. */
+export const CAMPOS_TEXTO_PLAN = {
+  objetivo: 300,
+  contexto: 3000,
+  choque: 3000,
+  ofensiva_ct: 3000,
+  ofensiva_plantel: 300,
+  defensiva_ct: 3000,
+  defensiva_plantel: 300,
+  tda_ct: 3000,
+  tda_plantel: 300,
+  tad_ct: 3000,
+  tad_plantel: 300,
+  abp_ct: 3000,
+  abp_plantel: 300,
+  gestion: 2000,
+} as const;
+export type CampoTextoPlan = keyof typeof CAMPOS_TEXTO_PLAN;
 
-/** Columnas editables del plan: ataque_notas, defensa_vimeo, transicion_pdf… */
-export type CampoPlan = `${BloquePlan}_${SufijoPlan}`;
+/** Listas de ids del plan (principios del modelo o jugadores). */
+export const CAMPOS_LISTA_PLAN = [
+  "ofensiva_principios",
+  "ofensiva_jugadores",
+  "defensiva_principios",
+  "defensiva_jugadores",
+  "tda_principios",
+  "tda_jugadores",
+  "tad_principios",
+  "tad_jugadores",
+  "microciclo_principios",
+] as const;
+export type CampoListaPlan = (typeof CAMPOS_LISTA_PLAN)[number];
 
-export const CAMPOS_PLAN: readonly CampoPlan[] = BLOQUES_PLAN.flatMap(({ clave }) =>
-  SUFIJOS_PLAN.map((sufijo) => `${clave}_${sufijo}` as const),
-);
-
-/** Fila de la tabla "plan_partido". */
-export type PlanPartido = Tables<"plan_partido">;
+/** Jugador clave del rival y cómo neutralizarlo. */
+export interface JugadorClave {
+  nombre: string;
+  dorsal: number | null;
+  como: string;
+  /** Nuestro jugador encargado (id) */
+  responsable: string | null;
+}
 
 // ---------- Informe del rival ------------------------------------
 
@@ -71,7 +125,7 @@ export const TABS_PARTIDO = [
   { id: "abp", label: "Pelota quieta" },
   { id: "plan", label: "Plan de partido" },
   { id: "convocatoria", label: "Convocatoria" },
-  { id: "vestuario", label: "Vestuario" },
+  { id: "vestuario", label: "Info al plantel" },
   { id: "eventos", label: "En vivo" },
   { id: "post", label: "Post partido" },
 ] as const;
@@ -168,3 +222,6 @@ export interface CambioPlanificado {
   sale: string;
   entra: string;
 }
+
+export type Concentracion = Tables<"concentraciones">;
+export type Habitacion = Tables<"habitaciones">;
