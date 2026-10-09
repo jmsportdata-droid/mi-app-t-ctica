@@ -62,3 +62,12 @@ export function IconCuenta({ className }: IconProps) {
     </svg>
   );
 }
+
+export function IconCalendario({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <rect x="3" y="4" width="18" height="17" rx="2" />
+      <path d="M16 2v4M8 2v4M3 10h18M8 14h2M14 14h2M8 17.5h2M14 17.5h2" />
+    </svg>
+  );
+}

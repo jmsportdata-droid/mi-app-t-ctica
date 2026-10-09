@@ -16,7 +16,7 @@ export type Partido = Tables<"partidos">;
 
 export type PartidoInput = Pick<
   Partido,
-  "fecha" | "rival_id" | "estadio" | "competicion" | "es_local" | "estado"
+  "fecha" | "hora" | "rival_id" | "estadio" | "competicion" | "es_local" | "estado"
 >;
 
 export type RivalResumen = Pick<Equipo, "id" | "nombre" | "escudo_ruta" | "estadio">;

@@ -38,6 +38,8 @@ function errorDeBD(error: PostgrestError, contexto: string): { ok: false; error:
 }
 
 function revalidarPartido(id: string) {
+  // El partido también figura en el calendario
+  revalidatePath("/calendario", "layout");
   revalidatePath("/partidos");
   revalidatePath(`/partidos/${id}`);
 }
@@ -112,6 +114,7 @@ export async function eliminarPartido(id: string): Promise<PartidoActionResult> 
   if (error) return errorDeBD(error, "eliminar");
 
   revalidatePath("/partidos");
+  revalidatePath("/calendario", "layout");
   return { ok: true, id };
 }
 

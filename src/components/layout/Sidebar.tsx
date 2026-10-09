@@ -6,9 +6,17 @@ import { cn } from "@/lib/utils/cn";
 import { Logo } from "@/components/Logo";
 import { LogoutButton } from "./LogoutButton";
 import { ROL_LABEL, type Rol } from "@/types/cuerpo-tecnico";
-import { IconCuenta, IconCuerpoTecnico, IconEquipos, IconPartidos, IconPlantilla } from "./icons";
+import {
+  IconCalendario,
+  IconCuenta,
+  IconCuerpoTecnico,
+  IconEquipos,
+  IconPartidos,
+  IconPlantilla,
+} from "./icons";
 
 const NAVEGACION = [
+  { href: "/calendario", label: "Calendario", Icono: IconCalendario },
   { href: "/plantilla", label: "Plantel", Icono: IconPlantilla },
   { href: "/equipos", label: "Equipos", Icono: IconEquipos },
   { href: "/partidos", label: "Partidos", Icono: IconPartidos },

@@ -6,7 +6,7 @@ import { nombreArchivoSeguro } from "@/lib/export";
 import { clubDeTemporada } from "@/lib/club";
 import { requerirContexto } from "@/lib/contexto";
 import { getTemporada } from "@/lib/data/cuerpo-tecnico";
-import { formatearFechaPartido } from "@/lib/utils/fecha";
+import { formatearFechaPartido, horaCorta } from "@/lib/utils/fecha";
 import { esTabPartido, type PartidoConRival } from "@/types/partido";
 import type { Temporada } from "@/types/cuerpo-tecnico";
 import { BackLink } from "@/components/ui/BackLink";
@@ -69,7 +69,10 @@ export default async function PartidoPage({ params, searchParams }: Props) {
         </div>
 
         <p className="mt-6 text-center text-sm text-slate-600">
-          <span className="capitalize">{formatearFechaPartido(partido.fecha)}</span>
+          <span className="capitalize">
+            {formatearFechaPartido(partido.fecha)}
+            {partido.hora && ` · ${horaCorta(partido.hora)}`}
+          </span>
           <span className="mx-2 text-slate-300">·</span>
           {partido.estadio ?? "Estadio por confirmar"}
         </p>

@@ -41,3 +41,8 @@ export function sumarDias(fecha: string, dias: number): string {
   const d = new Date(Date.UTC(anio ?? 1970, (mes ?? 1) - 1, (dia ?? 1) + dias));
   return d.toISOString().slice(0, 10);
 }
+
+/** "16:00:00" → "16:00"; null → null. */
+export function horaCorta(hora: string | null | undefined): string | null {
+  return hora ? hora.slice(0, 5) : null;
+}

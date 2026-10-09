@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { formatearFechaPartido } from "@/lib/utils/fecha";
+import { formatearFechaPartido, horaCorta } from "@/lib/utils/fecha";
 import type { PartidoConRival } from "@/types/partido";
 import { EstadoBadge } from "./EstadoBadge";
 import { Enfrentamiento, type ClubPropio } from "./Enfrentamiento";
@@ -20,7 +20,10 @@ export function PartidoCard({ partido, club }: { partido: PartidoConRival; club:
         <div className="flex items-center gap-2 text-slate-700">
           <dt className="sr-only">Fecha</dt>
           <IconoCalendario />
-          <dd className="capitalize">{formatearFechaPartido(partido.fecha)}</dd>
+          <dd className="capitalize">
+            {formatearFechaPartido(partido.fecha)}
+            {partido.hora && ` · ${horaCorta(partido.hora)}`}
+          </dd>
         </div>
         <div className="flex items-center gap-2 text-slate-500">
           <dt className="sr-only">Estadio</dt>

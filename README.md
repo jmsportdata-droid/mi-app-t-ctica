@@ -59,6 +59,16 @@ Los datos se separan en dos capas:
 - Las imágenes (fotos y escudos) están en buckets **privados**, en una carpeta por cuerpo técnico, y
   se sirven desde `/imagenes/...` con la sesión del usuario.
 
+## Calendario
+
+- La vista principal es el **ciclo de partido a partido**: del día después del partido anterior
+  al día del próximo. Cada día lleva su etiqueta (MD-3 … MD, MD+1, MD+2), calculada en
+  `src/lib/calendario.ts`. Sin partidos cargados, se muestran semanas de 7 días.
+- Actividades (`actividades`): tipo, horario, **hora de citación**, lugar, **indicaciones para
+  los jugadores**, notas internas y si las ven los jugadores. Fecha y hora en hora de Uruguay.
+- Cada partido tiene su actividad, que se crea y se actualiza sola (trigger en `partidos`).
+- **Copiar del ciclo anterior** lleva cada actividad al día con la misma etiqueta (MD-2 → MD-2).
+
 ## Importación desde API-Football
 
 **Plantel → Importar** y **Equipos → Importar** traen jugadores y rivales desde

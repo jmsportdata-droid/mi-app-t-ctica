@@ -11,6 +11,7 @@ import {
   type SufijoPlan,
 } from "@/types/partido";
 import { textoOpcionalSchema } from "./comun";
+import { horaSchema } from "./calendario";
 
 export const partidoSchema = z.object({
   rival_id: z.string({ required_error: "Elegí un rival" }).uuid("Elegí un rival"),
@@ -18,6 +19,7 @@ export const partidoSchema = z.object({
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/, "Ingresá una fecha válida")
     .refine((v) => !Number.isNaN(Date.parse(v)), "Ingresá una fecha válida"),
+  hora: horaSchema,
   estadio: textoOpcionalSchema(100, "El estadio"),
   competicion: textoOpcionalSchema(80, "La competencia"),
   es_local: z.boolean(),

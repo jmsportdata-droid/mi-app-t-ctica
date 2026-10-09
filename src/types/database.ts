@@ -52,6 +52,78 @@ export type Database = {
           },
         ]
       }
+      actividades: {
+        Row: {
+          actualizado_en: string
+          creado_en: string
+          creado_por: string | null
+          fecha: string
+          hora_citacion: string | null
+          hora_fin: string | null
+          hora_inicio: string | null
+          id: string
+          indicaciones: string | null
+          lugar: string | null
+          notas_internas: string | null
+          partido_id: string | null
+          temporada_id: string
+          tipo: Database["public"]["Enums"]["tipo_actividad"]
+          titulo: string
+          visible_jugadores: boolean
+        }
+        Insert: {
+          actualizado_en?: string
+          creado_en?: string
+          creado_por?: string | null
+          fecha: string
+          hora_citacion?: string | null
+          hora_fin?: string | null
+          hora_inicio?: string | null
+          id?: string
+          indicaciones?: string | null
+          lugar?: string | null
+          notas_internas?: string | null
+          partido_id?: string | null
+          temporada_id: string
+          tipo: Database["public"]["Enums"]["tipo_actividad"]
+          titulo: string
+          visible_jugadores?: boolean
+        }
+        Update: {
+          actualizado_en?: string
+          creado_en?: string
+          creado_por?: string | null
+          fecha?: string
+          hora_citacion?: string | null
+          hora_fin?: string | null
+          hora_inicio?: string | null
+          id?: string
+          indicaciones?: string | null
+          lugar?: string | null
+          notas_internas?: string | null
+          partido_id?: string | null
+          temporada_id?: string
+          tipo?: Database["public"]["Enums"]["tipo_actividad"]
+          titulo?: string
+          visible_jugadores?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "actividades_partido_id_fkey"
+            columns: ["partido_id"]
+            isOneToOne: true
+            referencedRelation: "partidos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "actividades_temporada_id_fkey"
+            columns: ["temporada_id"]
+            isOneToOne: false
+            referencedRelation: "temporadas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       alineacion_partido: {
         Row: {
           actualizado_en: string
@@ -369,6 +441,7 @@ export type Database = {
           estadio: string | null
           estado: Database["public"]["Enums"]["estado_partido"]
           fecha: string
+          hora: string | null
           id: string
           ids_externos: Json
           rival_id: string
@@ -382,6 +455,7 @@ export type Database = {
           estadio?: string | null
           estado?: Database["public"]["Enums"]["estado_partido"]
           fecha: string
+          hora?: string | null
           id?: string
           ids_externos?: Json
           rival_id: string
@@ -395,6 +469,7 @@ export type Database = {
           estadio?: string | null
           estado?: Database["public"]["Enums"]["estado_partido"]
           fecha?: string
+          hora?: string | null
           id?: string
           ids_externos?: Json
           rival_id?: string
@@ -601,6 +676,17 @@ export type Database = {
       pie_habil: "derecho" | "izquierdo" | "ambos"
       rol_miembro: "entrenador" | "ayudante" | "preparador_fisico" | "analista"
       tipo_abp: "ofensivo" | "defensivo"
+      tipo_actividad:
+        | "entrenamiento"
+        | "partido"
+        | "gimnasio"
+        | "charla_tecnica"
+        | "reunion_cuerpo_tecnico"
+        | "comida"
+        | "viaje"
+        | "concentracion"
+        | "libre"
+        | "otro"
       tipo_evento: "gol" | "ocasion" | "duelo" | "nota"
     }
     CompositeTypes: {
@@ -743,6 +829,18 @@ export const Constants = {
       pie_habil: ["derecho", "izquierdo", "ambos"],
       rol_miembro: ["entrenador", "ayudante", "preparador_fisico", "analista"],
       tipo_abp: ["ofensivo", "defensivo"],
+      tipo_actividad: [
+        "entrenamiento",
+        "partido",
+        "gimnasio",
+        "charla_tecnica",
+        "reunion_cuerpo_tecnico",
+        "comida",
+        "viaje",
+        "concentracion",
+        "libre",
+        "otro",
+      ],
       tipo_evento: ["gol", "ocasion", "duelo", "nota"],
     },
   },

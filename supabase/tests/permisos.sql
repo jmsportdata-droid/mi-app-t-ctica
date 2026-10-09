@@ -114,6 +114,23 @@ begin
   exception when insufficient_privilege then null;
   end;
 
+  -- Calendario: el partido creó su actividad sola; nada de B
+  if (select count(*) from public.actividades where tipo = 'partido') <> 1 then
+    raise exception 'FALLA: el partido no generó su actividad en el calendario (o se ve la de B)';
+  end if;
+  insert into public.actividades (temporada_id, tipo, titulo, fecha, hora_inicio, hora_citacion)
+    values ('00000000-0000-4000-c000-00000000000a', 'entrenamiento', 'Entrenamiento', '2026-04-29', '10:00', '09:30');
+  begin
+    insert into public.actividades (temporada_id, tipo, titulo, fecha)
+      values ('00000000-0000-4000-c000-00000000000b', 'entrenamiento', 'Intruso', '2026-04-29');
+    raise exception 'FALLA: el analista A pudo cargar una actividad en el calendario de B';
+  exception when insufficient_privilege then null;
+  end;
+  update public.partidos set fecha = '2026-05-03' where id = '00000000-0000-4000-f000-00000000000a';
+  if (select fecha from public.actividades where partido_id = '00000000-0000-4000-f000-00000000000a') <> '2026-05-03' then
+    raise exception 'FALLA: al cambiar la fecha del partido no se movió en el calendario';
+  end if;
+
   -- Disponibilidad: solo de jugadores propios
   insert into public.disponibilidad (jugador_id, fecha, estado, fecha_regreso)
     values ('00000000-0000-4000-e000-00000000000a', '2026-05-01', 'baja', '2026-05-20');

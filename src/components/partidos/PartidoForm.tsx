@@ -20,6 +20,7 @@ interface PartidoFormProps {
 interface Valores {
   rival_id: string;
   fecha: string;
+  hora: string;
   estadio: string;
   competicion: string;
   es_local: boolean;
@@ -34,6 +35,7 @@ export function PartidoForm({ rivales, partido }: PartidoFormProps) {
   const [valores, setValores] = useState<Valores>({
     rival_id: partido?.rival_id ?? "",
     fecha: partido?.fecha ?? "",
+    hora: partido?.hora?.slice(0, 5) ?? "",
     estadio: partido?.estadio ?? "",
     competicion: partido?.competicion ?? "",
     es_local: partido?.es_local ?? true,
@@ -143,7 +145,7 @@ export function PartidoForm({ rivales, partido }: PartidoFormProps) {
         </div>
       </fieldset>
 
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="grid gap-5 sm:grid-cols-[1fr_8rem_1fr]">
         <Input
           label="Fecha"
           type="date"
@@ -152,6 +154,14 @@ export function PartidoForm({ rivales, partido }: PartidoFormProps) {
           onChange={(e) => actualizar("fecha", e.target.value)}
           error={errores.fecha}
           required
+        />
+        <Input
+          label="Hora"
+          type="time"
+          name="hora"
+          value={valores.hora}
+          onChange={(e) => actualizar("hora", e.target.value)}
+          error={errores.hora}
         />
         <div>
           <Input
