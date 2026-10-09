@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   agregarHabitacion,
   asignarHabitacion,
+  cambiarCapacidadHabitacion,
   eliminarHabitacion,
   guardarConcentracion,
   quitarConcentracion,
@@ -199,27 +200,76 @@ function Habitaciones({
 }) {
   const { pendiente, error, ejecutar } = useAccion();
   const repetir = useAccion();
+  // Tocar y después tocar la habitación (tablet y celular); arrastrar en la computadora
   const [elegido, setElegido] = useState<string | null>(null);
+  const [sobre, setSobre] = useState<string | null>(null);
   const porId = new Map(convocados.map((j) => [j.id, j]));
   const asignados = new Set(habitaciones.flatMap((h) => h.jugadores));
   const sinHabitacion = convocados.filter((j) => !asignados.has(j.id));
   const camas = habitaciones.reduce((t, h) => t + h.capacidad, 0);
+  const SIN = "sin-habitacion";
 
-  const chip = (j: Jugador, activo: boolean) => (
-    <button
-      type="button"
-      onClick={() => setElegido(activo ? null : j.id)}
-      className={cn(
-        "rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset transition-colors",
-        activo
-          ? "bg-brand-600 text-white ring-brand-600"
-          : "bg-white text-slate-700 ring-slate-300 hover:bg-slate-50",
-      )}
-    >
-      {j.numero ? `${j.numero}. ` : ""}
-      {j.nombre}
-    </button>
-  );
+  function mover(jugadorId: string, habitacionId: string | null) {
+    ejecutar(
+      () => asignarHabitacion(partidoId, jugadorId, habitacionId),
+      () => setElegido(null),
+    );
+  }
+
+  const zona = (id: string, habitacionId: string | null, llena: boolean) => ({
+    onDragOver: (e: React.DragEvent) => {
+      if (llena) return;
+      e.preventDefault();
+      setSobre(id);
+    },
+    onDragLeave: () => setSobre((x) => (x === id ? null : x)),
+    onDrop: (e: React.DragEvent) => {
+      e.preventDefault();
+      setSobre(null);
+      const jugadorId = e.dataTransfer.getData("text/plain");
+      if (jugadorId) mover(jugadorId, habitacionId);
+    },
+  });
+
+  const chip = (j: Jugador, enHabitacion: boolean) => {
+    const activo = elegido === j.id;
+    return (
+      <span
+        key={j.id}
+        draggable
+        onDragStart={(e) => {
+          e.dataTransfer.setData("text/plain", j.id);
+          e.dataTransfer.effectAllowed = "move";
+        }}
+        onClick={() => setElegido(activo ? null : j.id)}
+        className={cn(
+          "inline-flex cursor-grab select-none items-center gap-1 rounded-full py-1 pl-2.5 text-xs font-medium ring-1 ring-inset transition-colors active:cursor-grabbing",
+          enHabitacion ? "pr-1" : "pr-2.5",
+          activo
+            ? "bg-brand-600 text-white ring-brand-600"
+            : enHabitacion
+              ? "bg-slate-900 text-white ring-slate-900"
+              : "bg-white text-slate-700 ring-slate-300 hover:bg-slate-50",
+        )}
+      >
+        {j.numero ? `${j.numero}. ` : ""}
+        {j.nombre}
+        {enHabitacion && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              mover(j.id, null);
+            }}
+            className="rounded-full px-1 text-slate-300 hover:bg-slate-700 hover:text-white"
+            aria-label={`Sacar a ${j.nombre} de la habitación`}
+          >
+            ×
+          </button>
+        )}
+      </span>
+    );
+  };
 
   return (
     <div className="space-y-4 border-t border-slate-100 pt-4">
@@ -227,8 +277,8 @@ function Habitaciones({
         <div>
           <h3 className="font-semibold text-slate-900">Habitaciones</h3>
           <p className="text-xs text-slate-500">
-            Tocá un jugador y después la habitación. {camas} camas para {convocados.length}{" "}
-            convocados.
+            Arrastrá cada nombre a su habitación (en tablet o celular: tocá el nombre y después la
+            habitación). {camas} camas para {convocados.length} convocados.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -264,9 +314,9 @@ function Habitaciones({
           <Link
             href={`/imprimir/convocatoria/${partidoId}?que=habitaciones`}
             target="_blank"
-            className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+            className="inline-flex items-center rounded-lg bg-brand-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-700"
           >
-            Exportar (PDF) ↗
+            Exportar para directiva (PDF) ↗
           </Link>
         </div>
       </div>
@@ -275,7 +325,14 @@ function Habitaciones({
       {convocados.length === 0 ? (
         <p className="text-sm text-slate-500">Primero armá la convocatoria.</p>
       ) : (
-        <div className="space-y-2 rounded-xl bg-slate-50 p-3">
+        <div
+          {...zona(SIN, null, false)}
+          onClick={() => elegido && asignados.has(elegido) && mover(elegido, null)}
+          className={cn(
+            "space-y-2 rounded-xl border-2 border-dashed p-3 transition-colors",
+            sobre === SIN ? "border-brand-400 bg-brand-50" : "border-slate-200 bg-slate-50",
+          )}
+        >
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
             Sin habitación ({sinHabitacion.length})
           </p>
@@ -283,7 +340,7 @@ function Habitaciones({
             {sinHabitacion.length === 0 ? (
               <span className="text-xs text-emerald-700">Todos tienen habitación.</span>
             ) : (
-              sinHabitacion.map((j) => <span key={j.id}>{chip(j, elegido === j.id)}</span>)
+              sinHabitacion.map((j) => chip(j, false))
             )}
           </div>
         </div>
@@ -292,44 +349,73 @@ function Habitaciones({
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {habitaciones.map((h) => {
           const llena = h.jugadores.length >= h.capacidad;
+          const destino = elegido !== null && !llena && !h.jugadores.includes(elegido);
           return (
             <div
               key={h.id}
+              {...zona(h.id, h.id, llena)}
+              onClick={() => destino && elegido && mover(elegido, h.id)}
               className={cn(
-                "space-y-2 rounded-xl border p-3",
-                elegido && !llena ? "border-brand-400 bg-brand-50/40" : "border-slate-200",
+                "min-h-32 space-y-2 rounded-xl border-2 p-3 transition-colors",
+                sobre === h.id
+                  ? "border-brand-500 bg-brand-50"
+                  : destino
+                    ? "cursor-pointer border-brand-300 bg-brand-50/40"
+                    : "border-slate-200",
               )}
             >
-              <div className="flex items-start gap-2">
+              <div className="flex items-start gap-2" onClick={(e) => e.stopPropagation()}>
                 <div className="min-w-0 flex-1">
                   <AutoSaveField
-                    label={`${h.capacidad === 3 ? "Triple" : h.capacidad === 2 ? "Doble" : `${h.capacidad} camas`} · ${h.jugadores.length}/${h.capacidad}`}
+                    label={`${h.jugadores.length}/${h.capacidad} camas`}
                     valorInicial={h.nombre}
                     onGuardar={(v) => renombrarHabitacion(partidoId, h.id, v)}
                   />
                 </div>
-                <button
-                  type="button"
-                  onClick={() => ejecutar(() => eliminarHabitacion(partidoId, h.id))}
-                  className="mt-6 rounded px-2 py-1 text-xs text-slate-500 hover:bg-red-50 hover:text-red-600"
-                  aria-label={`Borrar ${h.nombre}`}
-                >
-                  ✕
-                </button>
+                <div className="mt-6 flex shrink-0 items-center gap-1">
+                  <select
+                    value={h.capacidad}
+                    onChange={(e) =>
+                      ejecutar(() =>
+                        cambiarCapacidadHabitacion(partidoId, h.id, Number(e.target.value)),
+                      )
+                    }
+                    aria-label="Tipo de habitación"
+                    className="rounded-md border border-slate-300 bg-white px-1.5 py-1 text-xs"
+                  >
+                    <option value={1}>Single</option>
+                    <option value={2}>Doble</option>
+                    <option value={3}>Triple</option>
+                    <option value={4}>Cuádruple</option>
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => ejecutar(() => eliminarHabitacion(partidoId, h.id))}
+                    className="rounded px-2 py-1 text-xs text-slate-500 hover:bg-red-50 hover:text-red-600"
+                    aria-label={`Borrar ${h.nombre}`}
+                  >
+                    ✕
+                  </button>
+                </div>
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {h.jugadores.map((id) => {
                   const j = porId.get(id);
-                  return (
+                  return j ? (
+                    chip(j, true)
+                  ) : (
                     <span
                       key={id}
-                      className="inline-flex items-center gap-1 rounded-full bg-slate-900 py-1 pl-2.5 pr-1 text-xs font-medium text-white"
+                      className="inline-flex items-center gap-1 rounded-full bg-slate-200 py-1 pl-2.5 pr-1 text-xs text-slate-600"
                     >
-                      {j ? `${j.numero ? `${j.numero}. ` : ""}${j.nombre}` : "No convocado"}
+                      No convocado
                       <button
                         type="button"
-                        onClick={() => ejecutar(() => asignarHabitacion(partidoId, id, null))}
-                        className="rounded-full px-1 text-slate-300 hover:bg-slate-700 hover:text-white"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          mover(id, null);
+                        }}
+                        className="rounded-full px-1 hover:bg-slate-300"
                         aria-label="Sacar de la habitación"
                       >
                         ×
@@ -337,21 +423,10 @@ function Habitaciones({
                     </span>
                   );
                 })}
+                {h.jugadores.length === 0 && (
+                  <span className="text-xs text-slate-400">Soltá acá a los jugadores</span>
+                )}
               </div>
-              {elegido && !llena && (
-                <Button
-                  className="w-full px-3 py-1.5"
-                  disabled={pendiente}
-                  onClick={() =>
-                    ejecutar(
-                      () => asignarHabitacion(partidoId, elegido, h.id),
-                      () => setElegido(null),
-                    )
-                  }
-                >
-                  Poner acá
-                </Button>
-              )}
             </div>
           );
         })}

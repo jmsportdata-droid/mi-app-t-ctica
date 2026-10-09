@@ -409,3 +409,32 @@ export async function repetirUltimasHabitaciones(
   revalidar(partidoId);
   return { ok: true, copiadas: nuevas.length };
 }
+
+/** Cambia una habitación de doble a triple (o al revés) si entran los que ya están. */
+export async function cambiarCapacidadHabitacion(
+  partidoId: string,
+  id: string,
+  capacidad: number,
+): Promise<Resultado> {
+  const parsed = z.number().int().min(1).max(4).safeParse(capacidad);
+  if (!idSchema.safeParse(id).success || !parsed.success)
+    return { ok: false, error: "Datos no válidos" };
+  const accion = await getAccion();
+  if (!accion) return SESION_EXPIRADA;
+  const { data: h } = await accion.supabase
+    .from("habitaciones")
+    .select("jugadores")
+    .eq("id", id)
+    .maybeSingle();
+  if (!h) return { ok: false, error: "Esa habitación ya no existe." };
+  if (h.jugadores.length > parsed.data) {
+    return { ok: false, error: "Sacá a un jugador antes de achicar la habitación." };
+  }
+  const { error } = await accion.supabase
+    .from("habitaciones")
+    .update({ capacidad: parsed.data })
+    .eq("id", id);
+  if (error) return errorDeBD(error, "capacidad");
+  revalidar(partidoId);
+  return { ok: true };
+}
