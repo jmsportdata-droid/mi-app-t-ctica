@@ -274,6 +274,47 @@ export type Database = {
           },
         ]
       }
+      asistente_plan: {
+        Row: {
+          aplicado_en: string | null
+          avisos: string[]
+          borrador: Json
+          fuentes: Json
+          generado_en: string
+          partido_id: string
+          puntos: Json
+          validaciones: Json
+        }
+        Insert: {
+          aplicado_en?: string | null
+          avisos?: string[]
+          borrador?: Json
+          fuentes?: Json
+          generado_en?: string
+          partido_id: string
+          puntos?: Json
+          validaciones?: Json
+        }
+        Update: {
+          aplicado_en?: string | null
+          avisos?: string[]
+          borrador?: Json
+          fuentes?: Json
+          generado_en?: string
+          partido_id?: string
+          puntos?: Json
+          validaciones?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asistente_plan_partido_id_fkey"
+            columns: ["partido_id"]
+            isOneToOne: true
+            referencedRelation: "partidos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       concentraciones: {
         Row: {
           actividad_id: string | null
@@ -2153,7 +2194,11 @@ export type Database = {
         | "otro"
       tipo_cesped: "natural" | "sintetico" | "hibrido"
       tipo_evento: "gol" | "ocasion" | "duelo" | "nota"
-      tipo_pedido_sofascore: "informe_rival" | "plantel_propio" | "post_partido"
+      tipo_pedido_sofascore:
+        | "informe_rival"
+        | "plantel_propio"
+        | "post_partido"
+        | "plan_asistente"
       tipo_tarea:
         | "entrada_en_calor"
         | "pre_sesion"
@@ -2400,6 +2445,7 @@ export const Constants = {
         "informe_rival",
         "plantel_propio",
         "post_partido",
+        "plan_asistente",
       ],
       tipo_tarea: [
         "entrada_en_calor",

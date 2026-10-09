@@ -9,6 +9,7 @@ import { getJugadas, getJugadasPartido } from "@/lib/data/jugadas";
 import { getInformeSofascore } from "@/lib/data/informe";
 import { getMarcasPartido } from "@/lib/data/marcas";
 import { getPostPartido } from "@/lib/data/post-partido";
+import { getAsistentePlan } from "@/lib/data/asistente-plan";
 import { nombreArchivoSeguro } from "@/lib/export";
 import { clubDeTemporada } from "@/lib/club";
 import { requerirContexto } from "@/lib/contexto";
@@ -70,6 +71,7 @@ export default async function PartidoPage({ params, searchParams }: Props) {
     sofascore,
     marcas,
     post,
+    asistente,
   ] = await Promise.all([
     getDetallePartido(partido.id),
     getJugadores(partido.temporada_id),
@@ -81,6 +83,7 @@ export default async function PartidoPage({ params, searchParams }: Props) {
     getInformeSofascore(partido.id, partido.rival_id, cuerpoTecnico.id),
     getMarcasPartido(partido.id),
     getPostPartido(partido.id, partido.temporada_id, partido.fecha, cuerpoTecnico.id),
+    getAsistentePlan(partido.id),
   ]);
   const tabInicial = esTabPartido(searchParams.tab) ? searchParams.tab : "previa";
 
@@ -171,6 +174,7 @@ export default async function PartidoPage({ params, searchParams }: Props) {
         sofascore={sofascore}
         marcas={marcas}
         post={post}
+        asistente={asistente}
         bibliotecaJugadas={biblioteca}
         colorClub={temporada.color_principal}
         partidoId={partido.id}

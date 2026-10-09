@@ -12,7 +12,8 @@ La web no puede pedirle datos a Sofascore, así que este programa corre en la Ma
 5. genera el PowerPoint y el PDF;
 6. sube todo a la app: informe, PDF, plantel rival con estadísticas y la previa.
 
-También procesa el plantel propio y el post partido (worker/post.py).
+También procesa el plantel propio, el post partido (worker/post.py) y el
+asistente del plan (worker/asistente.py).
 
 Se corre con el Python de la skill (tiene curl_cffi):
     ~/.claude/skills/informe-rival/.venv/bin/python worker/sofascore.py
@@ -35,7 +36,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-VERSION = "1.2"
+VERSION = "1.3"
 RAIZ = Path(__file__).resolve().parent.parent
 SKILL = Path.home() / ".claude" / "skills" / "informe-rival"
 SCRIPTS = SKILL / "scripts"
@@ -527,6 +528,9 @@ def vuelta():
         try:
             if pedido.get("tipo") == "plantel_propio":
                 procesar_propio(pedido)
+            elif pedido.get("tipo") == "plan_asistente":
+                import asistente  # noqa: WPS433  (worker/asistente.py)
+                asistente.procesar_asistente(pedido, sys.modules[__name__])
             elif pedido.get("tipo") == "post_partido":
                 import post  # noqa: WPS433  (worker/post.py)
                 post.procesar_post(pedido, sys.modules[__name__])

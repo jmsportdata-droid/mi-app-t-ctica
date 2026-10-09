@@ -385,6 +385,14 @@ begin
   exception when insufficient_privilege then null;
   end;
 
+  -- Asistente del plan: solo en partidos propios
+  insert into public.asistente_plan (partido_id) values ('00000000-0000-4000-f000-00000000000a');
+  begin
+    insert into public.asistente_plan (partido_id) values ('00000000-0000-4000-f000-00000000000b');
+    raise exception 'FALLA: el analista A pidió el asistente en un partido de B';
+  exception when insufficient_privilege then null;
+  end;
+
   -- Sofascore: pedidos, plantel rival e informes; uno abierto por partido; nada de B
   insert into public.pedidos_sofascore (partido_id) values ('00000000-0000-4000-f000-00000000000a');
   begin

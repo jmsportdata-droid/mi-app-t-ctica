@@ -19,6 +19,8 @@ import { PlanPartidoEditor, type TareaSugerida } from "./PlanPartidoEditor";
 import { JugadasPartidoPanel, type JugadaElegida } from "@/components/pizarra/JugadasPartidoPanel";
 import type { Jugada } from "@/types/jugada";
 import { PostPartidoPanel } from "./PostPartidoPanel";
+import { AsistentePlan } from "./AsistentePlan";
+import type { DatosAsistentePlan } from "@/lib/data/asistente-plan";
 import { ConclusionesPost } from "@/components/post/ConclusionesPost";
 import { EstadisticasPost } from "@/components/post/EstadisticasPost";
 import { JugadoresPost } from "@/components/post/JugadoresPost";
@@ -45,6 +47,7 @@ interface Props {
   sofascore: DatosSofascore;
   marcas: MarcasPartido;
   post: DatosPostPartido;
+  asistente: DatosAsistentePlan;
   bibliotecaJugadas: Jugada[];
   colorClub: string;
   partidoId: string;
@@ -69,6 +72,7 @@ export function PartidoTabs({
   sofascore,
   marcas,
   post,
+  asistente,
   bibliotecaJugadas,
   colorClub,
   partidoId,
@@ -216,7 +220,17 @@ export function PartidoTabs({
         </div>
       </Panel>
       <Panel id="plan" activa={activa} visitadas={visitadas}>
+        <AsistentePlan
+          partidoId={partidoId}
+          asistente={asistente.asistente}
+          pedido={asistente.pedido}
+          macConectada={sofascore.macConectada}
+          plan={detalle.plan}
+        />
+        <div className="h-6" />
         <PlanPartidoEditor
+          // Al usar el borrador de Claude, los textos se vuelven a cargar
+          key={asistente.asistente?.aplicado_en ?? "plan"}
           partidoId={partidoId}
           plan={detalle.plan}
           principios={principios}
