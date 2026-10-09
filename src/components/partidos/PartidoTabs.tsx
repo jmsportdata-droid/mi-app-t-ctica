@@ -3,15 +3,28 @@
 import { useRef, useState } from "react";
 import { cn } from "@/lib/utils/cn";
 import type { DetallePartido } from "@/lib/data/partidos";
+import type { EstadoDelDia } from "@/types/disponibilidad";
 import type { Jugador } from "@/types/jugador";
-import { TABS_PARTIDO, type TabPartido } from "@/types/partido";
+import { TABS_PARTIDO, type PartidoConRival, type TabPartido } from "@/types/partido";
 import { AbpPanel } from "./AbpPanel";
-import { AlineacionEditor } from "./AlineacionEditor";
+import { AnalisisVideoPanel } from "./AnalisisVideoPanel";
+import { ConvocatoriaPanel } from "./ConvocatoriaPanel";
+import { EscenariosPanel } from "./EscenariosPanel";
 import { InformeRivalPanel } from "./InformeRivalPanel";
 import { PlanPartidoPanel } from "./PlanPartidoPanel";
+import { PostPartidoPanel } from "./PostPartidoPanel";
+import { PreviaPanel } from "./PreviaPanel";
+import { VestuarioPanel } from "./VestuarioPanel";
 import { EventosPanel } from "./eventos/EventosPanel";
 
 interface Props {
+  partido: PartidoConRival;
+  /** Nombre de nuestro club en la temporada */
+  club: string;
+  disponibilidad: Record<string, EstadoDelDia>;
+  /** Qué pasos ya tienen contenido */
+  completos: Record<TabPartido, boolean>;
+  encabezadoConvocatoria: string;
   partidoId: string;
   detalle: DetallePartido;
   jugadores: Jugador[];
@@ -22,6 +35,11 @@ interface Props {
 }
 
 export function PartidoTabs({
+  partido,
+  club,
+  disponibilidad,
+  completos,
+  encabezadoConvocatoria,
   partidoId,
   detalle,
   jugadores,
@@ -84,28 +102,81 @@ export function PartidoTabs({
                 : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700",
             )}
           >
+            <span
+              className={cn(
+                "mr-2 inline-flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold",
+                completos[tab.id]
+                  ? "bg-emerald-500 text-white"
+                  : activa === tab.id
+                    ? "bg-brand-600 text-white"
+                    : "bg-slate-200 text-slate-600",
+              )}
+              aria-hidden
+            >
+              {completos[tab.id] ? "✓" : i + 1}
+            </span>
             {tab.label}
+            {completos[tab.id] && <span className="sr-only"> (con contenido)</span>}
           </button>
         ))}
       </div>
 
+      <Panel id="previa" activa={activa} visitadas={visitadas}>
+        <PreviaPanel
+          partidoId={partidoId}
+          previa={detalle.previa}
+          formacionPropia={detalle.alineacion?.formacion ?? null}
+          formacionRival={partido.formacion_rival}
+        />
+      </Panel>
       <Panel id="informe" activa={activa} visitadas={visitadas}>
+        <Proximamente>
+          Las estadísticas colectivas e individuales del rival y los insights de la IA llegan desde
+          la skill de Sofascore (etapa P3). Mientras tanto, el informe se carga con links.
+        </Proximamente>
         <InformeRivalPanel partidoId={partidoId} informe={detalle.informe} />
       </Panel>
-      <Panel id="plan" activa={activa} visitadas={visitadas}>
-        <PlanPartidoPanel partidoId={partidoId} plan={detalle.plan} />
+      <Panel id="video" activa={activa} visitadas={visitadas}>
+        <AnalisisVideoPanel partidoId={partidoId} analisis={detalle.analisis} />
       </Panel>
       <Panel id="abp" activa={activa} visitadas={visitadas}>
+        <Proximamente>
+          En la etapa P2: características del rival, sus ABP ofensivas y defensivas, emparejamiento
+          de marcas con ventaja por altura, roles de los nuestros, penales y la biblioteca de
+          jugadas con su PDF.
+        </Proximamente>
         <AbpPanel partidoId={partidoId} abp={detalle.abp} />
       </Panel>
-      <Panel id="alineacion" activa={activa} visitadas={visitadas}>
-        <AlineacionEditor
+      <Panel id="plan" activa={activa} visitadas={visitadas}>
+        <div className="space-y-6">
+          <PlanPartidoPanel partidoId={partidoId} plan={detalle.plan} />
+          <EscenariosPanel
+            partidoId={partidoId}
+            escenarios={detalle.escenarios}
+            jugadores={jugadores}
+          />
+        </div>
+      </Panel>
+      <Panel id="convocatoria" activa={activa} visitadas={visitadas}>
+        <ConvocatoriaPanel
           partidoId={partidoId}
           alineacion={detalle.alineacion}
           jugadores={jugadores}
+          disponibilidad={disponibilidad}
+          encabezado={encabezadoConvocatoria}
         />
       </Panel>
+      <Panel id="vestuario" activa={activa} visitadas={visitadas}>
+        <VestuarioPanel partidoId={partidoId} videos={detalle.videos} />
+      </Panel>
+      <Panel id="post" activa={activa} visitadas={visitadas}>
+        <PostPartidoPanel partido={partido} club={club} />
+      </Panel>
       <Panel id="eventos" activa={activa} visitadas={visitadas}>
+        <Proximamente>
+          El seguimiento en vivo (KPI por tramos, alertas y cambios que actualizan las marcas) se
+          define más adelante. Por ahora se registran los eventos del partido.
+        </Proximamente>
         <EventosPanel
           partidoId={partidoId}
           videoUrl={videoUrl}
@@ -141,5 +212,13 @@ function Panel({
     >
       {visitadas.has(id) && children}
     </div>
+  );
+}
+
+function Proximamente({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="mb-4 rounded-xl border border-dashed border-brand-200 bg-brand-50/40 px-4 py-3 text-sm text-slate-600">
+      {children}
+    </p>
   );
 }

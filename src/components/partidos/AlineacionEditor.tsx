@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils/cn";
 import {
   FORMACIONES,
   LISTA_FORMACIONES,
+  etiquetaFormacion,
   type AlineacionPartido,
   type Formacion,
 } from "@/types/alineacion";
@@ -136,7 +137,7 @@ export function AlineacionEditor({ partidoId, alineacion, jugadores }: Props) {
                   : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50",
               )}
             >
-              {f}
+              {etiquetaFormacion(f)}
             </button>
           ))}
         </div>

@@ -278,6 +278,38 @@ begin
   exception when insufficient_privilege then null;
   end;
 
+  -- Partido: previa, análisis, escenarios y vestuario; nada de B
+  insert into public.partido_previa (partido_id, arbitro, cesped)
+    values ('00000000-0000-4000-f000-00000000000a', 'Árbitro A', 'natural');
+  insert into public.analisis_rival (partido_id, fase, texto, valoracion)
+    values ('00000000-0000-4000-f000-00000000000a', 'ofensiva_inicio', 'Sale largo al 9', 'patron');
+  insert into public.escenarios_partido (partido_id, situacion, respuesta)
+    values ('00000000-0000-4000-f000-00000000000a', 'perdiendo', 'Pasamos a 1-3-4-3');
+  insert into public.videos_vestuario (partido_id, tipo, url, visible_jugadores) values
+    ('00000000-0000-4000-f000-00000000000a', 'rival', 'https://vimeo.com/1', true),
+    ('00000000-0000-4000-f000-00000000000a', 'pre_partido', 'https://vimeo.com/2', false);
+  update public.partidos set goles_favor = 2, goles_contra = 1 where id = '00000000-0000-4000-f000-00000000000a';
+  if jsonb_array_length(public.semana_publica(current_setting('prueba.token'), '2026-04-27') -> 'videos') <> 1 then
+    raise exception 'FALLA: el link de jugadores tiene que mostrar solo los videos visibles';
+  end if;
+  begin
+    update public.partidos set goles_contra = null where id = '00000000-0000-4000-f000-00000000000a';
+    raise exception 'FALLA: se guardó un resultado con un solo arco';
+  exception when check_violation then null;
+  end;
+  begin
+    insert into public.analisis_rival (partido_id, fase, texto)
+      values ('00000000-0000-4000-f000-00000000000b', 'ofensiva_inicio', 'Intruso');
+    raise exception 'FALLA: el analista A pudo cargar el análisis de un partido de B';
+  exception when insufficient_privilege then null;
+  end;
+  begin
+    insert into public.videos_vestuario (partido_id, tipo, url)
+      values ('00000000-0000-4000-f000-00000000000b', 'rival', 'https://vimeo.com/3');
+    raise exception 'FALLA: el analista A pudo cargar videos de un partido de B';
+  exception when insufficient_privilege then null;
+  end;
+
   -- Disponibilidad: solo de jugadores propios
   insert into public.disponibilidad (jugador_id, fecha, estado, fecha_regreso)
     values ('00000000-0000-4000-e000-00000000000a', '2026-05-01', 'baja', '2026-05-20');

@@ -156,6 +156,50 @@ export type Database = {
           },
         ]
       }
+      analisis_rival: {
+        Row: {
+          clip_url: string | null
+          creado_en: string
+          fase: Database["public"]["Enums"]["fase_analisis"]
+          id: string
+          orden: number
+          partido_id: string
+          referencia: string | null
+          texto: string
+          valoracion: Database["public"]["Enums"]["valoracion_analisis"] | null
+        }
+        Insert: {
+          clip_url?: string | null
+          creado_en?: string
+          fase: Database["public"]["Enums"]["fase_analisis"]
+          id?: string
+          orden?: number
+          partido_id: string
+          referencia?: string | null
+          texto: string
+          valoracion?: Database["public"]["Enums"]["valoracion_analisis"] | null
+        }
+        Update: {
+          clip_url?: string | null
+          creado_en?: string
+          fase?: Database["public"]["Enums"]["fase_analisis"]
+          id?: string
+          orden?: number
+          partido_id?: string
+          referencia?: string | null
+          texto?: string
+          valoracion?: Database["public"]["Enums"]["valoracion_analisis"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analisis_rival_partido_id_fkey"
+            columns: ["partido_id"]
+            isOneToOne: false
+            referencedRelation: "partidos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       asistencia_sesion: {
         Row: {
           actividad_id: string
@@ -352,6 +396,50 @@ export type Database = {
             columns: ["cuerpo_tecnico_id"]
             isOneToOne: false
             referencedRelation: "cuerpos_tecnicos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      escenarios_partido: {
+        Row: {
+          cambios: Json
+          creado_en: string
+          desde_minuto: number | null
+          formacion: Database["public"]["Enums"]["formacion"] | null
+          id: string
+          orden: number
+          partido_id: string
+          respuesta: string
+          situacion: Database["public"]["Enums"]["situacion_partido"]
+        }
+        Insert: {
+          cambios?: Json
+          creado_en?: string
+          desde_minuto?: number | null
+          formacion?: Database["public"]["Enums"]["formacion"] | null
+          id?: string
+          orden?: number
+          partido_id: string
+          respuesta: string
+          situacion: Database["public"]["Enums"]["situacion_partido"]
+        }
+        Update: {
+          cambios?: Json
+          creado_en?: string
+          desde_minuto?: number | null
+          formacion?: Database["public"]["Enums"]["formacion"] | null
+          id?: string
+          orden?: number
+          partido_id?: string
+          respuesta?: string
+          situacion?: Database["public"]["Enums"]["situacion_partido"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "escenarios_partido_partido_id_fkey"
+            columns: ["partido_id"]
+            isOneToOne: false
+            referencedRelation: "partidos"
             referencedColumns: ["id"]
           },
         ]
@@ -562,6 +650,80 @@ export type Database = {
           },
         ]
       }
+      partido_previa: {
+        Row: {
+          actualizado_en: string
+          arbitro: string | null
+          arbitro_amarillas: number | null
+          arbitro_notas: string | null
+          arbitro_penales: number | null
+          arbitro_rojas: number | null
+          cancha_ancho: number | null
+          cancha_largo: number | null
+          cesped: Database["public"]["Enums"]["tipo_cesped"] | null
+          clima: string | null
+          condiciones_notas: string | null
+          estado_cancha: string | null
+          partido_id: string
+          rival_bajas: string | null
+          rival_calendario: string | null
+          rival_dt: string | null
+          rival_dt_tendencias: string | null
+          rival_notas: string | null
+          rival_racha: string | null
+        }
+        Insert: {
+          actualizado_en?: string
+          arbitro?: string | null
+          arbitro_amarillas?: number | null
+          arbitro_notas?: string | null
+          arbitro_penales?: number | null
+          arbitro_rojas?: number | null
+          cancha_ancho?: number | null
+          cancha_largo?: number | null
+          cesped?: Database["public"]["Enums"]["tipo_cesped"] | null
+          clima?: string | null
+          condiciones_notas?: string | null
+          estado_cancha?: string | null
+          partido_id: string
+          rival_bajas?: string | null
+          rival_calendario?: string | null
+          rival_dt?: string | null
+          rival_dt_tendencias?: string | null
+          rival_notas?: string | null
+          rival_racha?: string | null
+        }
+        Update: {
+          actualizado_en?: string
+          arbitro?: string | null
+          arbitro_amarillas?: number | null
+          arbitro_notas?: string | null
+          arbitro_penales?: number | null
+          arbitro_rojas?: number | null
+          cancha_ancho?: number | null
+          cancha_largo?: number | null
+          cesped?: Database["public"]["Enums"]["tipo_cesped"] | null
+          clima?: string | null
+          condiciones_notas?: string | null
+          estado_cancha?: string | null
+          partido_id?: string
+          rival_bajas?: string | null
+          rival_calendario?: string | null
+          rival_dt?: string | null
+          rival_dt_tendencias?: string | null
+          rival_notas?: string | null
+          rival_racha?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partido_previa_partido_id_fkey"
+            columns: ["partido_id"]
+            isOneToOne: true
+            referencedRelation: "partidos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partidos: {
         Row: {
           competicion: string | null
@@ -570,9 +732,14 @@ export type Database = {
           estadio: string | null
           estado: Database["public"]["Enums"]["estado_partido"]
           fecha: string
+          formacion_rival: Database["public"]["Enums"]["formacion"] | null
+          goles_contra: number | null
+          goles_favor: number | null
           hora: string | null
           id: string
           ids_externos: Json
+          penales_contra: number | null
+          penales_favor: number | null
           rival_id: string
           temporada_id: string
           video_url: string | null
@@ -584,9 +751,14 @@ export type Database = {
           estadio?: string | null
           estado?: Database["public"]["Enums"]["estado_partido"]
           fecha: string
+          formacion_rival?: Database["public"]["Enums"]["formacion"] | null
+          goles_contra?: number | null
+          goles_favor?: number | null
           hora?: string | null
           id?: string
           ids_externos?: Json
+          penales_contra?: number | null
+          penales_favor?: number | null
           rival_id: string
           temporada_id: string
           video_url?: string | null
@@ -598,9 +770,14 @@ export type Database = {
           estadio?: string | null
           estado?: Database["public"]["Enums"]["estado_partido"]
           fecha?: string
+          formacion_rival?: Database["public"]["Enums"]["formacion"] | null
+          goles_contra?: number | null
+          goles_favor?: number | null
           hora?: string | null
           id?: string
           ids_externos?: Json
+          penales_contra?: number | null
+          penales_favor?: number | null
           rival_id?: string
           temporada_id?: string
           video_url?: string | null
@@ -1154,6 +1331,44 @@ export type Database = {
           },
         ]
       }
+      videos_vestuario: {
+        Row: {
+          actualizado_en: string
+          duracion: string | null
+          notas: string | null
+          partido_id: string
+          tipo: Database["public"]["Enums"]["tipo_video_vestuario"]
+          url: string | null
+          visible_jugadores: boolean
+        }
+        Insert: {
+          actualizado_en?: string
+          duracion?: string | null
+          notas?: string | null
+          partido_id: string
+          tipo: Database["public"]["Enums"]["tipo_video_vestuario"]
+          url?: string | null
+          visible_jugadores?: boolean
+        }
+        Update: {
+          actualizado_en?: string
+          duracion?: string | null
+          notas?: string | null
+          partido_id?: string
+          tipo?: Database["public"]["Enums"]["tipo_video_vestuario"]
+          url?: string | null
+          visible_jugadores?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "videos_vestuario_partido_id_fkey"
+            columns: ["partido_id"]
+            isOneToOne: false
+            referencedRelation: "partidos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -1261,7 +1476,23 @@ export type Database = {
         | "presion"
         | "bloque"
         | "linea_defensiva"
-      formacion: "4-3-3" | "4-4-2" | "4-2-3-1" | "5-3-2"
+      fase_analisis:
+        | "ofensiva_inicio"
+        | "ofensiva_organizacion"
+        | "ofensiva_finalizacion"
+        | "defensa_bloque_alto"
+        | "defensa_bloque_medio"
+        | "defensa_bloque_bajo"
+        | "transicion_defensa_ataque"
+        | "transicion_ataque_defensa"
+      formacion:
+        | "4-3-3"
+        | "4-4-2"
+        | "4-2-3-1"
+        | "5-3-2"
+        | "3-4-3"
+        | "4-1-4-1"
+        | "3-5-2"
       linea_jugador: "POR" | "DEF" | "CEN" | "DEL"
       momento_juego:
         | "organizacion_ofensiva"
@@ -1277,6 +1508,13 @@ export type Database = {
         | "recuperacion"
       pie_habil: "derecho" | "izquierdo" | "ambos"
       rol_miembro: "entrenador" | "ayudante" | "preparador_fisico" | "analista"
+      situacion_partido:
+        | "ganando"
+        | "empatando"
+        | "perdiendo"
+        | "con_uno_menos"
+        | "con_uno_mas"
+        | "otro"
       tipo_abp: "ofensivo" | "defensivo"
       tipo_actividad:
         | "entrenamiento"
@@ -1290,6 +1528,7 @@ export type Database = {
         | "concentracion"
         | "libre"
         | "otro"
+      tipo_cesped: "natural" | "sintetico" | "hibrido"
       tipo_evento: "gol" | "ocasion" | "duelo" | "nota"
       tipo_tarea:
         | "entrada_en_calor"
@@ -1306,6 +1545,12 @@ export type Database = {
         | "arqueros"
         | "fuerza"
         | "recuperacion"
+      tipo_video_vestuario:
+        | "rival"
+        | "pelota_quieta"
+        | "pre_partido"
+        | "post_partido"
+      valoracion_analisis: "fortaleza" | "debilidad" | "patron"
       via_metodologica: "analitica" | "global" | "sistemica"
     }
     CompositeTypes: {
@@ -1458,7 +1703,25 @@ export const Constants = {
         "bloque",
         "linea_defensiva",
       ],
-      formacion: ["4-3-3", "4-4-2", "4-2-3-1", "5-3-2"],
+      fase_analisis: [
+        "ofensiva_inicio",
+        "ofensiva_organizacion",
+        "ofensiva_finalizacion",
+        "defensa_bloque_alto",
+        "defensa_bloque_medio",
+        "defensa_bloque_bajo",
+        "transicion_defensa_ataque",
+        "transicion_ataque_defensa",
+      ],
+      formacion: [
+        "4-3-3",
+        "4-4-2",
+        "4-2-3-1",
+        "5-3-2",
+        "3-4-3",
+        "4-1-4-1",
+        "3-5-2",
+      ],
       linea_jugador: ["POR", "DEF", "CEN", "DEL"],
       momento_juego: [
         "organizacion_ofensiva",
@@ -1476,6 +1739,14 @@ export const Constants = {
       ],
       pie_habil: ["derecho", "izquierdo", "ambos"],
       rol_miembro: ["entrenador", "ayudante", "preparador_fisico", "analista"],
+      situacion_partido: [
+        "ganando",
+        "empatando",
+        "perdiendo",
+        "con_uno_menos",
+        "con_uno_mas",
+        "otro",
+      ],
       tipo_abp: ["ofensivo", "defensivo"],
       tipo_actividad: [
         "entrenamiento",
@@ -1490,6 +1761,7 @@ export const Constants = {
         "libre",
         "otro",
       ],
+      tipo_cesped: ["natural", "sintetico", "hibrido"],
       tipo_evento: ["gol", "ocasion", "duelo", "nota"],
       tipo_tarea: [
         "entrada_en_calor",
@@ -1507,6 +1779,13 @@ export const Constants = {
         "fuerza",
         "recuperacion",
       ],
+      tipo_video_vestuario: [
+        "rival",
+        "pelota_quieta",
+        "pre_partido",
+        "post_partido",
+      ],
+      valoracion_analisis: ["fortaleza", "debilidad", "patron"],
       via_metodologica: ["analitica", "global", "sistemica"],
     },
   },

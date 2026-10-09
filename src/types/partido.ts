@@ -1,4 +1,4 @@
-import type { Tables } from "./database";
+import type { Enums, Tables } from "./database";
 import type { Equipo } from "./equipo";
 
 // ---------- Partido ----------------------------------------------
@@ -63,15 +63,108 @@ export type InformeRival = Tables<"informe_rival">;
 
 // ---------- Pestañas del detalle ---------------------------------
 
+/** Los pasos del partido, en el orden en que se trabajan en la semana. */
 export const TABS_PARTIDO = [
+  { id: "previa", label: "Previa" },
   { id: "informe", label: "Informe rival" },
+  { id: "video", label: "Video rival" },
+  { id: "abp", label: "Pelota quieta" },
   { id: "plan", label: "Plan de partido" },
-  { id: "abp", label: "Pelota parada" },
-  { id: "alineacion", label: "Alineación" },
-  { id: "eventos", label: "Eventos" },
+  { id: "convocatoria", label: "Convocatoria" },
+  { id: "vestuario", label: "Vestuario" },
+  { id: "eventos", label: "En vivo" },
+  { id: "post", label: "Post partido" },
 ] as const;
 export type TabPartido = (typeof TABS_PARTIDO)[number]["id"];
 
 export function esTabPartido(valor: unknown): valor is TabPartido {
   return TABS_PARTIDO.some((t) => t.id === valor);
+}
+
+// ---------- Previa, análisis, escenarios y vestuario --------------
+
+export type PartidoPrevia = Tables<"partido_previa">;
+export type AnalisisRival = Tables<"analisis_rival">;
+export type EscenarioPartido = Tables<"escenarios_partido">;
+export type VideoVestuario = Tables<"videos_vestuario">;
+export type FaseAnalisis = Enums<"fase_analisis">;
+export type ValoracionAnalisis = Enums<"valoracion_analisis">;
+export type SituacionPartido = Enums<"situacion_partido">;
+export type TipoVideoVestuario = Enums<"tipo_video_vestuario">;
+export type TipoCesped = Enums<"tipo_cesped">;
+
+/** Estructura del análisis de video del rival. */
+export const BLOQUES_ANALISIS = [
+  {
+    titulo: "Fase ofensiva",
+    fases: [
+      { valor: "ofensiva_inicio", label: "Inicios" },
+      { valor: "ofensiva_organizacion", label: "Organización" },
+      { valor: "ofensiva_finalizacion", label: "Finalización" },
+    ],
+  },
+  {
+    titulo: "Fase defensiva",
+    fases: [
+      { valor: "defensa_bloque_alto", label: "Bloque alto" },
+      { valor: "defensa_bloque_medio", label: "Bloque medio" },
+      { valor: "defensa_bloque_bajo", label: "Bloque bajo" },
+    ],
+  },
+  {
+    titulo: "Transiciones",
+    fases: [
+      { valor: "transicion_defensa_ataque", label: "Defensa-ataque" },
+      { valor: "transicion_ataque_defensa", label: "Ataque-defensa" },
+    ],
+  },
+] as const satisfies readonly {
+  titulo: string;
+  fases: readonly { valor: FaseAnalisis; label: string }[];
+}[];
+
+export const VALORACIONES = [
+  {
+    valor: "fortaleza",
+    label: "Fortaleza",
+    chip: "bg-emerald-50 text-emerald-800 ring-emerald-200",
+  },
+  { valor: "debilidad", label: "Debilidad", chip: "bg-red-50 text-red-800 ring-red-200" },
+  { valor: "patron", label: "Patrón", chip: "bg-sky-50 text-sky-800 ring-sky-200" },
+] as const satisfies readonly { valor: ValoracionAnalisis; label: string; chip: string }[];
+
+export const SITUACIONES = [
+  { valor: "ganando", label: "Ganando" },
+  { valor: "empatando", label: "Empatando" },
+  { valor: "perdiendo", label: "Perdiendo" },
+  { valor: "con_uno_menos", label: "Con uno menos" },
+  { valor: "con_uno_mas", label: "Con uno más" },
+  { valor: "otro", label: "Otro" },
+] as const satisfies readonly { valor: SituacionPartido; label: string }[];
+
+export const VIDEOS_VESTUARIO = [
+  {
+    valor: "rival",
+    label: "Rival: fases de juego",
+    ayuda: "Lo fundamental del análisis del rival.",
+  },
+  { valor: "pelota_quieta", label: "Pelota quieta", ayuda: "Las ABP del rival y las nuestras." },
+  { valor: "pre_partido", label: "Charla pre partido", ayuda: "El video de la charla técnica." },
+  {
+    valor: "post_partido",
+    label: "Post partido",
+    ayuda: "Lo que se le muestra al plantel después.",
+  },
+] as const satisfies readonly { valor: TipoVideoVestuario; label: string; ayuda: string }[];
+
+export const CESPEDES = [
+  { valor: "natural", label: "Natural" },
+  { valor: "sintetico", label: "Sintético" },
+  { valor: "hibrido", label: "Híbrido" },
+] as const satisfies readonly { valor: TipoCesped; label: string }[];
+
+/** Cambio planificado de un escenario. */
+export interface CambioPlanificado {
+  sale: string;
+  entra: string;
 }

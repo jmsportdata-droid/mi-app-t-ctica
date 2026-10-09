@@ -11,6 +11,7 @@ import {
   type ActividadCompartida,
 } from "@/lib/semana";
 import { hoyISO, sumarDias } from "@/lib/utils/fecha";
+import { VIDEOS_VESTUARIO, type TipoVideoVestuario } from "@/types/partido";
 
 export const metadata: Metadata = {
   title: "Semana del plantel",
@@ -22,7 +23,20 @@ interface SemanaPublica {
   temporada: string;
   partidos: PartidoReferencia[];
   actividades: ActividadCompartida[];
+  videos?: {
+    partido_id: string;
+    fecha: string;
+    tipo: TipoVideoVestuario;
+    url: string;
+    duracion: string | null;
+    notas: string | null;
+  }[];
 }
+
+const LABEL_VIDEO = Object.fromEntries(VIDEOS_VESTUARIO.map((v) => [v.valor, v.label])) as Record<
+  TipoVideoVestuario,
+  string
+>;
 
 /**
  * Semana para los jugadores, sin usuario: el token del link es la credencial.
@@ -179,6 +193,41 @@ export default async function SemanaJugadoresPage({
             );
           })}
         </div>
+
+        {semana.videos && semana.videos.length > 0 && (
+          <section className="mt-8">
+            <h2
+              className="mb-3 text-xs font-semibold uppercase tracking-[0.3em]"
+              style={{ color: PALETA.acento }}
+            >
+              Videos
+            </h2>
+            <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {semana.videos.map((v) => (
+                <li key={`${v.partido_id}-${v.tipo}`}>
+                  <a
+                    href={v.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block h-full rounded-2xl border p-4 transition-colors hover:bg-white/10"
+                    style={{ borderColor: "rgba(183,202,219,0.3)" }}
+                  >
+                    <p className="text-xs font-semibold" style={{ color: PALETA.suave }}>
+                      {diaMes(v.fecha)}
+                      {v.duracion && ` · ${v.duracion}`}
+                    </p>
+                    <p className="mt-1 font-bold">▶ {LABEL_VIDEO[v.tipo]}</p>
+                    {v.notas && (
+                      <p className="mt-1 text-sm" style={{ color: PALETA.suave }}>
+                        {v.notas}
+                      </p>
+                    )}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
       </div>
     </main>
   );

@@ -4,7 +4,15 @@ import { createClient } from "@/lib/supabase/server";
 import type { AbpPartido } from "@/types/abp";
 import type { AlineacionPartido } from "@/types/alineacion";
 import type { EventoPartido } from "@/types/evento";
-import type { InformeRival, PartidoConRival, PlanPartido } from "@/types/partido";
+import type {
+  AnalisisRival,
+  EscenarioPartido,
+  InformeRival,
+  PartidoConRival,
+  PartidoPrevia,
+  PlanPartido,
+  VideoVestuario,
+} from "@/types/partido";
 
 const SELECT_CON_RIVAL = "*, rival:equipos(id, nombre, escudo_ruta, estadio)";
 
@@ -47,25 +55,53 @@ export interface DetallePartido {
   abp: AbpPartido[];
   alineacion: AlineacionPartido | null;
   eventos: EventoPartido[];
+  previa: PartidoPrevia | null;
+  analisis: AnalisisRival[];
+  escenarios: EscenarioPartido[];
+  videos: VideoVestuario[];
 }
 
 /** Contenido de las pestañas del partido (las filas 1:1 se crean al primer guardado). */
 export async function getDetallePartido(partidoId: string): Promise<DetallePartido> {
   const supabase = createClient();
-  const [plan, informe, abp, alineacion, eventos] = await Promise.all([
-    supabase.from("plan_partido").select("*").eq("partido_id", partidoId).maybeSingle(),
-    supabase.from("informe_rival").select("*").eq("partido_id", partidoId).maybeSingle(),
-    supabase.from("abp_partido").select("*").eq("partido_id", partidoId),
-    supabase.from("alineacion_partido").select("*").eq("partido_id", partidoId).maybeSingle(),
-    supabase
-      .from("eventos_partido")
-      .select("*")
-      .eq("partido_id", partidoId)
-      .order("minuto", { ascending: true })
-      .order("creado_en", { ascending: true }),
-  ]);
+  const [plan, informe, abp, alineacion, eventos, previa, analisis, escenarios, videos] =
+    await Promise.all([
+      supabase.from("plan_partido").select("*").eq("partido_id", partidoId).maybeSingle(),
+      supabase.from("informe_rival").select("*").eq("partido_id", partidoId).maybeSingle(),
+      supabase.from("abp_partido").select("*").eq("partido_id", partidoId),
+      supabase.from("alineacion_partido").select("*").eq("partido_id", partidoId).maybeSingle(),
+      supabase
+        .from("eventos_partido")
+        .select("*")
+        .eq("partido_id", partidoId)
+        .order("minuto", { ascending: true })
+        .order("creado_en", { ascending: true }),
+      supabase.from("partido_previa").select("*").eq("partido_id", partidoId).maybeSingle(),
+      supabase
+        .from("analisis_rival")
+        .select("*")
+        .eq("partido_id", partidoId)
+        .order("orden", { ascending: true })
+        .order("creado_en", { ascending: true }),
+      supabase
+        .from("escenarios_partido")
+        .select("*")
+        .eq("partido_id", partidoId)
+        .order("orden", { ascending: true })
+        .order("creado_en", { ascending: true }),
+      supabase.from("videos_vestuario").select("*").eq("partido_id", partidoId),
+    ]);
 
-  const error = plan.error ?? informe.error ?? abp.error ?? alineacion.error ?? eventos.error;
+  const error =
+    plan.error ??
+    informe.error ??
+    abp.error ??
+    alineacion.error ??
+    eventos.error ??
+    previa.error ??
+    analisis.error ??
+    escenarios.error ??
+    videos.error;
   if (error) {
     console.error("[getDetallePartido]", error.message);
     throw new Error("No se pudo cargar el detalle del partido");
@@ -76,5 +112,9 @@ export async function getDetallePartido(partidoId: string): Promise<DetalleParti
     abp: abp.data ?? [],
     alineacion: alineacion.data as AlineacionPartido | null,
     eventos: eventos.data ?? [],
+    previa: previa.data,
+    analisis: analisis.data ?? [],
+    escenarios: escenarios.data ?? [],
+    videos: videos.data ?? [],
   };
 }

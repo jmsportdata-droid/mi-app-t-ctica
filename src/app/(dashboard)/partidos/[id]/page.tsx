@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getDetallePartido, getPartido } from "@/lib/data/partidos";
+import { getDisponibilidadDelDia } from "@/lib/data/disponibilidad";
 import { getJugadores } from "@/lib/data/jugadores";
 import { nombreArchivoSeguro } from "@/lib/export";
 import { clubDeTemporada } from "@/lib/club";
 import { requerirContexto } from "@/lib/contexto";
 import { getTemporada } from "@/lib/data/cuerpo-tecnico";
-import { formatearFechaPartido, horaCorta } from "@/lib/utils/fecha";
-import { esTabPartido, type PartidoConRival } from "@/types/partido";
+import { formatearDia, formatearFechaPartido, horaCorta } from "@/lib/utils/fecha";
+import { CAMPOS_PLAN, esTabPartido, type PartidoConRival, type TabPartido } from "@/types/partido";
 import type { Temporada } from "@/types/cuerpo-tecnico";
 import { BackLink } from "@/components/ui/BackLink";
 import { Enfrentamiento } from "@/components/partidos/Enfrentamiento";
@@ -45,11 +46,31 @@ export default async function PartidoPage({ params, searchParams }: Props) {
   const { partido, temporada } = datos;
   const titulo = tituloPartido(partido, temporada.club);
 
-  const [detalle, jugadores] = await Promise.all([
+  const [detalle, jugadores, disponibilidad] = await Promise.all([
     getDetallePartido(partido.id),
     getJugadores(partido.temporada_id),
+    getDisponibilidadDelDia(partido.temporada_id, partido.fecha),
   ]);
-  const tabInicial = esTabPartido(searchParams.tab) ? searchParams.tab : "informe";
+  const tabInicial = esTabPartido(searchParams.tab) ? searchParams.tab : "previa";
+
+  const { previa, informe, plan } = detalle;
+  const completos: Record<TabPartido, boolean> = {
+    previa:
+      partido.formacion_rival !== null ||
+      (previa !== null &&
+        Object.entries(previa).some(
+          ([k, v]) => k !== "partido_id" && k !== "actualizado_en" && v !== null,
+        )),
+    informe: Boolean(informe?.slides_url || informe?.vimeo_url || informe?.tags.length),
+    video: detalle.analisis.length > 0,
+    abp: detalle.abp.some((a) => a.descripcion),
+    plan: detalle.escenarios.length > 0 || CAMPOS_PLAN.some((c) => plan?.[c]),
+    convocatoria: (detalle.alineacion?.titulares.filter(Boolean).length ?? 0) === 11,
+    vestuario: detalle.videos.some((v) => v.url),
+    eventos: detalle.eventos.length > 0,
+    post: partido.goles_favor !== null,
+  };
+  const rival = partido.rival?.nombre ?? "rival";
 
   return (
     <>
@@ -79,6 +100,11 @@ export default async function PartidoPage({ params, searchParams }: Props) {
       </header>
 
       <PartidoTabs
+        partido={partido}
+        club={temporada.club}
+        disponibilidad={disponibilidad}
+        completos={completos}
+        encabezadoConvocatoria={`Convocados vs ${rival} · ${formatearDia(partido.fecha)}`}
         partidoId={partido.id}
         detalle={detalle}
         jugadores={jugadores}

@@ -32,13 +32,41 @@ export function Enfrentamiento({
     esNuestro: false,
   };
   const [local, visitante] = partido.es_local ? [nosotros, rival] : [rival, nosotros];
+  const hayResultado = partido.goles_favor !== null && partido.goles_contra !== null;
+  const goles = partido.es_local
+    ? [partido.goles_favor, partido.goles_contra]
+    : [partido.goles_contra, partido.goles_favor];
+  const penales =
+    partido.penales_favor !== null && partido.penales_contra !== null
+      ? partido.es_local
+        ? [partido.penales_favor, partido.penales_contra]
+        : [partido.penales_contra, partido.penales_favor]
+      : null;
 
   return (
     <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
       <EquipoLado lado={local} tamano={tamano} etiqueta="Local" />
-      <span className={cn("font-bold text-slate-300", tamano === "lg" ? "text-2xl" : "text-sm")}>
-        VS
-      </span>
+      {hayResultado ? (
+        <span className="flex flex-col items-center">
+          <span
+            className={cn(
+              "font-extrabold tabular-nums text-slate-900",
+              tamano === "lg" ? "text-4xl" : "text-xl",
+            )}
+          >
+            {goles[0]} – {goles[1]}
+          </span>
+          {penales && (
+            <span className="text-[11px] font-medium text-slate-500">
+              Penales {penales[0]}–{penales[1]}
+            </span>
+          )}
+        </span>
+      ) : (
+        <span className={cn("font-bold text-slate-300", tamano === "lg" ? "text-2xl" : "text-sm")}>
+          VS
+        </span>
+      )}
       <EquipoLado lado={visitante} tamano={tamano} etiqueta="Visitante" />
     </div>
   );

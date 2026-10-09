@@ -61,11 +61,50 @@ export const FORMACIONES = {
     { label: "DC", linea: "DEL", x: 38, y: 22 },
     { label: "DC", linea: "DEL", x: 62, y: 22 },
   ],
+  "3-4-3": [
+    POR,
+    { label: "DFC", linea: "DEF", x: 28, y: 74 },
+    { label: "DFC", linea: "DEF", x: 50, y: 77 },
+    { label: "DFC", linea: "DEF", x: 72, y: 74 },
+    { label: "MI", linea: "CEN", x: 12, y: 48 },
+    { label: "MC", linea: "CEN", x: 38, y: 54 },
+    { label: "MC", linea: "CEN", x: 62, y: 54 },
+    { label: "MD", linea: "CEN", x: 88, y: 48 },
+    { label: "EI", linea: "DEL", x: 20, y: 25 },
+    { label: "DC", linea: "DEL", x: 50, y: 19 },
+    { label: "ED", linea: "DEL", x: 80, y: 25 },
+  ],
+  "4-1-4-1": [
+    POR,
+    ...DEFENSA_4,
+    { label: "MCD", linea: "CEN", x: 50, y: 60 },
+    { label: "MI", linea: "CEN", x: 14, y: 42 },
+    { label: "MC", linea: "CEN", x: 37, y: 44 },
+    { label: "MC", linea: "CEN", x: 63, y: 44 },
+    { label: "MD", linea: "CEN", x: 86, y: 42 },
+    { label: "DC", linea: "DEL", x: 50, y: 19 },
+  ],
+  "3-5-2": [
+    POR,
+    { label: "DFC", linea: "DEF", x: 28, y: 74 },
+    { label: "DFC", linea: "DEF", x: 50, y: 77 },
+    { label: "DFC", linea: "DEF", x: 72, y: 74 },
+    { label: "CAI", linea: "CEN", x: 10, y: 50 },
+    { label: "MC", linea: "CEN", x: 32, y: 52 },
+    { label: "MCD", linea: "CEN", x: 50, y: 58 },
+    { label: "MC", linea: "CEN", x: 68, y: 52 },
+    { label: "CAD", linea: "CEN", x: 90, y: 50 },
+    { label: "DC", linea: "DEL", x: 38, y: 22 },
+    { label: "DC", linea: "DEL", x: 62, y: 22 },
+  ],
 } as const satisfies Record<string, readonly SlotFormacion[]>;
 
 export type Formacion = keyof typeof FORMACIONES;
 export const LISTA_FORMACIONES = Object.keys(FORMACIONES) as Formacion[];
 export const TITULARES = 11;
+
+/** Como se escribe en el cuerpo técnico: con el arquero ("1-4-3-3"). */
+export const etiquetaFormacion = (f: Formacion) => `1-${f}`;
 
 /** Fila de la tabla "alineacion_partido". */
 export type AlineacionPartido = Omit<Tables<"alineacion_partido">, "titulares"> & {
